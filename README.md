@@ -7,6 +7,8 @@ Quando tinha uns 14 anos, meu pai tinha uma necessidade que era um sistema de OS
 
 ## Demonstração
 
+https://github.com/ldedev/LogicO.S/assets/7676415/187ae46b-e055-4953-a03a-f2bd065585b9
+
 
 
 
