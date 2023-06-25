@@ -1,0 +1,31 @@
+##17:10:19,206 | 2017/10/15##
+##14:34:12,44 | 2017/11/20##
+##Tabela de empresa<1@crlf/>##
+##Empresa##
+####
+##Begin##
+
+<IDCODIGO>
+0=1
+</IDCODIGO>
+
+<NOME>
+0=EMPRESA | LógicO.S
+</NOME>
+
+<CNPJ/CPF>
+0=
+</CNPJ/CPF>
+
+<CEP>
+0=
+</CEP>
+
+<LOCALIDADE>
+0=
+</LOCALIDADE>
+
+<LOGO>
+0=C:\Users\André Luiz\Pictures\Logo.jpg
+</LOGO>
+

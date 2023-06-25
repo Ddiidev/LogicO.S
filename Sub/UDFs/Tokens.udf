@@ -1,0 +1,189 @@
+;FUNCTION
+;				Tokens(), __JoinStart()
+;
+;AUTHOR			André Luiz (AlsCompanny@gmail.com)
+;
+;CONTRIBUTORS	André Luiz
+;               none.
+;
+;ACTION			Sorts the data of a string as an array.
+;
+;SYNTAX		
+;				Tokens([STRING], [INT BOOL]),
+;				__JoinStart([ARRAY], [INT START], [INT END])
+;
+;VERSION		1.0.6.1
+;DATA CREATED	: 01/19/2018
+;DATA MODIFIED	: 12/08/2018
+;
+;PARAMETERS 	
+;				Parameters 1
+;					STRING/ARRAY
+;				Parameters 2
+;					INTEGER
+;				Parameters 3
+;					INTEGER
+;
+;REMARKS		This Udf was developed to meet a need.
+;				I noticed that my dear KiXtart has no array block (ugly), so I decided
+;				to do something and it resulted in this udf.
+;				Some people talk about the implementation of> dim $x = "a", in a single statement,
+;				but this is not possible because of the lack of array block, because it would conflict
+;				see> dim $x = "ola", 1, $n = "opa".
+;				This is not good for the interpreter because it has to differentiate what in that row
+;				is part of the array $n and know if $f is part also $n, so it needs an array block.
+;
+;RETURNS
+;		array containing the values of the string containing
+;		the consecutive types passed in the Tokens() function parameter.
+;
+;DEPENDENCIES AlsString() http://www.kixtart.org/UDF/UDF_lister.php?what=post&code=213556
+;
+;KIXTART VER	4.60>
+; 
+;Example(s)
+;
+function Tokens($Line, Optional $TypeExplicit)
+	if (Instr($Line, '"') = 0)
+		if (TRim(RemoveNumeric($Line)) <> "")
+			if (Instr($Line, ',') = 0)
+				redim $Tokens[0]
+				$Tokens[0] = $Line
+				exit 1
+			endif
+		else
+			redim $Tokens[0]
+			$Tokens[0] = $Line
+			exit 1
+		endif
+	endif
+	if (VarType($TypeExplicit)=0)
+		$TypeExplicit = 1
+	endif
+	Dim
+		$i, $chr, $cache_cmd,
+		$tmp, $tmpId, $len, $indexTok,
+		$NumberBool
+	$len		= Len($line)
+	$indexTok	= -1
+	$NumberBool	= 0
+	Redim
+		$tokens[$len]
+
+	$Line = StringToCharArray($Line)
+	for $i=0 to $len-1
+		;<PEGANDO CARACTERES E ATRIBUINDO VALOR AO CACHE DE COMANDO>
+			$chr = $Line[$i]
+		;</PEGANDO CARACTERES E ATRIBUINDO VALOR AO CACHE DE COMANDO>
+
+		/*	COMANDOS, EXPRESÕES, VARIÁVEIS, MACROS ETC... SERÃO LISTADAS ABAIXO	*/
+		select
+			case ($chr = ',')
+				$NumberBool	= 0
+				if ($indexTok <> -1)
+					if not ($TypeExplicit)
+						if isNumber($Tokens[$indexTok])
+							$Tokens[$indexTok] = Cint($Tokens[$indexTok])
+						else
+							if isFloat($Tokens[$indexTok])
+								$Tokens[$indexTok] = cfloat($Tokens[$indexTok])
+							else
+								$Tokens[$indexTok] = _cutScape($Tokens[$indexTok])
+							endif
+						endif
+					else
+						$Tokens[$indexTok] = _cutScape($Tokens[$indexTok])
+					endif
+				endif
+
+			case IsNumber($chr) or ($chr = '.')
+				if not $NumberBool
+					$NumberBool	= 1
+					$indexTok	= $indexTok + 1
+				endif
+				$Tokens[$indexTok] = cstr($Tokens[$indexTok]) + cstr($chr)
+
+			case ($chr = '"')
+				$indexTok = $indexTok + 1
+				$tmpId = Ascan($Line, '"', $i+1)
+				if ($tmpId <> -1)
+					$tokens[$indexTok]	= _JoinStart($Line, $i+1, $tmpId-1)
+				endif
+				$i = $tmpId
+				$NumberBool = 0
+		endselect
+	next
+	if not ($TypeExplicit)
+		if isNumber($Tokens[$indexTok])
+			$Tokens[$indexTok] = Cint($Tokens[$indexTok])
+		else
+			if isFloat($Tokens[$indexTok])
+				$Tokens[$indexTok] = cfloat($Tokens[$indexTok],1)
+			endif
+		endif
+	else
+		$Tokens[$indexTok] = _cutScape($Tokens[$indexTok])
+	endif
+	Redim
+		preserve $Tokens[$indexTok]
+endfunction
+
+function _JoinStart($Array, $start, $len)
+	dim $
+	for $=$start to $len
+		$_JoinStart = $_JoinStart + $Array[$]
+	next
+endfunction
+
+function _cutScape($text)
+	dim
+		$scapeId, $chr[1],
+		$i, $fim
+	if (len($text) = 0)
+		$_cutScape = $text
+		exit 1
+	endif
+	if not instr($text, "\")
+		$_cutScape = $text
+		exit 0
+	endif
+	redim $_cutScape[len($text)-1]
+	for $i=0 to ubound($_cutScape)
+		$_cutScape[$i] = substr($text, $i+1, 1)
+	next
+
+	$scapeID = 0
+	while not $fim
+		$scapeId	= ascan($_cutScape, '\', $scapeID)
+		if ($scapeID > -1)
+			$chr[0]		= $_cutScape[$scapeId]
+			if ($scapeID+1 > ubound($_cutScape))
+				$chr[1] = ''
+			else
+				$chr[1]		= $_cutScape[$scapeId+1]
+			endif
+			if (join($chr,"") = '\\')
+				$_cutScape[$scapeID] = ''
+				$scapeID= $scapeID+1
+			else
+				$_cutScape[$scapeID] = ''
+				select
+					case ($chr[1] = 'c')
+						$_cutScape[$scapeID+1] = chr(13)
+					case ($chr[1] = 'l')
+						$_cutScape[$scapeID+1] = chr(10)
+					case ($chr[1] = 'n')
+						$_cutScape[$scapeID+1] = @crlf
+					case ($chr[1] == 'Q')
+						$_cutScape[$scapeID+1] = '"'
+					case ($chr[1] == 'q')
+						$_cutScape[$scapeID+1] = "'"
+				endselect
+			endif
+		else
+			$fim = 1
+		endif
+		$scapeID= $scapeID+1
+	loop
+	$_cutScape = join($_cutScape, "")
+endfunction

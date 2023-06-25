@@ -1,0 +1,27 @@
+##07:25:16,390 | 2017/11/10##
+##12:21:07,168 | 2017/11/19##
+##Usuários.<1@crlf/>Serve para adicionar os usuário com permições e restrições no programa.##
+##User##
+####
+##Begin##
+
+<IDCODIGO>
+0=1
+1=2
+</IDCODIGO>
+
+<ID-USER>
+0=1
+1=2
+</ID-USER>
+
+<SENHA>
+0=123
+1=123
+</SENHA>
+
+<TIPO>
+0=3
+1=3
+</TIPO>
+

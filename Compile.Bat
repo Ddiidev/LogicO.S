@@ -1,0 +1,1 @@
+WKIX32.EXE "%CD%\Main.KiX" /t

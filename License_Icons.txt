@@ -1,0 +1,10 @@
+Icon Pack : IKONS icons Designer : Piotr Kwiatkowski
+Designer HomePage : http://dribbble.com/p_kwiatkowski
+License : Free for personal use
+Tags : user
+
+######
+Icon Pack : Glyph smarticons Designer : smarticons
+Designer HomePage : http://glyph.smarticons.co/
+License : Creative Commons
+Tags : upwards arrowtobar

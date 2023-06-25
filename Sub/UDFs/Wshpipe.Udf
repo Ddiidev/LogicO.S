@@ -1,0 +1,76 @@
+; 
+;Function: 
+;   WshPipe() 
+; 
+;Author: 
+;   Christopher Shilt (christopher.shilt@relizon.com) 
+; 
+;Version: 
+;   1.3 
+; 
+;Version History: 
+; 
+;   13 Feb 2004  Version 1.3 - Removed Status Loop. 
+; 
+;   18 June 2003 Version 1.2 - Cleaned up code. Added error checking for support of the  
+;                              WScript.Shell.Exec method. 
+; 
+;   14 June 2002 Version 1.0 - Original Version. 
+; 
+;Action: 
+;   Runs an application in a child command-shell, providing access to the StdOut/StdErr  
+;   streams. Pipes the output to an array and returns the ExitCode of the command to the 
+;   @ERROR macro. 
+; 
+;Syntax: 
+;   WshPipe(COMMAND, optional NOECHO) 
+; 
+;Parameters: 
+;   COMMAND : REQUIRED. String value indicating the command line used to run the script. 
+;                       The command line should appear exactly as it would if you typed 
+;                       it at the command prompt.  
+; 
+;   NOECHO  : OPTIONAL. Suppress the command's output to the console, ouput is still 
+;                       stored in an array. 
+; 
+;Remarks: 
+; 
+;Returns: 
+;   Output of COMMAND in an array, ExitCode of the COMMAND in the @ERROR macro. By 
+;   default, the output is echoed to the screen but can be suppressed. 
+;  
+;Dependencies: 
+;   KiX 4.02 
+;   WSH 5.6 (Included with Microsoft Internet Explorer 6.0. Also available for download 
+;           from Microsoft's MSDN website.) 
+;  
+;Example: 
+; 
+; ; Display all KiX files in C:\ directory 
+; $rc=WshPipe("dir c:\*.kix") 
+; @ERROR " | " @SERROR ? 
+; 
+; ; Display all KiX files in C:\ directory, but suppress output to screen 
+; $rc=WshPipe("%comspec% /c dir c:\*.kix",1) 
+; @ERROR " | " @SERROR ? 
+; 
+; ; Display all KiX files in C:\ directory, suppress output to screen. Then use FOR/NEXT 
+; ; to exclude data. 
+; $rc=WshPipe("%comspec% /c dir c:\*.kix",1) 
+; for each $line in $rc 
+;    if not instr($line, "File Not Found") 
+;       ? $line 
+;    endif 
+; next 
+; @ERROR " | " @SERROR ? 
+; 
+;Source 
+Function WshPipe($ShellCMD, OPTIONAL $NoEcho)
+	Dim $oExec, $Output
+	$oExec = CreateObject("WScript.Shell").Exec($ShellCMD)
+	If Not VarType($oExec)=9 $WshPipe="WScript.Shell Exec Unsupported" Exit 10 EndIf
+	$Output = $oExec.StdOut.ReadAll + $oExec.StdErr.ReadAll
+	If Not $NoEcho $Output Endif
+	$WshPipe=Split(Join(Split($Output,CHR(13)),''),CHR(10))
+	Exit($oExec.ExitCode)
+EndFunction

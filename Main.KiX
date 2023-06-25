@@ -1,0 +1,1121 @@
+;;<CONFIGURANDO AMBIENTE>
+	Break on
+	;$=SetConsole(HIDE)
+	if exist($Path)
+		CD $Path
+	endif
+	$=SetOption(Explicit, on)
+	;Call 'C:\Users\André Luiz\Desktop\Gerenciador_Kdb\KiXDB.Udf'
+	include '.\Sub\UDFs\Hash.Udf'
+	include '.\Sub\UDFs\AlsArray.udf'
+	include '.\Sub\UDFs\Tokens.udf'
+	include '.\Sub\UDFs\AlsString.Udf'
+	include '.\Sub\UDFs\KiXDB.udf'
+;;</CONFIGURANDO AMBIENTE>
+;;<DECLARANDO VARIÁVEIS>
+	Global
+		$System, $form, $Status,
+		$Lista_Imagem, $IMG, $ICO,
+		$IMG_Large, $IMG_Prod,
+		$PictureBox
+	;;<PAGINAS>
+		Global
+			$TabControl, $Tab_Main, $Tab_Clientes,
+			$Tab_Serviços, $Tab_Produtos, $KeyCode_Temp,
+			$Tab_OS,
+			$Ticks_KeyCode
+	;;</PAGINAS>
+	;;<SÓ POR CONTROLE>
+		Global
+			$Version, $User_Func[3], $EventArgs,
+			$Estatiticas_Sys, $Estoque_Min,
+			$DIR_IMG
+	;;</SÓ POR CONTROLE>
+	Dim
+		$GBox, $GB_Panel, $GB_Panel_Sub,
+		$GB_Central, $GB_Prod_Etoq_Min,
+		$GB_OS_Aberto, $GB_Resumo_Sys,
+		$comb_Rela, $comb_Fina,
+		$Bt_Cliente, $Bt_Produto,
+		$Bt_Servico, $Bt_Venda,
+		$Bt_Os,
+		$LogoMain
+	Global
+		$Menu_Bt,
+		$Menu_Bt_Clientes, $Menu_Bt_Produto,
+		$Menu_Bt_Servico, $Menu_Bt_Venda,
+		$Menu_Bt_Os, $Menu_Bt_Rela,
+		$Menu_Bt_Finaca, $Menu_Bt_Conf
+	$System 		= CreateObject('Kixtart.System')
+;;<CASO NÃO HAJA O 'KIXTART.DLL'>
+	if (VarType($System) <> 9)
+		if (messagebox('Olá, por algum motivo o componente chamado "kixtart.dll" que garante o funcionamento do LógicO.S '+@crlf+
+				'não se encontra no sistema. É possível que o sistema "'+@ProductType+'" Não tenha permitido a instalação'+@crlf+@crlf+
+				'Você permite que eu o instale em seu computador?'+@crlf+
+				'O processo é rápido e 100% seguro!'+@crlf+@crlf,
+				'LógicO.S necessita de um componente.', 4+64) = 6)
+			$=SetConsole(HIDE)
+			ShellUAC('RegSvr32.exe', '/s "'+@curdir+'\Kixforms.dll"')
+			$System = CreateObject('Kixtart.System')
+			if (VarType($System) <> 9)
+				$=MessageBox('Olá, o componente não foi instalado mesmo assim, contate o suporte'+@crlf+
+					'André Luiz: +55 (083)9 8770-8091', "Componente não encontrado!", 16)
+			endif
+			$=Msg('Obrigado por sua confiança nos nossos produtos ALS Company, seja bem vindo ao LógicO.S', "Obrigado!!", 64)
+		else
+			$=messagebox('Não há problemas, obrigado por ter instalado o LógicO.S em sua maquina!'+@crlf+@crlf+'Acesse em: www.LógicO.S.blogspot.com.br', 'Acesse em: www.LógicO.S.blogspot.com.br', 0)
+			Exit 1
+		endif
+	endif
+;;</CASO NÃO HAJA O 'KIXTART.DLL'>
+
+	$form				= $System.Form()
+	$form.size			= 830, 620
+	$form.MinimumSize	= 830, 620
+	$form.text			= 'LógicO.S'
+	$form.OnResize		= 'Form_Resize()'
+	$form.OnMouseWheel	= 'EventoScrollbar($$GB_Panel_Sub, $$Tab_Main)'
+	$form.Icon			= $System.Icon(@Curdir+'\Logo-0001.ico')
+	$form.Center()
+
+	$Status				= $Form.Timer()
+	$Status.InterVal	= 350
+	$Status.OnTimer		= "Status_Sys()"
+	
+	$Ticks_KeyCode			= $Form.Timer
+	$Ticks_KeyCode.InterVal	= 1555
+	$Ticks_KeyCode.OnTimer	= "$$KeyCode_Temp = ''"
+	
+	$DIR_IMG		= @Curdir+'\Gráficos'
+	$Version		= '1.0.0.0'
+	;$DIR_IMG_DB	= @Curdir+'\Banco-d-Dados\IMG'
+	
+	;;<ABRINDO TABELAS>
+		:LOAD_DB
+		;Dim
+		;	$x
+		;$x = @Ticks
+		tb_load(@CurDir+'\Banco-d-Dados\Configurações.ktb', 'Conf')
+	
+		tb_load(@CurDir+'\Banco-d-Dados\Empresa.ktb', 'Empresa')
+		tb_load(@CurDir+'\Banco-d-Dados\Serviços.ktb', 'Servicos')
+		tb_load(@CurDir+'\Banco-d-Dados\Clientes.ktb', 'Clientes')
+		tb_load(@CurDir+'\Banco-d-Dados\Del_Clientes.ktb', 'Del_Clientes')
+		tb_load(@CurDir+'\Banco-d-Dados\Categoria_Produtos.ktb', 'Categoria_Produtos')
+		tb_load(@CurDir+'\Banco-d-Dados\Produtos.ktb', 'Produtos')
+		tb_load(@CurDir+'\Banco-d-Dados\FUNC.ktb', 'Funcionario')
+		tb_load(@CurDir+'\Banco-d-Dados\User.ktb', 'Usuario')
+		tb_load(@CurDir+'\Banco-d-Dados\O_S.ktb', 'OS')
+		;@Ticks-$x?
+	;;</ABRINDO TABELAS>
+
+	;;<IMAGENS>
+		:IMAGE_LIST
+		$Ico					= $System.ImageList()
+		$Ico.ImageSize			= 25, 20
+		$Ico.TransparentColor	= &FF0080
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Clientes.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Os.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Produtos.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Serviços.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Vendas.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Casa.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Relatorio.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Financas.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Abaixar.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Subir.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Add_Usuario%Cliente.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Del_Usuario%Cliente.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Edit_Usuario%Cliente.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Save_Usuario%Cliente.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Cancelar.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Buscar.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Add_Serviços.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Del_Serviços.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Categoria.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Salvar.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Editar.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\OS_Add.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\OS_AddAll.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\OS_Sub.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\OS_SubAll.bmp'), $System.Color(0,0,0), 512, 512)
+		$Ico.Images.AddStrip($System.Bitmap($DIR_IMG+'\Arrastar-Mouse.bmp'), $System.Color(0,0,0), 512, 512)
+		
+		$IMG					= $System.ImageList()
+		$IMG.ImageSize			= 150, 90
+		$IMG.TransparentColor	= &FF0080
+		$IMG.Images.AddStrip($System.Bitmap($DIR_IMG+'\LogoFinal.bmp'), $System.Color(0,0,0), 565, 300)
+		;$IMG.Images.AddStrip($System.Bitmap("C:\Users\André Luiz\Desktop\LógicO.S\Logo-0001.bmp"), $System.Color(0,0,0), 261,232)
+		
+		
+		$Lista_Imagem					= $System.ImageList()
+		$Lista_Imagem.ImageSize			= 75, 50
+		$Lista_Imagem.TransparentColor	= &FF0080
+		$Lista_Imagem.Images.AddStrip($System.Bitmap($DIR_IMG+'\Clientes.bmp'), $System.Color(0,0,0), 512, 512)
+		$Lista_Imagem.Images.AddStrip($System.Bitmap($DIR_IMG+'\Os.bmp'), $System.Color(0,0,0), 512, 512)
+		$Lista_Imagem.Images.AddStrip($System.Bitmap($DIR_IMG+'\Produtos.bmp'), $System.Color(0,0,0), 512, 512)
+		$Lista_Imagem.Images.AddStrip($System.Bitmap($DIR_IMG+'\Serviços.bmp'), $System.Color(0,0,0), 512, 512)
+		$Lista_Imagem.Images.AddStrip($System.Bitmap($DIR_IMG+'\Vendas.bmp'), $System.Color(0,0,0), 512, 512)
+		$Lista_Imagem.Images.AddStrip($System.Bitmap($DIR_IMG+'\Suporte.bmp'), $System.Color(0,0,0), 512, 512)
+		
+		$IMG_Large						= $System.ImageList()
+		$IMG_Large.ImageSize			= 128, 128
+		$IMG_Large.TransparentColor		= 'black'
+		$IMG_Large.AddStrip($System.Bitmap($DIR_IMG+'\User-.bmp'), $System.Color(0,0,0), 128, 128)
+		$IMG_Large.AddStrip($System.Bitmap($DIR_IMG+'\User-Correto.bmp'), $System.Color(0,0,0), 128, 128)
+		$IMG_Large.AddStrip($System.Bitmap($DIR_IMG+'\User-InCorreto.bmp'), $System.Color(0,0,0), 128, 128)
+	;;</IMAGENS>
+;;</DECLARANDO VARIÁVEIS>
+/*LógicO.S*/
+
+;;<Controle das tabelas>
+	$TabControl				= $form.TabControl
+	$TabControl.Appearance	= 2
+	$TabControl.Location	= 0, -21
+	$TabControl.BackColor	= 0, 51, 102
+	$TabControl.SizeMode	= 1
+	$TabControl.Size		= $form.ClientSize
+	$TabControl.Top			= $TabControl.Top-4
+	$TabControl.Bottom		= $TabControl.Bottom+30
+	$TabControl.Left		= $TabControl.Left+218
+	$TabControl.Right		= $TabControl.Right
+	$TabControl.Anchor		= 1 + 2 + 4 + 8
+;;</Controle das tabelas>
+
+;;<Tabela principal>
+	;;<GRUPOS>
+	:GRUPOS
+		$Tab_Main					= $TabControl.TabPages.Add('Inicio')	;0
+		$Tab_Main.FontSize			= 11
+		$Tab_Main.FontName			= 'Candara'
+		$Tab_Main.BackColor			= &FFF8F0
+
+		$Tab_Clientes				= $TabControl.TabPages.Add('Clientes')	;1
+		$Tab_Clientes.FontSize		= 11
+		$Tab_Clientes.FontName		= 'Candara'
+		$Tab_Clientes.BackColor		= 0, 51, 102
+
+		$Tab_Produtos				= $TabControl.TabPages.Add('Produtos')	;2
+		$Tab_Produtos.FontSize		= 11
+		$Tab_Produtos.FontName		= 'Candara'
+		$Tab_Produtos.BackColor		= 0, 51, 102
+
+		$Tab_Serviços				= $TabControl.TabPages.Add('Serviços')	;3
+		$Tab_Serviços.FontSize		= 11
+		$Tab_Serviços.FontName		= 'Candara'
+		$Tab_Serviços.BackColor		= 0, 51, 102
+
+		$Tab_OS						= $TabControl.TabPages.Add('O.S')		;4
+		$Tab_OS.FontSize			= 11
+		$Tab_OS.FontName			= 'Candara'
+		$Tab_OS.BackColor			= 0, 51, 102
+		$=$TabControl.TabPages.Add('Vendas')	;5
+		
+		$GB_Panel					= $Form.Controls.Add("GroupBox")
+		$GB_Panel.BorderStyle		= 0
+		$GB_Panel.FontName			= 'Candara'
+		$GB_Panel.Dock				= 'Left'
+		$GB_Panel.BackColor			= 30, 30, 30
+		$GB_Panel.width				= 220
+		
+		$GB_Panel_Sub				= $GB_Panel.Controls.Add("GroupBox")
+		$GB_Panel_Sub.BorderStyle	= 0
+		$GB_Panel_Sub.Anchor		= 1 + 2
+		$GB_Panel_Sub.Location		= 0, $GB_Panel_Sub.Top+140
+		$GB_Panel_Sub.Size			= $GB_Panel.width, 390
+		$GB_Panel_Sub.BackColor		= 50, 50, 50
+		$GB_Panel_Sub.ForeColor		= 'white'
+		$GB_Panel_Sub.FontSize		= 18
+		$GB_Panel_Sub.TextAlign		= 2
+		$GB_Panel_Sub.Text			= 'Menu'
+
+		$GBox						= $Tab_Main.Controls.Add("GroupBox")
+		$GBox.BorderStyle			= 0
+		$GBox.Dock					= 'Top'
+		$GBox.BackColor				= 0, 51, 102
+		$GBox.ClientSize			= $Tab_Main.Width, 140
+
+	;;<SCROLLBAR (CENTRAL)>
+		Global
+			$Track_C
+		$Track_C					= $Tab_Main.Controls.scrollbar
+		$Track_C.Anchor				= 2 + 1 + 8
+		$Track_C.Orientation		= 1
+		$Track_C.BackColor			= $GBox.backColor
+		$Track_C.Minimum 			= 0 
+		$Track_C.Maximum 			= $Tab_Main.Height/60
+		$Track_C.BorderStyle		= 0
+		$Track_C.step				= 1
+		$Track_C.left				= 571
+		$Track_C.Top				= $GBox.Bottom
+		$Track_C.Size				= 20, $Tab_Main.clientheight-$GBox.ClientHeight
+		$Track_C.OnScroll			= 'Scrolling($$Tab_Main, $$Track_C, "0;1")'
+	;;<;SCROLLBAR (CENTRAL)>
+
+		$GB_Central					= $Tab_Main.Controls.Add("GroupBox")
+		$GB_Central.BorderStyle		= 0
+		$GB_Central.Dock			= 'Top'
+		$GB_Central.BackColor		= &FFF8F0
+		$GB_Central.Size			= $Tab_Main.Width, 140
+
+		$GB_Prod_Etoq_Min				= $Tab_Main.Controls.Add("GroupBox")
+		$GB_Prod_Etoq_Min.BorderStyle	= 2
+		$GB_Prod_Etoq_Min.FontBold		= 1
+		$GB_Prod_Etoq_Min.FontSize		= 16
+		$GB_Prod_Etoq_Min.Dock			= 'Top'
+		$GB_Prod_Etoq_Min.ForeColor		= 'gray'
+		$GB_Prod_Etoq_Min.BackColor		= &FFF8F0
+		$GB_Prod_Etoq_Min.Size			= 545, 200
+		$GB_Prod_Etoq_Min.Location		= 15, $GB_Prod_Etoq_Min.Top
+		$GB_Prod_Etoq_Min.Text			= 'Produtos com estoques minímos'
+
+		$GB_OS_Aberto				= $Tab_Main.Controls.Add("GroupBox")
+		$GB_OS_Aberto.BorderStyle	= 2
+		$GB_OS_Aberto.FontBold		= 1
+		$GB_OS_Aberto.FontSize		= 16
+		$GB_OS_Aberto.Dock			= 'Top'
+		$GB_OS_Aberto.ForeColor		= 'gray'
+		$GB_OS_Aberto.BackColor		= &FFF8F0
+		$GB_OS_Aberto.Size			= 545, 140
+		$GB_OS_Aberto.Location		= 15, $GB_OS_Aberto.Top
+		$GB_OS_Aberto.Text			= 'Ordem de serviços em aberto'
+
+		$GB_Resumo_Sys				= $Tab_Main.Controls.Add("GroupBox")
+		$GB_Resumo_Sys.FontBold		= 1
+		$GB_Resumo_Sys.BorderStyle	= 2
+		$GB_Resumo_Sys.FontSize		= 16
+		$GB_Resumo_Sys.Dock			= 'Top'
+		$GB_Resumo_Sys.ForeColor		= 'gray'
+		$GB_Resumo_Sys.BackColor		= &FFF8F0
+		$GB_Resumo_Sys.Size			= 545, 310
+		$GB_Resumo_Sys.Location		= 15, $GB_Resumo_Sys.Top
+		$GB_Resumo_Sys.Text			= 'Estatíticas do sistema'
+	;;</GRUPOS>
+
+	;;<SCROLLBAR (MENU LATERAL)>
+		Global
+			$Track
+		$Track = $GB_Panel_Sub.Controls.ScrollBar
+		$Track.Anchor			= 2 + 1
+		$Track.Orientation		= 1
+		$Track.BackColor		= 30, 30, 30
+		$Track.Minimum 			= 0 
+		$Track.Maximum 			= $GB_Panel_Sub.Height/60
+		$Track.BorderStyle		= 0
+		$Track.Left				= 197
+		$Track.Size				= 20, $GB_Panel_Sub.clientheight
+		$Track.OnScroll			= 'Scrolling($$GB_Panel_Sub, $$Track, 0)'
+	;;<;SCROLLBAR (MENU LATERAL)>
+	
+	
+;;<IMAGEM DO CLIENTE>
+	:IMAGEM_DO_CLIENTE
+	$PictureBox				= $GBox.Controls.PictureBox
+	$PictureBox.Anchor		= 8
+	$PictureBox.BorderStyle	= 0
+	$PictureBox.size		= 230, $GBox.Height-2
+	$PictureBox.Location	= 360, 0
+	$PictureBox.SizeMode	= 1
+	if (tb_GetData('Empresa.LOGO', 1) = '')
+		$PictureBox.Image		= $System.Bitmap($DIR_IMG+'\Logo.jpg')
+	else
+		$PictureBox.Image		= $System.Bitmap(tb_GetData('Empresa.LOGO', 1))
+	endif
+;;</IMAGEM DO CLIENTE>
+
+;;<LABEL'S>
+	:LABELs
+	$=$GBox.Controls.LABEL
+	$GBox.Controls(1).Height	= 150
+	$GBox.Controls(1).Width		= 363
+	$GBox.Controls(1).FontName	= 'Times New Roman'
+	$GBox.Controls(1).FontSize	= 14
+	$GBox.Controls(1).ForeColor	= 'White'
+	$GBox.Controls(1).Text		=
+		'Nome da empresa	: '+tb_GetData('Empresa.NOME', 1)+@Crlf+
+		'CNPF/CPF	: '+tb_GetData('Empresa.CNPJ/CPF', 1)+@Crlf+
+		'CEP		: '+tb_GetData('Empresa.CEP', 1)+@Crlf+
+		'Localidade	: '+tb_GetData('Empresa.LOCALIDADE', 1)
+;;</LABEL'S>
+
+
+;;<GROUP BOX PANEL>
+	$LogoMain				= $GB_Panel.ToolButton
+	$LogoMain.Dock			= 'Top'
+	$LogoMain.BorderStyle	= 0
+	$LogoMain.FlatStyle		= 0
+	$LogoMain.Alignment		= 1
+	$LogoMain.Style			= 1
+	$LogoMain.Pushed		= True()
+	$LogoMain.FontSize		= 13
+	$LogoMain.Size			= 150, 90
+	$LogoMain.Width			= $GB_Panel.width
+	$LogoMain.BackColor		= 'Transparent'
+	$LogoMain.Icon			= $IMG.Images(0)
+	$LogoMain.OnClick		= '$$LogoMain.Pushed	= 1'
+;;</GROUP BOX PANEL>
+
+	;;<NÚMERO DE SUPORTE(LABEL NO FINAL)>
+	:NUMERO_DE_SUPORTE
+	if 1
+		Dim
+			$temp
+		$temp=$GB_Panel.Controls.Add('ToolButton')
+		$temp.Text			= 'Número de suporte:'+@crlf+' (83)9 8770-8091'
+		$temp.Dock			= 2
+		$temp.BorderStyle	= 1
+		$temp.FlatStyle		= 0
+		$temp.FontSize		= 12
+		$temp.ForeColor		= 'white'
+		$temp.Size			= 218, 50
+		$temp.FontName		= 'Segoe UI'
+		$temp.Top			= $GB_Panel.Bottom-50
+		$temp.Icon			= $Lista_Imagem.Images(5)
+		$temp.TooltipText	= 'Mais informações de suporte'
+		$temp.OnClick		= '' ;;Aqui vai abrir uma tela de mais contato de suporte.
+	endif
+	;;</NÚMERO DE SUPORTE(LABEL NO FINAL)>
+
+;;<GROUP BOX PANEL_SUB>
+	:MENU_LATERAL
+	$Menu_Bt					= $GB_Panel_Sub.Controls.ToolButton
+	$Menu_Bt.Anchor				= 1
+	$Menu_Bt.BorderStyle		= 0
+	$Menu_Bt.FlatStyle			= 0
+	$Menu_Bt.FontSize			= 13
+	$Menu_Bt.Size				= 200, 45
+	$Menu_Bt.Top				= 35
+	$Menu_Bt.BackColor			= 20, 20, 20
+	$Menu_Bt.HotBackColor		= 20, 20, 20
+	$Menu_Bt.ForeColor			= 'White'
+	$Menu_Bt.Text				= 'Inicio'
+	$Menu_Bt.Icon				= $Ico.Images(5)
+	$Menu_Bt.OnClick			=
+	'
+		Clear_Select()
+		$$Menu_Bt.BackColor			= 20, 20, 20
+		$$TabControl.SelectedIndex	= 0
+	'
+	
+	$Menu_Bt_Clientes				= $GB_Panel_Sub.Controls.ToolButton
+	$Menu_Bt_Clientes.Anchor		= 1
+	$Menu_Bt_Clientes.BorderStyle	= 0
+	$Menu_Bt_Clientes.FlatStyle		= 0
+	$Menu_Bt_Clientes.FontSize		= 13
+	$Menu_Bt_Clientes.Size			= 200, 45
+	$Menu_Bt_Clientes.Top				= $Menu_Bt.Top+$Menu_Bt_Clientes.Bottom+2
+	$Menu_Bt_Clientes.BackColor		= 0, 0, 0
+	$Menu_Bt_Clientes.HotBackColor	= 20, 20, 20
+	$Menu_Bt_Clientes.ForeColor		= 'White'
+	$Menu_Bt_Clientes.Text			= 'Clientes'
+	$Menu_Bt_Clientes.Icon			= $Ico.Images(0)
+	$Menu_Bt_Clientes.OnClick		=
+	'
+		Clear_Select()
+		$$Menu_Bt_Clientes.BackColor	= 20, 20, 20
+		$$TabControl.SelectedIndex	= 1 $$Tx_Pes_Cliente.SetFocus()
+	'
+	
+	$Menu_Bt_Servico					= $GB_Panel_Sub.Controls.ToolButton
+	$Menu_Bt_Servico.Anchor			= 1
+	$Menu_Bt_Servico.BorderStyle		= 0
+	$Menu_Bt_Servico.FlatStyle		= 0
+	$Menu_Bt_Servico.FontSize		= 13
+	$Menu_Bt_Servico.Size				= 200, 45
+	$Menu_Bt_Servico.Top				= $Menu_Bt_Clientes.Top+$Menu_Bt_Servico.Bottom+2
+	$Menu_Bt_Servico.BackColor		= 0, 0, 0
+	$Menu_Bt_Servico.HotBackColor	= 20, 20, 20
+	$Menu_Bt_Servico.ForeColor		= 'White'
+	$Menu_Bt_Servico.Text				= 'Serviços'
+	$Menu_Bt_Servico.Icon				= $Ico.Images(3)
+	$Menu_Bt_Servico.OnClick			=
+	'
+		Clear_Select()
+		$$Menu_Bt_Servico.BackColor	= 20, 20, 20
+		$$TabControl.SelectedIndex	= 3 $$Tx_Pes_Serviços.SetFocus()
+	'
+	
+	$Menu_Bt_OS					= $GB_Panel_Sub.Controls.ToolButton
+	$Menu_Bt_OS.Anchor			= 1
+	$Menu_Bt_OS.BorderStyle		= 0
+	$Menu_Bt_OS.FlatStyle			= 0
+	$Menu_Bt_OS.FontSize			= 13
+	$Menu_Bt_OS.Size				= 200, 45
+	$Menu_Bt_OS.Top				= $Menu_Bt_Servico.Top+$Menu_Bt_OS.Bottom+2
+	$Menu_Bt_OS.BackColor			= 0, 0, 0
+	$Menu_Bt_OS.HotBackColor		= 20, 20, 20
+	$Menu_Bt_OS.ForeColor			= 'White'
+	$Menu_Bt_OS.Text				= 'Ordem de serviços'
+	$Menu_Bt_OS.Icon				= $Ico.Images(1)
+	$Menu_Bt_OS.OnClick			=
+	'
+		Clear_Select()
+		$$Menu_Bt_OS.BackColor		= 20, 20, 20
+		$$TabControl.SelectedIndex	= 4
+	'
+	
+	$Menu_Bt_Produto					= $GB_Panel_Sub.Controls.ToolButton
+	$Menu_Bt_Produto.Anchor			= 1
+	$Menu_Bt_Produto.BorderStyle		= 0
+	$Menu_Bt_Produto.FlatStyle		= 0
+	$Menu_Bt_Produto.FontSize		= 13
+	$Menu_Bt_Produto.Size				= 200, 45
+	$Menu_Bt_Produto.Top				= $Menu_Bt_OS.Top+$Menu_Bt_Produto.Bottom+2
+	$Menu_Bt_Produto.BackColor		= 0, 0, 0
+	$Menu_Bt_Produto.HotBackColor	= 20, 20, 20
+	$Menu_Bt_Produto.ForeColor		= 'White'
+	$Menu_Bt_Produto.Text				= 'Produtos'
+	$Menu_Bt_Produto.Icon				= $Ico.Images(2)
+	$Menu_Bt_Produto.OnClick			=
+	'
+		Clear_Select()
+		$$Menu_Bt_Produto.BackColor	= 20, 20, 20
+		$$TabControl.SelectedIndex	= 2
+	'
+	
+	$Menu_Bt_Venda					= $GB_Panel_Sub.Controls.ToolButton
+	$Menu_Bt_Venda.Anchor				= 1
+	$Menu_Bt_Venda.BorderStyle		= 0
+	$Menu_Bt_Venda.FlatStyle			= 0
+	$Menu_Bt_Venda.FontSize			= 13
+	$Menu_Bt_Venda.Size				= 200, 45
+	$Menu_Bt_Venda.Top				= $Menu_Bt_Produto.Top+$Menu_Bt_Venda.Bottom+2
+	$Menu_Bt_Venda.BackColor			= 0, 0, 0
+	$Menu_Bt_Venda.HotBackColor		= 20, 20, 20
+	$Menu_Bt_Venda.ForeColor			= 'White'
+	$Menu_Bt_Venda.Text				= 'Vendas'
+	$Menu_Bt_Venda.Icon				= $Ico.Images(4)
+	$Menu_Bt_Venda.OnClick			=
+	'
+		Clear_Select()
+		$$Menu_Bt_Venda.BackColor	= 20, 20, 20
+		$$TabControl.SelectedIndex	= 5
+	'
+	
+	$Menu_Bt_Rela						= $GB_Panel_Sub.Controls.ToolButton
+	$Menu_Bt_Rela.Anchor				= 1
+	$Menu_Bt_Rela.BorderStyle		= 0
+	$Menu_Bt_Rela.FlatStyle			= 0
+	$Menu_Bt_Rela.FontSize			= 13
+	$Menu_Bt_Rela.Size				= 200, 45
+	$Menu_Bt_Rela.Top					= $Menu_Bt_Venda.Top+$Menu_Bt_Rela.Bottom+2
+	$Menu_Bt_Rela.BackColor			= 0, 0, 0
+	$Menu_Bt_Rela.HotBackColor		= 20, 20, 20
+	$Menu_Bt_Rela.ForeColor			= 'White'
+	$Menu_Bt_Rela.Text				= 'Relatório'
+	$Menu_Bt_Rela.Icon				= $Ico.Images(6)
+	$Menu_Bt_Rela.OnClick				=
+	'
+		Clear_Select()
+		$$Menu_Bt_Rela.BackColor	= 20, 20, 20
+	'
+
+	$=$Menu_Bt_Rela.Controls.ToolButton
+	$Menu_Bt_Rela.Controls(0).Anchor				= 4
+	$Menu_Bt_Rela.Controls(0).BorderStyle		= 0
+	$Menu_Bt_Rela.Controls(0).FlatStyle			= 0
+	$Menu_Bt_Rela.Controls(0).FontSize			= 13
+	$Menu_Bt_Rela.Controls(0).Size				= 50, 45
+	$Menu_Bt_Rela.Controls(0).Top				= 0
+	$Menu_Bt_Rela.Controls(0).Left				= $Menu_Bt_Rela.Right-50
+	$Menu_Bt_Rela.Controls(0).BackColor			= 0, 0, 0
+	$Menu_Bt_Rela.Controls(0).HotBackColor		= 100, 0, 3
+	$Menu_Bt_Rela.Controls(0).ForeColor			= 'White'
+	$Menu_Bt_Rela.Controls(0).Icon				= $Ico.Images(8)
+	$Menu_Bt_Rela.Controls(0).OnClick			=
+	'
+		if ($$Comb_Rela.Visible)
+			$$Comb_Rela.Visible = 0
+			$$Menu_Bt_Rela.Controls(0).Icon = $$Ico.Images(8)
+		else
+			$$Comb_Rela.Visible = 1
+			$$Menu_Bt_Rela.Controls(0).Icon = $$Ico.Images(9)
+		endif
+	'
+	
+	;;<COMBOBOX DOS RELATÓRIOS>
+		$Comb_Rela				= $GB_Panel_Sub.Controls.Add('GroupBox')
+		$Comb_Rela.BorderStyle	= 0
+		$Comb_Rela.Left			= 3
+		$Comb_Rela.Height		= $Comb_Rela.Height+50
+		$Comb_Rela.Width		= $GB_Panel_Sub.Width-8
+		$Comb_Rela.Top			= $Menu_Bt_Rela.Bottom+1
+		$Comb_Rela.Visible = 0
+
+		$=$Comb_Rela.Controls.ToolButton
+		$Comb_Rela.Controls(0).Anchor			= 1
+		$Comb_Rela.Controls(0).BorderStyle		= 0
+		$Comb_Rela.Controls(0).FlatStyle		= 0
+		$Comb_Rela.Controls(0).Top				= 0
+		$Comb_Rela.Controls(0).FontSize			= 13
+		$Comb_Rela.Controls(0).Size				= 218, 30
+		$Comb_Rela.Controls(0).BackColor		= 0, 0, 0
+		$Comb_Rela.Controls(0).HotBackColor		= 100, 0, 3
+		$Comb_Rela.Controls(0).ForeColor		= 'White'
+		$Comb_Rela.Controls(0).Text				= 'Clientes'
+		$Comb_Rela.Controls(0).OnClick			= ''
+
+		$=$Comb_Rela.Controls.ToolButton
+		$Comb_Rela.Controls(1).Anchor			= 1
+		$Comb_Rela.Controls(1).BorderStyle		= 0
+		$Comb_Rela.Controls(1).FlatStyle		= 0
+		$Comb_Rela.Controls(1).Top				= $Comb_Rela.Controls(0).Bottom+1
+		$Comb_Rela.Controls(1).FontSize			= 13
+		$Comb_Rela.Controls(1).Size				= 218, 30
+		$Comb_Rela.Controls(1).BackColor		= 0, 0, 0
+		$Comb_Rela.Controls(1).HotBackColor		= 100, 0, 3
+		$Comb_Rela.Controls(1).ForeColor		= 'White'
+		$Comb_Rela.Controls(1).Text				= 'Produtos'
+		$Comb_Rela.Controls(1).OnClick			= ''
+
+		$=$Comb_Rela.Controls.ToolButton
+		$Comb_Rela.Controls(2).Anchor			= 1
+		$Comb_Rela.Controls(2).BorderStyle		= 0
+		$Comb_Rela.Controls(2).FlatStyle		= 0
+		$Comb_Rela.Controls(2).Top				= $Comb_Rela.Controls(1).Bottom+1
+		$Comb_Rela.Controls(2).FontSize			= 13
+		$Comb_Rela.Controls(2).Size				= 218, 30
+		$Comb_Rela.Controls(2).BackColor		= 0, 0, 0
+		$Comb_Rela.Controls(2).HotBackColor		= 100, 0, 3
+		$Comb_Rela.Controls(2).ForeColor		= 'White'
+		$Comb_Rela.Controls(2).Text				= 'Serviços'
+		$Comb_Rela.Controls(2).OnClick			= ''
+
+		$=$Comb_Rela.Controls.ToolButton
+		$Comb_Rela.Controls(3).Anchor			= 1
+		$Comb_Rela.Controls(3).BorderStyle		= 0
+		$Comb_Rela.Controls(3).FlatStyle		= 0
+		$Comb_Rela.Controls(3).Top				= $Comb_Rela.Controls(2).Bottom+1
+		$Comb_Rela.Controls(3).FontSize			= 13
+		$Comb_Rela.Controls(3).Size				= 218, 30
+		$Comb_Rela.Controls(3).BackColor		= 0, 0, 0
+		$Comb_Rela.Controls(3).HotBackColor		= 100, 0, 3
+		$Comb_Rela.Controls(3).ForeColor		= 'White'
+		$Comb_Rela.Controls(3).Text				= 'Ordem de serviço'
+		$Comb_Rela.Controls(3).OnClick			= ''
+		
+		$=$Comb_Rela.Controls.ToolButton
+		$Comb_Rela.Controls(4).Anchor			= 1
+		$Comb_Rela.Controls(4).BorderStyle		= 0
+		$Comb_Rela.Controls(4).FlatStyle		= 0
+		$Comb_Rela.Controls(4).Top				= $Comb_Rela.Controls(3).Bottom+1
+		$Comb_Rela.Controls(4).FontSize			= 13
+		$Comb_Rela.Controls(4).Size				= 218, 30
+		$Comb_Rela.Controls(4).BackColor		= 0, 0, 0
+		$Comb_Rela.Controls(4).HotBackColor		= 100, 0, 3
+		$Comb_Rela.Controls(4).ForeColor		= 'White'
+		$Comb_Rela.Controls(4).Text				= 'Vendas'
+		$Comb_Rela.Controls(4).OnClick			= ''
+	;;</COMBOBOX DOS RELATÓRIOS>
+	
+	$Menu_Bt_Finaca					= $GB_Panel_Sub.Controls.Add('ToolButton')
+	$Menu_Bt_Finaca.Anchor			= 1
+	$Menu_Bt_Finaca.BorderStyle		= 0
+	$Menu_Bt_Finaca.FlatStyle		= 0
+	$Menu_Bt_Finaca.FontSize			= 13
+	$Menu_Bt_Finaca.Size				= 200, 45
+	$Menu_Bt_Finaca.Top				= $Menu_Bt_Rela.Top+$Menu_Bt_Finaca.Bottom+2
+	$Menu_Bt_Finaca.BackColor		= 0, 0, 0
+	$Menu_Bt_Finaca.HotBackColor		= 20, 20, 20
+	$Menu_Bt_Finaca.ForeColor		= 'White'
+	$Menu_Bt_Finaca.Text				= 'Finanças'
+	$Menu_Bt_Finaca.Icon				= $Ico.Images(7)
+	$Menu_Bt_Finaca.OnClick			=
+	'
+		Clear_Select()
+		$$Menu_Bt_Finaca.BackColor	= 20, 20, 20
+	'
+	;;<COMBOBOX FINANÇAS>
+		$Comb_Fina				= $GB_Panel_Sub.Controls.Add('GroupBox')
+		$Comb_Fina.BorderStyle	= 0
+		$Comb_Fina.Left			= 3
+		$Comb_Fina.Height		= $Comb_Fina.Height+20
+		$Comb_Fina.Width		= $GB_Panel_Sub.Width-8
+		$Comb_Fina.Top			= $Menu_Bt_Finaca.Bottom+1
+		$Comb_Fina.Visible		= 0
+		
+		$=$Comb_Fina.Controls.ToolButton
+		$Comb_Fina.Controls(0).Anchor			= 1
+		$Comb_Fina.Controls(0).BorderStyle		= 0
+		$Comb_Fina.Controls(0).FlatStyle		= 0
+		$Comb_Fina.Controls(0).Top				= 1
+		$Comb_Fina.Controls(0).FontSize			= 13
+		$Comb_Fina.Controls(0).Size				= 218, 30
+		$Comb_Fina.Controls(0).BackColor		= 0, 0, 0
+		$Comb_Fina.Controls(0).HotBackColor		= 100, 0, 3
+		$Comb_Fina.Controls(0).ForeColor		= 'White'
+		$Comb_Fina.Controls(0).Text				= 'Lançamentos'
+		$Comb_Fina.Controls(0).OnClick			= ''
+	;;</COMBOBOX FINANÇAS>
+	
+	$=$Menu_Bt_Finaca.Controls.ToolButton
+	$Menu_Bt_Finaca.Controls(0).Anchor			= 4
+	$Menu_Bt_Finaca.Controls(0).BorderStyle		= 0
+	$Menu_Bt_Finaca.Controls(0).FlatStyle		= 0
+	$Menu_Bt_Finaca.Controls(0).FontSize		= 13
+	$Menu_Bt_Finaca.Controls(0).Size			= 50, 45
+	$Menu_Bt_Finaca.Controls(0).Top				= 0
+	$Menu_Bt_Finaca.Controls(0).Left			= $Menu_Bt_Finaca.Right-50
+	$Menu_Bt_Finaca.Controls(0).BackColor		= 0, 0, 0
+	$Menu_Bt_Finaca.Controls(0).HotBackColor	= 100, 0, 3
+	$Menu_Bt_Finaca.Controls(0).ForeColor		= 'White'
+	$Menu_Bt_Finaca.Controls(0).Icon			= $Ico.Images(8)
+	$Menu_Bt_Finaca.Controls(0).OnClick			= 
+	'
+		if ($$Comb_Fina.Visible)
+			$$Comb_Fina.Visible = 0
+			$$Menu_Bt_Finaca.Controls(0).Icon = $$Ico.Images(8)
+		else
+			$$Comb_Fina.Visible = 1
+			$$Menu_Bt_Finaca.Controls(0).Icon = $$Ico.Images(9)
+		endif
+	'
+;;</GROUP BOX PANEL_SUB>
+
+;;<MENU DA CENTRAL>
+	:MENU_CENTRAL
+	$Bt_Cliente				= $GB_Central.ToolButton
+	$Bt_Cliente.BorderStyle	= 0
+	$Bt_Cliente.FlatStyle		= 0
+	$Bt_Cliente.Alignment		= 2
+	$Bt_Cliente.FontSize		= 13
+	$Bt_Cliente.Size			= 100, 75
+	$Bt_Cliente.Location		= 30, $GB_Central.Height/4
+	$Bt_Cliente.BackColor		= 0, 0, 0
+	$Bt_Cliente.HotBackColor	= 20, 20, 20
+	$Bt_Cliente.ForeColor		= 'White'
+	$Bt_Cliente.Text			= 'Clientes'
+	$Bt_Cliente.Icon			= $Lista_Imagem.Images(0)
+	$Bt_Cliente.OnClick		=
+	'
+		Clear_Select()
+		$$Menu_Bt_Clientes.BackColor	= 20, 20, 20
+		$$TabControl.SelectedIndex	= 1 $$Tx_Pes_Cliente.SetFocus()
+	'
+	
+	$=$GB_Central.Controls.Add('Splitter')
+	$GB_Central.Controls(1).BackColor	= 'gray'
+	$GB_Central.Controls(1).Size		= 3, 75
+	$GB_Central.Controls(1).Enabled		= 0
+	$GB_Central.Controls(1).Location	= $Bt_Cliente.Right+5, $GB_Central.Height/4
+	
+	$Bt_Servico				= $GB_Central.ToolButton
+	$Bt_Servico.BorderStyle	= 0
+	$Bt_Servico.FlatStyle		= 0
+	$Bt_Servico.Alignment		= 2
+	$Bt_Servico.FontSize		= 13
+	$Bt_Servico.Size			= 100, 75
+	$Bt_Servico.Location		= $GB_Central.Controls(1).Right+5, $GB_Central.Height/4
+	$Bt_Servico.BackColor		= 244, 189, 33
+	$Bt_Servico.HotBackColor	= 254, 209, 53
+	$Bt_Servico.ForeColor		= 'White'
+	$Bt_Servico.Text			= 'Serviços'
+	$Bt_Servico.Icon			= $Lista_Imagem.Images(3)
+	$Bt_Servico.OnClick		=
+	'
+		Clear_Select()
+		$$Menu_Bt_Servico.BackColor	= 20, 20, 20
+		$$TabControl.SelectedIndex	= 3 $$Tx_Pes_Serviços.SetFocus()
+	'
+	
+	$Bt_OS					= $GB_Central.ToolButton
+	$Bt_OS.BorderStyle	= 0
+	$Bt_OS.FlatStyle		= 0
+	$Bt_OS.Alignment		= 2
+	$Bt_OS.FontSize		= 13
+	$Bt_OS.Size			= 100, 75
+	$Bt_OS.Location		= $Bt_Servico.Right+5, $GB_Central.Height/4
+	$Bt_OS.BackColor		= 255, 0, 60
+	$Bt_OS.HotBackColor	= 255, 40, 100
+	$Bt_OS.ForeColor		= 'White'
+	$Bt_OS.Text			= 'O.S'
+	$Bt_OS.Icon			= $Lista_Imagem.Images(1)
+	$Bt_OS.OnClick			=
+	'
+		Clear_Select()
+		$$Menu_Bt_OS.BackColor		= 20, 20, 20
+		$$TabControl.SelectedIndex	= 4
+	'
+	
+	$=$GB_Central.Controls.Add('Splitter')
+	$GB_Central.Controls(4).BackColor	= 'gray'
+	$GB_Central.Controls(4).Size		= 3, 75
+	$GB_Central.Controls(4).Enabled		= 0
+	$GB_Central.Controls(4).Location	= $Bt_OS.Right+5, $GB_Central.Height/4
+	
+	$Bt_Produto				= $GB_Central.ToolButton
+	$Bt_Produto.BorderStyle	= 0
+	$Bt_Produto.FlatStyle		= 0
+	$Bt_Produto.Alignment		= 2
+	$Bt_Produto.FontSize		= 13
+	$Bt_Produto.Size			= 100, 75
+	$Bt_Produto.Location		= $GB_Central.Controls(4).Right+5, $GB_Central.Height/4
+	$Bt_Produto.BackColor		= 33, 189, 244
+	$Bt_Produto.HotBackColor	= 53, 209, 254
+	$Bt_Produto.ForeColor		= 'White'
+	$Bt_Produto.Text			= 'Produtos'
+	$Bt_Produto.Icon			= $Lista_Imagem.Images(2)
+	$Bt_Produto.OnClick		=
+	'
+		Clear_Select()
+		$$Menu_Bt_Produto.BackColor	= 20, 20, 20
+		$$TabControl.SelectedIndex	= 2
+	'
+	
+	$Bt_Venda					= $GB_Central.ToolButton
+	$Bt_Venda.BorderStyle		= 0
+	$Bt_Venda.FlatStyle		= 0
+	$Bt_Venda.Alignment		= 2
+	$Bt_Venda.FontSize		= 13
+	$Bt_Venda.Size				= 100, 75
+	$Bt_Venda.Location		= $Bt_Produto.Right+5, $GB_Central.Height/4
+	$Bt_Venda.BackColor		= 95, 194, 65
+	$Bt_Venda.HotBackColor	= 125, 224, 85
+	$Bt_Venda.ForeColor		= 'White'
+	$Bt_Venda.Text				= 'Vendas'
+	$Bt_Venda.Icon				= $Lista_Imagem.Images(4)
+	$Bt_Venda.OnClick			=
+	'
+		Clear_Select()
+		$$Menu_Bt_Venda.BackColor	= 20, 20, 20
+		$$TabControl.SelectedIndex	= 5
+	'
+;;</MENU DA CENTRAL>
+
+;;<PRODUTOS COM ESTOQUE MINÍMO>
+	:Estoque_Min
+	$Estoque_Min = $GB_Prod_Etoq_Min.Controls.GroupBox
+	$Estoque_Min.Size			= 538, 175
+	$Estoque_Min.Center()
+	$Estoque_Min.Top			= $Estoque_Min.Top+8
+	$Estoque_Min.BorderStyle	= 0
+	$Estoque_Min.Visible		= 0
+	
+	$=$Estoque_Min.Controls.GridView()
+	$Estoque_Min.Controls(0).Anchor						= 1 + 2 + 4 + 8
+	$Estoque_Min.Controls(0).Dock						= 5
+	$Estoque_Min.Controls(0).BorderStyle				= 0
+	$Estoque_Min.Controls(0).ReadOnly					= 1
+	$Estoque_Min.Controls(0).FullRowSelect				= 1
+	$Estoque_Min.Controls(0).ScrollBars					= 2
+	$Estoque_Min.Controls(0).Fontsize					= 15
+	$Estoque_Min.Controls(0).SelectionForeColor			= 0,0,0
+	$Estoque_Min.Controls(0).HeaderStyle				= 1
+	$Estoque_Min.Controls(0).AlternatingBackColor		= &0F7EBE7
+	$Estoque_Min.Controls(0).SelectionBackColor			= 169,178,202
+	$Estoque_Min.Controls(0).BackColor					= "White";"GhostWhite"
+	$Estoque_Min.Controls(0).GridLineColor				= &E7BE94 ;"RoyalBlue"
+	$Estoque_Min.Controls(0).ForeColor					= "Black" ;"MidnightBlue"
+	$Estoque_Min.Controls(0).Font						= $System.Font("Segeo UI", 10)
+	;;<ENTRANDO COM OS DADOS>
+		kdb_field_GridView($Estoque_Min.Controls(0), 'PRODUTOS', 'ID_CODEBAR;COMPLEMENTO;DATA-CAD;DATA-ALTERAÇÃO;FUNC-ALTERAÇÃO;MOTIVO-ALTERAÇÃO;PREVIEW')
+		$Estoque_Min.Controls(0).Columns(3).Text = 'Valor de compra'
+		$Estoque_Min.Controls(0).Columns(5).Text = 'Valor total'
+		$Estoque_Min.Controls(0).Columns(6).Text = 'Estoque'
+		;;
+	;;</ENTRANDO COM OS DADOS>
+	
+;;</PRODUTOS COM ESTOQUE MINÍMO>
+
+;;<OS EM ABERTO>
+;;</OS EM ABERTO>
+
+;;<Estatíticas do sistema>
+	:Estatíticas_Sys
+	$Estatiticas_Sys = $GB_Resumo_Sys.Controls.GroupBox
+	$Estatiticas_Sys.Size			= 530, 250
+	$Estatiticas_Sys.BorderStyle	= 0
+	$Estatiticas_Sys.Center()
+	
+	$=$Estatiticas_Sys.Controls.ToolButton
+	$Estatiticas_Sys.Controls(0).FlatStyle		= 0
+	$Estatiticas_Sys.Controls(0).BorderStyle	= 0
+	$Estatiticas_Sys.Controls(0).Anchor			= 4
+	$Estatiticas_Sys.Controls(0).Anchor			= 8
+	$Estatiticas_Sys.Controls(0).FontSize	 	= 19
+	$Estatiticas_Sys.Controls(0).Location		= 10, 43
+	$Estatiticas_Sys.Controls(0).BackColor		= 'black'
+	$Estatiticas_Sys.Controls(0).HotForeColor	= 'White'
+	$Estatiticas_Sys.Controls(0).HotBackColor	= 30, 30, 30
+	$Estatiticas_Sys.Controls(0).Size			= 250, 100
+	$Estatiticas_Sys.Controls(0).FontName		= 'Segoe UI'
+	$Estatiticas_Sys.Controls(0).text			= 'Clientes'
+	$Estatiticas_Sys.Controls(0).Icon			= $Lista_Imagem.Images(0)
+	$Estatiticas_Sys.Controls(0).OnClick			=
+	'
+		$$=Execute($$Menu_Bt_Clientes.OnClick) $$Tx_Pes_Cliente.SetFocus()
+	'
+	$Estatiticas_Sys.Controls(0).OnMouseEnter	=
+	'
+		$$Estatiticas_Sys.Controls(0).ToolTipText = "Cliente: "+join(tb_GetData("Clientes.Nome", "max"), @@crlf+"Cliente: ", 3)
+		if (tb_LinesData("Clientes.Nome") > 3)
+			$$Estatiticas_Sys.Controls(0).ToolTipText = $$Estatiticas_Sys.Controls(0).ToolTipText+@@crlf+"..."
+		endif
+	'
+
+	$=$Estatiticas_Sys.Controls.ToolButton
+	$Estatiticas_Sys.Controls(1).FlatStyle		= 0
+	$Estatiticas_Sys.Controls(1).BorderStyle	= 0
+	$Estatiticas_Sys.Controls(1).Anchor			= 4
+	$Estatiticas_Sys.Controls(1).Anchor			= 8
+	$Estatiticas_Sys.Controls(1).FontSize	 	= 19
+	$Estatiticas_Sys.Controls(1).BackColor		= 'black'
+	$Estatiticas_Sys.Controls(1).HotForeColor	= 'White'
+	$Estatiticas_Sys.Controls(1).HotBackColor	= 30, 30, 30
+	$Estatiticas_Sys.Controls(1).Size			= 250, 100
+	$Estatiticas_Sys.Controls(1).FontName		= 'Segoe UI'
+	$Estatiticas_Sys.Controls(1).text			= 'Produtos'
+	$Estatiticas_Sys.Controls(1).Icon			= $Lista_Imagem.Images(2)
+	$Estatiticas_Sys.Controls(1).Location		= $Estatiticas_Sys.Controls(0).right+5, $Estatiticas_Sys.Controls(0).Top
+	$Estatiticas_Sys.Controls(1).OnClick			=
+	'
+		$$=Execute($$Menu_Bt_Produto.OnClick) $$Tx_Pes_Prod.SetFocus()
+	'
+
+	$=$Estatiticas_Sys.Controls.ToolButton
+	$Estatiticas_Sys.Controls(2).FlatStyle		= 0
+	$Estatiticas_Sys.Controls(2).BorderStyle	= 0
+	$Estatiticas_Sys.Controls(2).Anchor			= 4
+	$Estatiticas_Sys.Controls(2).Anchor			= 8
+	$Estatiticas_Sys.Controls(2).FontSize	 	= 19
+	$Estatiticas_Sys.Controls(2).BackColor		= 'black'
+	$Estatiticas_Sys.Controls(2).HotForeColor	= 'White'
+	$Estatiticas_Sys.Controls(2).HotBackColor	= 30, 30, 30
+	$Estatiticas_Sys.Controls(2).Size			= 250, 100
+	$Estatiticas_Sys.Controls(2).FontName		= 'Segoe UI'
+	$Estatiticas_Sys.Controls(2).text			= 'Ordem de Serviços'
+	$Estatiticas_Sys.Controls(2).Icon			= $Lista_Imagem.Images(1)
+	$Estatiticas_Sys.Controls(2).Location		= $Estatiticas_Sys.Controls(0).Left, $Estatiticas_Sys.Controls(0).Bottom+6
+	$Estatiticas_Sys.Controls(2).OnClick			=
+	'
+		$$=Execute($$Menu_Bt_Clientes.OnClick)
+	'
+
+	$=$Estatiticas_Sys.Controls.ToolButton
+	$Estatiticas_Sys.Controls(3).FlatStyle		= 0
+	$Estatiticas_Sys.Controls(3).BorderStyle	= 0
+	$Estatiticas_Sys.Controls(3).Anchor			= 4
+	$Estatiticas_Sys.Controls(3).Anchor			= 8
+	$Estatiticas_Sys.Controls(3).FontSize	 	= 19
+	$Estatiticas_Sys.Controls(3).BackColor		= 'black'
+	$Estatiticas_Sys.Controls(3).HotForeColor	= 'White'
+	$Estatiticas_Sys.Controls(3).HotBackColor	= 30, 30, 30
+	$Estatiticas_Sys.Controls(3).Size			= 250, 100
+	$Estatiticas_Sys.Controls(3).FontName		= 'Segoe UI'
+	$Estatiticas_Sys.Controls(3).text			= 'Serviços'
+	$Estatiticas_Sys.Controls(3).Icon			= $Lista_Imagem.Images(3)
+	$Estatiticas_Sys.Controls(3).Location		= $Estatiticas_Sys.Controls(2).right+5, $Estatiticas_Sys.Controls(2).Top
+	$Estatiticas_Sys.Controls(3).OnClick			=
+	'
+		$$=Execute($$Menu_Bt_Servico.OnClick)
+	'
+	$Estatiticas_Sys.Controls(3).OnMouseEnter	=
+	'
+		$$Estatiticas_Sys.Controls(3).ToolTipText = "Serviços: "+join(tb_GetData("Servicos.DESCRIÇÃO", "max"), @@crlf+"Serviços: ", 3)
+		if (tb_LinesData("Servicos.DESCRIÇÃO") > 3)
+			$$Estatiticas_Sys.Controls(3).ToolTipText = $$Estatiticas_Sys.Controls(3).ToolTipText+@@crlf+"..."
+		endif
+	'
+;;</Estatíticas do sistema>
+;;</Tabela principal>
+TagObj($GB_Panel_Sub)
+TagObj($Tab_Main)
+
+Include '.\Sub\Telas\Serviços\Tab_Serviços.KiX'
+Include '.\Sub\Telas\Clientes\Tab_Clientes.KiX'
+Include '.\Sub\Telas\Produtos\Tab_Produtos.KiX'
+Include '.\Sub\Telas\Produtos\Tab_Prod_Categoria.KiX'
+Include '.\Sub\Telas\Produtos\Tab_Prod_Produtos.KiX'
+Include '.\Sub\Telas\O.S\Tab_OS.KiX'
+Include '.\Sub\Telas\Login\Logon.KiX'
+Include '.\Sub\UDFs\Flip_Currency.Udf'
+Include '.\Sub\UDFs\kdb_GridView.Udf'
+Include '.\Sub\UDFs\Porcentagem.Udf'
+Include '.\Sub\UDFs\Alternator.Udf'
+Include '.\Sub\UDFs\ShellUAC.Udf'
+Include '.\Sub\UDFs\GetUrl.Udf'
+Include '.\Sub\UDFs\Rand.Udf'
+
+:FORM_SHOW
+Do
+	$User_Func = UserLogin()
+	if (VarType($User_Func) <> 8204)
+		if (msg(
+			"Descule, mas você precisa entrar com uma conta de usuário"+@Crlf+
+			"Deseja tentar fazer login novamente?", "Deseja tenta de novo?", 4 + 48 + 4096) <> 6)
+			$form.Hide()
+			quit 1
+		endif
+	endif
+Until (VarType($User_Func) = 8204)
+$form.Show()
+/*
+*/
+;@Ticks-$x?
+While $form.visible()
+	$=Execute($System.DoEvents)
+loop
+
+Function Scrolling($FormNow, $Track, $ID)
+	Dim
+		$i
+	for $i=0 to $FormNow.Controls.Count
+		if Not Instr($ID, $i)
+			$FormNow.Controls($i).Top = $Track.Value * -60 + $FormNow.Controls($i).tag
+		endif
+	next
+EndFunction
+
+Function TagObj($Obj)
+	Dim
+		$i
+	for $i=0 to $Obj.Controls.Count
+		$Obj.Controls($i).Tag = $Obj.Controls($i).Top
+	next
+EndFunction
+
+function msg($str, $title, $style)
+	$msg		= $System.MessageBox()
+	$msg.style	= $style
+	$msg.text	= $str
+	$msg.title	= $title
+	$msg		= $msg.show
+endfunction
+
+function Form_Resize()
+	Dim
+		$w, /*$h,*/ $Form_Resize
+	
+	$w = $Tab_Clientes.Width-230
+	$GridView.Columns(2).Width = $w-258
+
+	if ($form.WindowState = 2)
+		$Estatiticas_Sys.Center()
+	else
+		$Estatiticas_Sys.Center()
+	endif
+endfunction
+
+function fKeyCode_Temp($obj)
+	$KeyCode_Temp = $KeyCode_Temp + "_" + $obj.KeyCode
+	if (InStr($KeyCode_Temp, "17_65"))
+		$obj.SelectionStart = 0
+		$obj.SelectionLength = Len($obj.Text)
+		$KeyCode_Temp = ''
+	endif
+	$fKeyCode_Temp = 1
+endfunction
+
+function Status_Sys()
+	;;<ESTATÍTICAS DO SISTEMA>
+		Select
+			Case ($TabControl.SelectedIndex = 1);Clientes
+				$FundoCliente.Text	= '('+tb_LinesData('Clientes.NOME')+') Clientes registrado(s)'
+
+			Case ($TabControl.SelectedIndex = 2);Produtos
+
+			Case ($TabControl.SelectedIndex = 3);Serviços
+				$FundoServiço.Text	= '('+tb_LinesData('Servicos.DESCRIÇÃO')+') Serviço(s) registrado(s)'
+
+			Case ($TabControl.SelectedIndex = 4);O.S
+				$FundoOS.Text	= '('+tb_LinesData('OS.DESCRIÇÃO')+') Ordem(s) de serviço(s) registrada(s)'
+
+			Case ($TabControl.SelectedIndex = 5);Vendas
+
+			Case Default()
+				;Clear_Select()
+				$Estatiticas_Sys.Controls(0).text	= 'Clientes'+@crlf+'('+Cstr(Abs(tb_LinesData('Clientes.NOME')))+')'
+				$Estatiticas_Sys.Controls(1).text	= 'Produtos'+@crlf+'('+Cstr(Abs(tb_LinesData('Produtos.DESCRIÇÃO')))+')'
+				$Estatiticas_Sys.Controls(3).text	= 'Serviços'+@crlf+'('+Cstr(Abs(tb_LinesData('Servicos.DESCRIÇÃO')))+')'
+
+		Endselect
+	;;</ESTATÍTICAS DO SISTEMA>
+endfunction
+
+function EventoScrollbar($Obj1, $Obj2)
+	Dim
+		$Delta
+	if ($System.EventArgs.Delta > 0) $Delta = 1 else $Delta = -1 endif
+	Select
+		Case ($form.MouseX > 0) And ($form.MouseX < 217)
+			$Track.Value = $Track.Value - $Delta
+			Scrolling($Obj1, $Track, "0")
+		Case ($form.MouseX > 218)
+			Select 
+				Case ($TabControl.SelectedIndex = 0)
+					$Track_C.Value = $Track_C.Value - $Delta
+					Scrolling($Obj2, $Track_C, "0;1")
+			Endselect
+	Endselect
+endfunction
+
+/*
+function MaximumForm()
+	if ($form.MouseY =< 40) And ($form.WindowState = 2)
+		$form.FormBorderStyle = 1
+	else
+		if ($form.WindowState = 1)
+			$form.FormBorderStyle = 0
+		endif
+		if ($form.WindowState = 2)
+			$form.FormBorderStyle = 0
+		endif
+	endif
+endfunction
+*/
+
+function MaskTextBox($Text, $Mask)
+	Dim
+		$i, $x, $chr, $count
+	$MaskTextBox = ''
+	for $i=1 to Len($Text)+1
+		$chr	= Substr($Text, $i, 1)
+		$count	= 0
+		for each $x in $Mask
+			if ($chr <> $x)
+				$count=$count+1
+			else
+				Goto ':Fim'
+			endif
+		next
+		::Fim
+		if ($count < Ubound($Mask)+1)
+			$MaskTextBox = $MaskTextBox + Cstr($chr)
+		endif
+	next
+endfunction
+
+function OpenFile(Optional $File)
+	Dim
+		$dir
+	if Not Exist($File)
+		$File = ''
+	endif
+	$dir = @Curdir
+	$OpenFile						= $System.OpenFileDialog()
+	$OpenFile.FilterIndex 		= 0
+	$OpenFile.Filter				= "(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG"
+	$OpenFile.InitialDirectory	= "%UserProfile%\Pictures\"
+	$OpenFile.Title				= 'Abra sua imagem'
+	$=$OpenFile.ShowDialog
+	$OpenFile.InitialDirectory	= @Curdir
+	CD $dir
+	if (Trim($OpenFile.FileName) = '')
+		$OpenFile					= $File
+		exit 1
+	else
+		$OpenFile					= $OpenFile.FileName
+		exit 0
+	endif
+endfunction
+
+function Clear_Select()
+	$Menu_Bt.BackColor				= 0, 0, 0
+	$Menu_Bt_OS.BackColor				= 0, 0, 0
+	$Menu_Bt_Venda.BackColor			= 0, 0, 0
+	$Menu_Bt_Rela.BackColor			= 0, 0, 0
+	$Menu_Bt_Servico.BackColor		= 0, 0, 0
+	$Menu_Bt_Finaca.BackColor		= 0, 0, 0
+	$Menu_Bt_Produto.BackColor		= 0, 0, 0
+	$Menu_Bt_Clientes.BackColor		= 0, 0, 0
+endfunction

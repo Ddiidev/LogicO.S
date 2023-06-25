@@ -1,0 +1,61 @@
+;;AUTHOR		: André Luiz
+;;VERSION		: 1.2
+;;FUNCTION		: Alternator(), DeAlternator()
+;;SOURCE:
+function alternator($text)
+	Dim
+		$i, $x, $asc, $decode, $newtext,
+		$lenth, $lenthD, $lixo
+	$newtext = ''
+	for $i=1 To Len($text)
+		$x = $x + 10 + ($i+2)
+		do
+			$decode	= (cint(Rand(4))/$x)+$x	/* CRIA UM VALOR DE CODIFICAÇÃO INÉDITO */
+			if not Ascan($Lixo, $decode) /* VERIFICANDO LIXO */
+				$decode = 0
+			endif
+		until ($decode >= $x)
+		$lenthD = Len($decode)
+		;;<ARQUIVANDO LIXO>
+			;if (Ubound($lixo) = 98) Redim $lixo[0] endif ;;Verificando as ocorrências do lixo.
+			Redim preserve $lixo[Ubound($lixo)+1]
+			$lixo[Ubound($lixo)] = $decode
+		;;</ARQUIVANDO LIXO>
+		$asc	= Cstr(asc(Substr($text, $i, 1)) * $decode) /* PEGA O VALOR ASCII DESSA LETRA*/
+		$lenth	= cstr(len($asc)) /* PEGA O TAMANHO DA LETRA ASCII */
+		$newtext= $newtext + $asc + $decode + cstr($lenth) + cstr($lenthD) /* ADICIONA AO TEXTO FINAL */
+		if ($x >= 80) $x = $x/cint($lenth) endif
+	next
+	$alternator = $newtext
+endfunction
+
+function Dealternator($text)
+	Dim
+		$i, $ID[1], $Div,
+		$code, $chr, $tmp,
+		$newtext, $lenth
+	$lenth	= Len($text)
+	$text	= Reverse($text)
+	for $i=1 To $lenth
+		$chr	= Substr($text, $i, 1)
+		$ID[0]	= Cint($chr)
+		$ID[1]	= Cint(Substr($text, $i+1, 1))
+		$Div	= Cint(Reverse(Substr($text, $i+2, $ID[0])))
+		$code	= Cint(Reverse(Substr($text, $i+2+Len($Div), $ID[1])))
+		$tmp	= Len(cstr($Div)+Cstr($code))+2
+		$text	= Substr($text, $tmp)
+		$newtext= $newtext + Chr($code / $Div)
+	next
+	$Dealternator = Reverse($newtext)
+endfunction
+
+function Reverse($argument)
+;;AUTHOR		:	André Luiz
+;;VERSION		:	1.0
+;;SYNTAX		:	Reverse([STRING])
+;;SOURCE		:
+	Dim $i
+	for $i=1 To Len($argument)
+		$Reverse = Substr($argument, $i, 1) + $Reverse
+	next
+endfunction

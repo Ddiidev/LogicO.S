@@ -1,0 +1,756 @@
+Global
+	$GB_Clientes, $FundoCliente, $Tab_C_GridView,
+	$Bt_Add_Cliente, $Bt_Del_Cliente, $Bt_Edit_Cliente,
+	$Bt_Sav_Cliente, $Bt_Pes_Cliente, $Tx_Pes_Cliente
+Global
+	$GB_Add_Clientes, $GB_Add_Clientes_Pessoal, $GB_Add_Clientes_Origem,
+	$Ajuda_Clientes
+
+
+$Ajuda_Clientes					= $Tab_Clientes.Controls.GroupBox
+$Ajuda_Clientes.BorderStyle		= 2
+$Ajuda_Clientes.FontSize		= 16
+$Ajuda_Clientes.Location		= 10, -3
+$Ajuda_Clientes.ForeColor		= 'gray'
+$Ajuda_Clientes.ClientSize		= 460, 75
+$Ajuda_Clientes.BackColor		= 0, 51, 102
+$Ajuda_Clientes.Text			= 'Ajuda de pesquisa'
+
+$=$Ajuda_Clientes.Controls.LABEL
+$Ajuda_Clientes.Controls(0).TextAlign 		= 1
+$Ajuda_Clientes.Controls(0).FontName		= 'Segeo UI'
+$Ajuda_Clientes.Controls(0).FontSize		= 10
+$Ajuda_Clientes.Controls(0).Location		= 2, 8
+$Ajuda_Clientes.Controls(0).ForeColor		= 167, 177, 183;'gray'
+$Ajuda_Clientes.Controls(0).BackColor		= 'Transparent'
+$Ajuda_Clientes.Controls(0).Size			= 460, 65
+$Ajuda_Clientes.Controls(0).Cursor			= 14
+$Ajuda_Clientes.Controls(0).OnMouseEnter	= '$$Ajuda_Clientes.Controls(0).ToolTipText = $$Ajuda_Clientes.Controls(0).Text'
+$Ajuda_Clientes.Controls(0).Text			=
+'
+Para fazer uma pesquisa personalizada(pesquisar por TELEFONE, CEP etc...)
+Basta colocar o nome do campo seguido de dois, dois pontos(::), exemplo:
+Tel::83, caso for buscar por nome, não é necessário especificar "Nome::"!
+'
+
+$=$Tab_Clientes.Controls.TabControl
+$Tab_Clientes.Controls(1).Anchor		= 1 + 2 + 4 + 8
+$Tab_Clientes.Controls(1).SizeMode 		= 1
+$Tab_Clientes.Controls(1).BorderStyle	= 0
+$Tab_Clientes.Controls(1).Location		= 0, $Ajuda_Clientes.bottom+4
+$Tab_Clientes.Controls(1).Size			= 590, 490
+$Tab_Clientes.Controls(1).Text			= '(0) Clientes registrado(s)'
+$Tab_Clientes.Controls(1).FontName		= 'Segeo UI'
+$Tab_Clientes.Controls(1).FontSize		= 16
+$Tab_Clientes.Controls(1).ForeColor		= 220, 220, 204
+$Tab_Clientes.Controls(1).BackColor		= 30, 30, 30
+
+$FundoCliente				= $Tab_Clientes.Controls(1).TabPages.Add("(0) Cliente(s)")
+$FundoCliente.BackColor		= 202, 202, 181
+$FundoCliente.FontName		= 'Candara'
+$FundoCliente.FontSize		= 11
+
+$Bt_Add_Cliente				= $FundoCliente.Controls.ToolButton
+$Bt_Add_Cliente.Alignment	= 0
+$Bt_Add_Cliente.BorderStyle	= 0
+$Bt_Add_Cliente.FlatStyle	= 0
+$Bt_Add_Cliente.Cursor		= 16
+$Bt_Add_Cliente.Location	= 10, 3
+$Bt_Add_Cliente.Size		= 150, 40
+$Bt_Add_Cliente.BackColor	= 6, 175, 143;'Transparent'
+$Bt_Add_Cliente.BackColor	= 255, 255, 255
+$Bt_Add_Cliente.Text		= 'Adicionar cliente'
+$Bt_Add_Cliente.Icon		= $ICO.Images(10)
+$Bt_Add_Cliente.OnClick		= 
+'
+	$$Bt_Sav_Cliente.Text		= "Salvar cliente"
+	if ($$GB_Add_Clientes.Visible)
+		if (Len($$GB_Add_Clientes_Pessoal.Controls(1).Text) > 0) and (Len($$Bt_Add_Cliente.Text) = 8)
+			if (MSG("Deseja cancelar as alterações?"+@@crlf+"você perdera todas aterações feitas!", "você perdera as aterações feitas!", 48 + 4) = 7)
+				$$GB_Add_Clientes_Pessoal.Controls(1).SetFocus()
+				exit 0
+			endif
+			$$GB_Add_Clientes_Pessoal.Controls(1).SetFocus()
+		endif
+		$$GB_Add_Clientes.Visible	= 0
+		$$GB_Clientes.Visible		= 1
+		$$Tx_Pes_Cliente.Visible	= 1
+		$$Bt_Pes_Cliente.Visible	= 1
+		$$Tab_C_GridView.Visible	= 1
+
+		$$Bt_Add_Cliente.Tag		= 0
+
+		$$Bt_Del_Cliente.Enabled	= 1
+		$$Bt_Edit_Cliente.Enabled	= 1
+
+		$$Bt_Add_Cliente.Alignment	= 0
+		$$Bt_Add_Cliente.Icon		= $$ICO.Images(10)
+		$$Bt_Add_Cliente.Text		= "Adicionar cliente"
+		Clear($$GB_Add_Clientes_Pessoal, $$GB_Add_Clientes_Origem)
+	else
+		$$GB_Add_Clientes.Visible	= 1
+		$$GB_Clientes.Visible		= 0
+		$$Tx_Pes_Cliente.Visible	= 0
+		$$Bt_Pes_Cliente.Visible	= 0
+		$$Tab_C_GridView.Visible	= 0
+
+		$$Bt_Add_Cliente.Tag		= 1
+
+		$$Bt_Del_Cliente.Enabled	= 0
+		$$Bt_Edit_Cliente.Enabled	= 0
+
+		$$Bt_Add_Cliente.Alignment	= 2
+		$$Bt_Add_Cliente.Icon		= $$ICO.Images(14)
+		$$Bt_Add_Cliente.Text		= "< Voltar"
+	endif
+	$$GB_Add_Clientes_Pessoal.Controls(1).SetFocus()
+'
+
+$Bt_Del_Cliente				= $FundoCliente.Controls.ToolButton
+$Bt_Del_Cliente.Alignment	= 0
+$Bt_Del_Cliente.BorderStyle	= 0
+$Bt_Del_Cliente.FlatStyle	= 0
+$Bt_Del_Cliente.Cursor		= 16
+$Bt_Del_Cliente.Location	= $Bt_Add_Cliente.Right+5, 3
+$Bt_Del_Cliente.Size		= 150, 40
+$Bt_Del_Cliente.BackColor	= 6, 175, 143;'Transparent'
+$Bt_Del_Cliente.BackColor	= 255, 255, 255
+$Bt_Del_Cliente.Text		= 'Deletar cliente(s)'
+$Bt_Del_Cliente.Icon		= $ICO.Images(11)
+$Bt_Del_Cliente.OnClick		= 'Deletar_Clientes()'
+
+$Bt_Edit_Cliente			= $FundoCliente.Controls.ToolButton
+$Bt_Edit_Cliente.Alignment	= 0
+$Bt_Edit_Cliente.BorderStyle= 0
+$Bt_Edit_Cliente.FlatStyle	= 0
+$Bt_Edit_Cliente.Cursor		= 16
+$Bt_Edit_Cliente.Location	= $Bt_Del_Cliente.Right+5, 3
+$Bt_Edit_Cliente.Size		= 150, 40
+$Bt_Edit_Cliente.BackColor	= 6, 175, 143;'Transparent'
+$Bt_Edit_Cliente.BackColor	= 255, 255, 255
+$Bt_Edit_Cliente.Text		= 'Editar cliente'
+$Bt_Edit_Cliente.Icon		= $ICO.Images(12)
+$Bt_Edit_Cliente.OnClick	=
+'
+	;if ($$Tab_C_GridView.FocusedItem)
+	$$Bt_Sav_Cliente.Text			= "Concluir"
+	if ($$GB_Add_Clientes.Visible)
+		$$GB_Add_Clientes.Visible	= 0
+		$$GB_Clientes.Visible		= 1
+		$$Tab_C_GridView.Visible	= 1
+		$$Tx_Pes_Cliente.Visible	= 1
+		$$Bt_Pes_Cliente.Visible	= 1
+
+		$$Bt_Edit_Cliente.Tag		= 0
+
+		$$Bt_Del_Cliente.Enabled	= 1
+		$$Bt_Add_Cliente.Enabled	= 1
+
+		$$Bt_Edit_Cliente.Alignment	= 0
+		$$Bt_Edit_Cliente.Text		= "Editar cliente"
+		$$Bt_Edit_Cliente.Icon		= $$ICO.Images(12)
+		Clear($$GB_Add_Clientes_Pessoal, $$GB_Add_Clientes_Origem)
+	else
+		$$GB_Add_Clientes.Visible	= 1
+		$$GB_Clientes.Visible		= 0
+		$$Tx_Pes_Cliente.Visible	= 0
+		$$Bt_Pes_Cliente.Visible	= 0
+		$$Tab_C_GridView.Visible	= 0
+
+		$$Bt_Edit_Cliente.Tag		= 1
+
+		$$Bt_Del_Cliente.Enabled	= 0
+		$$Bt_Add_Cliente.Enabled	= 0
+
+		$$Bt_Edit_Cliente.Alignment	= 2
+		$$Bt_Edit_Cliente.Text		= "< Voltar"
+		$$Bt_Edit_Cliente.Icon		= $$Ico.Images(14)
+		Editar_Prenche_Cliente($$GB_Add_Clientes_Pessoal, $$GB_Add_Clientes_Origem)
+	endif
+'
+$Tx_Pes_Cliente					= $FundoCliente.Controls.TextBox
+$Tx_Pes_Cliente.BorderStyle		= 0
+$Tx_Pes_Cliente.FontSize		= 17
+$Tx_Pes_Cliente.Height			= 30
+$Tx_Pes_Cliente.FontName		= 'Segeo UI'
+$Tx_Pes_Cliente.Left			= $Bt_Add_Cliente.Left
+$Tx_Pes_Cliente.Width			= $Bt_Del_Cliente.Right-10
+$Tx_Pes_Cliente.Top				= $Bt_Del_Cliente.Bottom+5
+$Tx_Pes_Cliente.OnKeyDown		=
+'
+	$=fKeyCode_Temp($$Tx_Pes_Cliente)
+	Pesquisar_Cliente()
+'
+
+$Bt_Pes_Cliente					= $FundoCliente.Controls.ToolButton
+$Bt_Pes_Cliente.Alignment		= 0
+$Bt_Pes_Cliente.BorderStyle		= 0
+$Bt_Pes_Cliente.FlatStyle		= 0
+$Bt_Pes_Cliente.Cursor			= 16
+$Bt_Pes_Cliente.Size			= 150, 30
+$Bt_Pes_Cliente.FontSize		= 12
+$Bt_Pes_Cliente.ForeColor		= 'white'
+$Bt_Pes_Cliente.BackColor		= 'black'
+$Bt_Pes_Cliente.Text			= 'Pesquisar'
+$Bt_Pes_Cliente.Icon			= $ICO.Images(15)
+$Bt_Pes_Cliente.Left			= $Bt_Del_Cliente.Right+5
+$Bt_Pes_Cliente.Top				= $Bt_Del_Cliente.Bottom+5
+$Bt_Pes_Cliente.OnClick			= 'Pesquisar_Cliente(1)'
+
+
+;;<ADICIONAR CLIENTES>
+	$GB_Add_Clientes					= $FundoCliente.Controls.GroupBox
+	$GB_Add_Clientes.Visible			= 0
+	$GB_Add_Clientes.BorderStyle		= 1
+	$GB_Add_Clientes.FontSize			= 18
+	$GB_Add_Clientes.Location			= 5, 45
+	$GB_Add_Clientes.ForeColor			= 'black'
+	$GB_Add_Clientes.ClientSize			= 530, 400
+	$GB_Add_Clientes.BackColor			= $FundoCliente.BackColor
+	$GB_Add_Clientes.Text				= 'Dados do cliente'
+
+	$GB_Add_Clientes_Pessoal			= $GB_Add_Clientes.Controls.GroupBox
+	$GB_Add_Clientes_Pessoal.Location	= 15, 30
+	$GB_Add_Clientes_Pessoal.BackColor	= $FundoCliente.BackColor
+	$GB_Add_Clientes_Pessoal.FontSize	= 12
+	$GB_Add_Clientes_Pessoal.ForeColor	= 'black'
+	$GB_Add_Clientes_Pessoal.ClientSize	= 500, 85
+	$GB_Add_Clientes_Pessoal.Text		= 'Pessoal'
+	
+	$GB_Add_Clientes_Origem				= $GB_Add_Clientes.Controls.GroupBox
+	$GB_Add_Clientes_Origem.Location	= 15, $GB_Add_Clientes_Pessoal.Bottom+2
+	$GB_Add_Clientes_Origem.BackColor	= $FundoCliente.BackColor
+	$GB_Add_Clientes_Origem.ForeColor	= 'black'
+	$GB_Add_Clientes_Origem.FontSize	= 12
+	$GB_Add_Clientes_Origem.ClientSize	= 500, 215
+	$GB_Add_Clientes_Origem.Text		= 'Origem'
+
+;;<SALVAR CLIENTE>
+	$Bt_Sav_Cliente				= $GB_Add_Clientes.Controls.ToolButton
+	$Bt_Sav_Cliente.Alignment	= 0
+	$Bt_Sav_Cliente.BorderStyle	= 0
+	$Bt_Sav_Cliente.FlatStyle	= 0
+	$Bt_Sav_Cliente.Cursor		= 16
+	$Bt_Sav_Cliente.Location	= $GB_Add_Clientes.Width/3+10, $GB_Add_Clientes.Height-55
+	$Bt_Sav_Cliente.Size		= 150, 40
+	$Bt_Sav_Cliente.FontSize	= 12
+	$Bt_Sav_Cliente.ForeColor	= 'Black'
+	$Bt_Sav_Cliente.BackColor	= 'white'
+	$Bt_Sav_Cliente.Text		= 'Salvar cliente'
+	$Bt_Sav_Cliente.Icon		= $ICO.Images(13)
+	$Bt_Sav_Cliente.OnClick		=
+	'
+		if (Len($$GB_Add_Clientes_Pessoal.Controls(1).Text) < 3)
+			$$GB_Add_Clientes_Pessoal.Controls(1).BackColor = "red"
+			$=MSG("Um nome de cliente tem que ter pelo menos 3 caractéres!", "Tipo de nome incorreto!", 48)
+			$$GB_Add_Clientes_Pessoal.Controls(1).BackColor = "white"
+			$$GB_Add_Clientes_Pessoal.Controls(1).SetFocus()
+			exit 0
+		endif
+		if (Len($$GB_Add_Clientes_Pessoal.Controls(1).Text) > 0)
+			Select
+				case ($$Bt_Add_Cliente.Tag = 1)
+					Salvar_Cliente($$GB_Add_Clientes_Pessoal, $$GB_Add_Clientes_Origem)
+				Case ($$Bt_Edit_Cliente.Tag = 1)
+					Salvar_Cliente($$GB_Add_Clientes_Pessoal, $$GB_Add_Clientes_Origem, 1)
+			Endselect
+		else
+			$$GB_Add_Clientes_Pessoal.Controls(1).BackColor = "red"
+			$=Msg(
+				"Por favor insira o nome do cliente."+@@crlf+@@crlf+
+				"!Sem o nome do cliente fica impossível de indentificá-lo depois. :)",
+				"Nome do cliente!", 64 + 4096
+			)
+			$$GB_Add_Clientes_Pessoal.Controls(1).SetFocus()
+			$$GB_Add_Clientes_Pessoal.Controls(1).BackColor = "white"
+		endif
+	'
+;;</SALVAR CLIENTE>
+
+;;<PESSOAL>
+	$=$GB_Add_Clientes_Pessoal.Controls.Label
+	$GB_Add_Clientes_Pessoal.Controls(0).FontSize	= 15
+	$GB_Add_Clientes_Pessoal.Controls(0).Width		= 270
+	$GB_Add_Clientes_Pessoal.Controls(0).Location	= 15, 20
+	$GB_Add_Clientes_Pessoal.Controls(0).ForeColor	= 'White'
+	$GB_Add_Clientes_Pessoal.Controls(0).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Pessoal.Controls(0).Text		= 'Nome do cliente'
+
+	$=$GB_Add_Clientes_Pessoal.Controls.TextBox
+	$GB_Add_Clientes_Pessoal.Controls(1).BorderStyle	= 0
+	$GB_Add_Clientes_Pessoal.Controls(1).FontSize		= 15
+	$GB_Add_Clientes_Pessoal.Controls(1).Width			= 270
+	$GB_Add_Clientes_Pessoal.Controls(1).FontName		= 'Segeo UI'
+	$GB_Add_Clientes_Pessoal.Controls(1).Height		= $GB_Add_Clientes_Pessoal.Controls(1).Height-5
+	$GB_Add_Clientes_Pessoal.Controls(1).Location		= 15, $GB_Add_Clientes_Pessoal.Controls(0).Bottom+2
+	$GB_Add_Clientes_Pessoal.Controls(1).OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$GB_Add_Clientes_Pessoal.Controls(1))
+		if ($$GB_Add_Clientes_Pessoal.Controls(1).KeyCode = 13)
+			$$GB_Add_Clientes_Pessoal.Controls(3).SetFocus()
+			$$GB_Add_Clientes_Pessoal.Controls(3).SelectionStart = 0
+			$$GB_Add_Clientes_Pessoal.Controls(3).SelectionLength = Len($$GB_Add_Clientes_Pessoal.Controls(3).Text)
+		endif
+	'
+	
+	$=$GB_Add_Clientes_Pessoal.Controls.Label
+	$GB_Add_Clientes_Pessoal.Controls(2).FontSize	= 15
+	$GB_Add_Clientes_Pessoal.Controls(2).Width		= 150
+	$GB_Add_Clientes_Pessoal.Controls(2).ForeColor	= 'White'
+	$GB_Add_Clientes_Pessoal.Controls(2).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Pessoal.Controls(2).Text		= 'Telefone/Celular'
+	$GB_Add_Clientes_Pessoal.Controls(2).Location	= $GB_Add_Clientes_Pessoal.Controls(0).Right+35, $GB_Add_Clientes_Pessoal.Controls(0).Top
+
+	$=$GB_Add_Clientes_Pessoal.Controls.TextBox
+	$GB_Add_Clientes_Pessoal.Controls(3).BorderStyle= 0
+	$GB_Add_Clientes_Pessoal.Controls(3).FontSize	= 15
+	$GB_Add_Clientes_Pessoal.Controls(3).Width		= 150
+	$GB_Add_Clientes_Pessoal.Controls(3).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Pessoal.Controls(3).Height		= $GB_Add_Clientes_Pessoal.Controls(3).Height-5
+	$GB_Add_Clientes_Pessoal.Controls(3).Location	= $GB_Add_Clientes_Pessoal.Controls(1).Right+35, $GB_Add_Clientes_Pessoal.Controls(0).Bottom+2
+	$GB_Add_Clientes_Pessoal.Controls(3).OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$GB_Add_Clientes_Pessoal.Controls(3))
+		if ($$GB_Add_Clientes_Pessoal.Controls(3).KeyCode = 13)
+			$$GB_Add_Clientes_Origem.Controls(1).SetFocus()
+			$$GB_Add_Clientes_Origem.Controls(1).SelectionStart = 0
+			$$GB_Add_Clientes_Origem.Controls(1).SelectionLength = Len($$GB_Add_Clientes_Origem.Controls(1).Text)
+		endif
+	'
+;;</PESSOAL>
+
+;;<ORIGEM>
+	;;<CEP>
+	$=$GB_Add_Clientes_Origem.Controls.Label
+	$GB_Add_Clientes_Origem.Controls(0).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(0).Width		= 150
+	$GB_Add_Clientes_Origem.Controls(0).Text		= 'CEP'
+	$GB_Add_Clientes_Origem.Controls(0).ForeColor	= 'White'
+	$GB_Add_Clientes_Origem.Controls(0).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(0).Location	= 15, 20
+
+	$=$GB_Add_Clientes_Origem.Controls.TextBox
+	$GB_Add_Clientes_Origem.Controls(1).BorderStyle		= 0
+	$GB_Add_Clientes_Origem.Controls(1).FontSize		= 15
+	$GB_Add_Clientes_Origem.Controls(1).Width			= 150
+	$GB_Add_Clientes_Origem.Controls(1).FontName		= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(1).Height			= $GB_Add_Clientes_Origem.Controls(1).Height-5
+	$GB_Add_Clientes_Origem.Controls(1).Location		= 15, $GB_Add_Clientes_Origem.Controls(0).Bottom+2
+	$GB_Add_Clientes_Origem.Controls(1).OnTextChanged 	= 'Preenche_Com_CEP($$GB_Add_Clientes_Origem.Controls(1), $$GB_Add_Clientes_Origem, $$GB_Add_Clientes_Pessoal)'
+	$GB_Add_Clientes_Origem.Controls(1).OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$GB_Add_Clientes_Origem.Controls(1))
+		if ($$GB_Add_Clientes_Origem.Controls(1).KeyCode = 13)
+			$$GB_Add_Clientes_Origem.Controls(3).SetFocus()
+			$$GB_Add_Clientes_Origem.Controls(3).SelectionStart = 0
+			$$GB_Add_Clientes_Origem.Controls(3).SelectionLength = Len($$GB_Add_Clientes_Origem.Controls(3).Text)
+		endif
+	'
+	;;</CEP>
+
+	;;<UF>
+	$=$GB_Add_Clientes_Origem.Controls.Label
+	$GB_Add_Clientes_Origem.Controls(2).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(2).Width		= 50
+	$GB_Add_Clientes_Origem.Controls(2).ForeColor	= 'White'
+	$GB_Add_Clientes_Origem.Controls(2).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(2).Text		= 'UF'
+	$GB_Add_Clientes_Origem.Controls(2).Location	= $GB_Add_Clientes_Origem.Controls(0).Right+35, $GB_Add_Clientes_Origem.Controls(0).top
+
+	$=$GB_Add_Clientes_Origem.Controls.TextBox
+	$GB_Add_Clientes_Origem.Controls(3).BorderStyle	= 0
+	$GB_Add_Clientes_Origem.Controls(3).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(3).Width		= 50
+	$GB_Add_Clientes_Origem.Controls(3).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(3).Height		= $GB_Add_Clientes_Origem.Controls(3).Height-5
+	$GB_Add_Clientes_Origem.Controls(3).Location	= $GB_Add_Clientes_Origem.Controls(1).Right+35, $GB_Add_Clientes_Origem.Controls(1).Top
+	$GB_Add_Clientes_Origem.Controls(3).OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$GB_Add_Clientes_Origem.Controls(3))
+		if ($$GB_Add_Clientes_Origem.Controls(3).KeyCode = 13)
+			$$GB_Add_Clientes_Origem.Controls(5).SetFocus()
+			$$GB_Add_Clientes_Origem.Controls(5).SelectionStart = 0
+			$$GB_Add_Clientes_Origem.Controls(5).SelectionLength = Len($$GB_Add_Clientes_Origem.Controls(5).Text)
+		endif
+	'
+	;;</UF>
+
+	;;<LOCALIDADE>
+	$=$GB_Add_Clientes_Origem.Controls.Label
+	$GB_Add_Clientes_Origem.Controls(4).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(4).Width		= 130
+	$GB_Add_Clientes_Origem.Controls(4).ForeColor	= 'White'
+	$GB_Add_Clientes_Origem.Controls(4).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(4).Text		= 'LOCALIDADE'
+	$GB_Add_Clientes_Origem.Controls(4).Location	= $GB_Add_Clientes_Origem.Controls(2).Right+35, $GB_Add_Clientes_Origem.Controls(2).Top
+
+	$=$GB_Add_Clientes_Origem.Controls.TextBox
+	$GB_Add_Clientes_Origem.Controls(5).BorderStyle	= 0
+	$GB_Add_Clientes_Origem.Controls(5).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(5).Width		= 180
+	$GB_Add_Clientes_Origem.Controls(5).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(5).Height		= $GB_Add_Clientes_Origem.Controls(5).Height-5
+	$GB_Add_Clientes_Origem.Controls(5).Location	= $GB_Add_Clientes_Origem.Controls(3).Right+35, $GB_Add_Clientes_Origem.Controls(3).Top
+	$GB_Add_Clientes_Origem.Controls(5).OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$GB_Add_Clientes_Origem.Controls(5))
+		if ($$GB_Add_Clientes_Origem.Controls(5).KeyCode = 13)
+			$$GB_Add_Clientes_Origem.Controls(7).SetFocus()
+			$$GB_Add_Clientes_Origem.Controls(7).SelectionStart = 0
+			$$GB_Add_Clientes_Origem.Controls(7).SelectionLength = Len($$GB_Add_Clientes_Origem.Controls(7).Text)
+		endif
+	'
+	;;</LOCALIDADE>
+
+	;;<BAIRRO>
+	$=$GB_Add_Clientes_Origem.Controls.Label
+	$GB_Add_Clientes_Origem.Controls(6).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(6).Width		= 100
+	$GB_Add_Clientes_Origem.Controls(6).ForeColor	= 'White'
+	$GB_Add_Clientes_Origem.Controls(6).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(6).Text		= 'Bairro'
+	$GB_Add_Clientes_Origem.Controls(6).Location	= 15, $GB_Add_Clientes_Origem.Controls(1).Bottom+10
+
+	$=$GB_Add_Clientes_Origem.Controls.TextBox
+	$GB_Add_Clientes_Origem.Controls(7).BorderStyle	= 0
+	$GB_Add_Clientes_Origem.Controls(7).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(7).Width		= 235
+	$GB_Add_Clientes_Origem.Controls(7).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(7).Height		= $GB_Add_Clientes_Origem.Controls(7).Height-5
+	$GB_Add_Clientes_Origem.Controls(7).Location	= 15, $GB_Add_Clientes_Origem.Controls(6).Bottom+2
+	$GB_Add_Clientes_Origem.Controls(7).OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$GB_Add_Clientes_Origem.Controls(7))
+		if ($$GB_Add_Clientes_Origem.Controls(7).KeyCode = 13)
+			$$GB_Add_Clientes_Origem.Controls(9).SetFocus()
+			$$GB_Add_Clientes_Origem.Controls(9).SelectionStart = 0
+			$$GB_Add_Clientes_Origem.Controls(9).SelectionLength = Len($$GB_Add_Clientes_Origem.Controls(9).Text)
+		endif
+	'
+	;;</BAIRRO>
+
+	;;<ENDEREÇO>
+	$=$GB_Add_Clientes_Origem.Controls.Label
+	$GB_Add_Clientes_Origem.Controls(8).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(8).Width		= 100
+	$GB_Add_Clientes_Origem.Controls(8).ForeColor	= 'White'
+	$GB_Add_Clientes_Origem.Controls(8).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(8).Text		= 'Endereço'
+	$GB_Add_Clientes_Origem.Controls(8).Location	= 15, $GB_Add_Clientes_Origem.Controls(7).Bottom+10
+
+	$=$GB_Add_Clientes_Origem.Controls.TextBox
+	$GB_Add_Clientes_Origem.Controls(9).BorderStyle	= 0
+	$GB_Add_Clientes_Origem.Controls(9).FontSize	= 15
+	$GB_Add_Clientes_Origem.Controls(9).Width		= 450
+	$GB_Add_Clientes_Origem.Controls(9).FontName	= 'Segeo UI'
+	$GB_Add_Clientes_Origem.Controls(9).Height		= $GB_Add_Clientes_Origem.Controls(9).Height-5
+	$GB_Add_Clientes_Origem.Controls(9).Location	= 15, $GB_Add_Clientes_Origem.Controls(8).Bottom+2
+	$GB_Add_Clientes_Origem.Controls(9).OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$GB_Add_Clientes_Origem.Controls(9))
+		if ($$GB_Add_Clientes_Origem.Controls(9).KeyCode = 13)
+			$$=Execute($$Bt_Sav_Cliente.OnClick)
+		endif
+		if ($$GB_Add_Clientes_Origem.Controls(9).KeyCode = 9)
+			$$GB_Add_Clientes_Pessoal.Controls(1).SetFocus()
+			$$GB_Add_Clientes_Pessoal.Controls(1).SelectionStart = 0
+			$$GB_Add_Clientes_Pessoal.Controls(1).SelectionLength = Len($$GB_Add_Clientes_Pessoal.Controls(1).Text)
+		endif
+	'
+	;;</ENDEREÇO>
+;;</ORIGEM>
+;;</ADICIONAR CLIENTES>
+
+$GB_Clientes					= $Tab_Clientes.Controls.GroupBox
+$GB_Clientes.Anchor			= 1 + 2 + 4 + 8
+$GB_Clientes.BorderStyle		= 0
+$GB_Clientes.Location			= 0, 170
+$GB_Clientes.BackColor		= 0, 51, 102
+$GB_Clientes.ClientSize		= 590, 348
+
+$Tab_C_GridView							= $FundoCliente.Controls.GridView()
+$Tab_C_GridView.Anchor					= 1 + 2 + 4 + 8
+$Tab_C_GridView.BorderStyle				= 0
+$Tab_C_GridView.ReadOnly				= 1
+$Tab_C_GridView.FullRowSelect			= 1
+$Tab_C_GridView.ScrollBars				= 2
+$Tab_C_GridView.Fontsize				= 15
+$Tab_C_GridView.SelectionForeColor		= 0,0,0
+$Tab_C_GridView.size					= $FundoCliente.Width-14, 350
+$Tab_C_GridView.HeaderStyle				= 1
+$Tab_C_GridView.AlternatingBackColor	= &0F7EBE7
+$Tab_C_GridView.SelectionBackColor		= 169,178,202
+$Tab_C_GridView.BackColor				= "White";"GhostWhite"
+$Tab_C_GridView.GridLineColor			= &E7BE94 ;"RoyalBlue"
+$Tab_C_GridView.ForeColor				= "Black" ;"MidnightBlue"
+$Tab_C_GridView.Font					= $System.Font("Segeo UI", 10)
+$Tab_C_GridView.OnClick					= 'Order_ClickCliente()'
+$Tab_C_GridView.Location				= 10, $Tx_Pes_Cliente.bottom+6
+Add_Data()
+
+Function Add_Data(Optional $Not)
+	Dim
+		$text, $i
+	if Not $Not
+		$=$Tab_C_GridView.Columns.Add('#')
+		$Tab_C_GridView.Columns(0).Width		= 20
+		$Tab_C_GridView.Columns(0).ValueType	= 11
+		kdb_field_GridView($Tab_C_GridView, 'Clientes', 'SERVIÇOS')
+	endif
+	for each $text in tb_getField('Clientes')
+		$i=$i+1
+		kdb_fData_GridView($Tab_C_GridView, 'Clientes.'+$text, $i)
+	next
+	$Tab_C_GridView.Columns(9).Width	= $Tab_C_GridView.Columns(9).Width+20
+	$Tab_C_GridView.Columns(9).text		= 'Data de cadastro'
+EndFunction
+
+function Order_ClickCliente()
+	if ($Tab_C_GridView.CurrentColumn.Index = 0)
+		$Tab_C_GridView.Cells($Tab_C_GridView.CurrentRow.Index, $Tab_C_GridView.CurrentColumn.Index).Value = Not $Tab_C_GridView.Cells($Tab_C_GridView.CurrentRow.Index, $Tab_C_GridView.CurrentColumn.Index).Value
+	endif
+endfunction
+
+function Deletar_Clientes()
+	Dim
+		$Deletar_Clientes, $temp, $count,
+		$Data_Temp[13], $Data_Temp_, $i
+	$Tab_C_GridView.BeginUpdate
+
+	$i=0
+	$count = 0
+	for $i=0 to $Tab_C_GridView.Rows.Count
+		if ($Tab_C_GridView.Cells($i, 0).Value <> 0)
+			$count = $count+1
+		endif
+	next
+
+	if ($count = 0)
+		if ($Tab_C_GridView.CurrentRowIndex <> -1)
+			if (Msg('Deseja realmente deletar o cliente "'+$Tab_C_GridView.Cells($Tab_C_GridView.CurrentRow.Index, 2).Text+'"', 'Atenção!', 64+3+4096) = 6)
+				Dim
+					$IDCODIGO
+				$count			= tb_GetData('Del_Clientes.IDCODIGO', 'max')
+				$count			= Cint($count[ubound($count)])+1
+				$Data_Temp_		= tb_GetDataLine('Clientes.IDCODIGO', $Tab_C_GridView.Cells($Tab_C_GridView.CurrentRow.Index, 1).Text)
+				$Data_Temp		= $count,
+					$Data_Temp_[0], 0, @Date+' | '+@Time,
+					$Data_Temp_[1], $Data_Temp_[2],
+					$Data_Temp_[3], $Data_Temp_[4],
+					$Data_Temp_[5], $Data_Temp_[6],
+					$Data_Temp_[7], $Data_Temp_[8],
+					$Data_Temp_[9], $Data_Temp_[10]
+				$IDCODIGO	= $Tab_C_GridView.Cells($Tab_C_GridView.CurrentRow.Index, 1).Text
+				tb_DelData_Cond('Clientes.IDCODIGO', $IDCODIGO)
+				tb_Save2('Clientes', @CurDir+'\Banco-d-Dados\Clientes.ktb')
+				$=$Tab_C_GridView.rows.Removeat($Tab_C_GridView.CurrentRow.Index)
+
+				;;<REGISTRANDO A DELEÇÃO>
+					tb_InsertData('Del_Clientes', $Data_Temp)
+					tb_Save2('Del_Clientes', @CurDir+'\Banco-d-Dados\Del_Clientes.ktb')
+				;;</REGISTRANDO A DELEÇÃO>
+			endif
+		endif
+		$Tab_C_GridView.EndUpdate
+		exit 200
+	endif
+
+	if ($count >= 2)
+		$temp = msg('Deseja deletar os ('+$count+') clientes selecionados?', 'Deseja deletar os Clientes?', 16 + 3 + 4096)
+	else
+		$temp = msg('Deseja deletar o cliente selecionado?', 'Deseja deletar o Cliente?', 16 + 3 + 4096)
+	endif
+	if ($temp = 6)
+		for $i=$Tab_C_GridView.Rows.Count To 0 step -1
+			if ($Tab_C_GridView.Cells($i, 0).Value <> 0)
+				$count			= tb_GetData('Del_Clientes.IDCODIGO', 'max')
+				$count			= Cint($count[ubound($count)])+1
+				$Data_Temp_		= tb_GetDataLine('Clientes.IDCODIGO', $Tab_C_GridView.Cells($i, 1).Text)
+				$Data_Temp		= $count,
+					$Data_Temp_[0], 0, @Date+' | '+@Time,
+					$Data_Temp_[1], $Data_Temp_[2],
+					$Data_Temp_[3], $Data_Temp_[4],
+					$Data_Temp_[5], $Data_Temp_[6],
+					$Data_Temp_[7], $Data_Temp_[8],
+					$Data_Temp_[9], $Data_Temp_[10]
+				tb_DelData_cond('Clientes.IDCODIGO', $Tab_C_GridView.Cells($i, 1).Text)
+				tb_Save2('Clientes', @CurDir+'\Banco-d-Dados\Clientes.ktb')
+	
+				;;<REGISTRANDO A DELEÇÃO>
+					tb_InsertData('Del_Clientes', $Data_Temp)
+					tb_Save2('Del_Clientes', @CurDir+'\Banco-d-Dados\Del_Clientes.ktb')
+				;;</REGISTRANDO A DELEÇÃO>
+				$=$Tab_C_GridView.Rows.RemoveAt($i)
+			endif
+		next
+	endif
+	$Tab_C_GridView.EndUpdate
+	exit 0
+endfunction
+
+function Preenche_Com_CEP($Obj1, $obj2, $obj3)
+	if (Len($obj1.Text) >= 8)
+		Dim
+			$temp, $Error, $time, $size
+		$size = 0
+
+		if exist(@Curdir+'\Sub\Error.txt')
+			del @Curdir+'\Sub\Error.txt'
+		endif
+		Run @Curdir+'\Sub\Test-Net.cmd'
+
+		$Time	= @Ticks
+		do
+			if exist(@Curdir+'\Sub\Error.txt')
+				$size = GetFileSize(@Curdir+'\Sub\Error.txt')
+			endif
+			if (Abs($Time-@Ticks) > 2000)
+				Exit 1
+			endif
+			sleep 0.1
+		until ($size = 8)
+
+		if ($Error = 1) Exit 0 endif
+		$=$obj2.Controls(3).Text ;;Só para não deixar o 'Form' travado
+		$temp = GetUrl('https://viacep.com.br/ws/'+Cstr($obj1.Text)+'/piped/')
+		Select
+			Case ($temp <> 'erro:true') And ($temp <> '<h2>Bad Request (400)</h2>')
+				$temp = Split($temp, '|')
+				$obj2.Controls(3).Text = Split($temp[5], ':')[1]
+				$obj2.Controls(5).Text = Split($temp[4], ':')[1]
+				$obj2.Controls(7).Text = Split($temp[3], ':')[1]
+				$obj2.Controls(9).Text = Split($temp[1], ':')[1]
+				if (Trim($obj3.Controls(3).Text) = '')
+					$temp = GetURL('http://ddd.pricez.com.br/estados/'+$obj2.Controls(3).Text)
+					$temp = Substr($temp, InStr($temp, '"ddd":')+7)
+					$temp = Substr($temp, 1, InStr($temp, ',')-1)
+					$obj3.Controls(3).Text = '('+$temp+') '
+				endif
+			Case ($temp = 'erro:true')
+				$obj2.Controls(3).Text = ''
+				$obj2.Controls(5).Text = ''
+				$obj2.Controls(7).Text = ''
+				$obj2.Controls(9).Text = ''
+		Endselect
+	endif
+endfunction
+
+function Salvar_Cliente($obj1, $obj2, Optional $SVorEDT)
+	Dim
+		$Salvar_Cliente, $Array
+	;;<VERIFICA SE O CLIENTE JÁ EXISTE!>
+	if (tb_GetDataCond('Clientes.Nome', 'Nome', $obj1.Controls(1).text) <> '') And Not $SVorEDT
+		$=Msg('O cliente '+$obj1.Controls(1).text+' já existe!', 'Cliente existente!', 48)
+		exit 0
+	endif
+	;;</VERIFICA SE O CLIENTE JÁ EXISTE!>
+	
+	if (msg('Deseja salvar o cliente "'+$obj1.Controls(1).text+'"?', 'Deseja Salvar os dados?', 48 + 3 + 4096) = '6')
+		$Salvar_Cliente = tb_getData('Clientes.IDCODIGO', 'max')
+		$Salvar_Cliente = Cint($Salvar_Cliente[Ubound($Salvar_Cliente)])+1
+		$Array =
+			$Salvar_Cliente,
+			$obj1.Controls(1).text, $obj1.Controls(3).text,
+			$obj2.Controls(1).Text, $obj2.Controls(3).Text,
+			$obj2.Controls(5).Text, $obj2.Controls(7).Text,
+			$obj2.Controls(9).Text, @Date, 0, 0
+		if ($SVorEDT <> 1)
+			tb_InsertData('Clientes', $Array)
+		else
+			Dim
+				$text, $i
+			$i = 0
+			$Array[0] = $Tab_C_GridView.Cells($Tab_C_GridView.CurrentRow.Index, 1).Text
+			for each $text in tb_getField('Clientes')
+				tb_UpdateData('Clientes.'+$text, $Array[0], $Array[$i], 'IDCODIGO')
+				$i=$i+1
+			next
+		endif
+		tb_Save2('Clientes', @CurDir+'\Banco-d-Dados\Clientes.ktb')
+		Add_Data(1)
+		if ($SVorEDT <> 1)
+			$Bt_Add_Cliente.Text = 'Adicionar cliente'
+			$=Execute($Bt_Add_Cliente.OnClick)
+		else
+			$=Execute($Bt_Edit_Cliente.OnClick)
+		endif
+	endif
+	$=$GB_Add_Clientes_Pessoal.Controls(1).SetFocus()
+endfunction
+
+function Editar_Prenche_Cliente($obj1, $obj2)
+	Dim
+		$Data[$Tab_C_GridView.ColumnCount], $i
+
+	For $i=1 to $Tab_C_GridView.ColumnCount-2
+		$Data[$i-1] = tb_getDataCond('Clientes.'+$Tab_C_GridView.Columns($i+1).HeaderText, 'IDCODIGO', $Tab_C_GridView.Cells($Tab_C_GridView.CurrentRow.Index, 1).Text)
+	next
+	$obj1.Controls(1).Text = $Data[0]
+	$obj1.Controls(3).Text = $Data[1]
+	$obj2.Controls(1).Text = $Data[2]
+	$obj2.Controls(3).Text = $Data[3]
+	$obj2.Controls(5).Text = $Data[4]
+	$obj2.Controls(7).Text = $Data[5]
+	$obj2.Controls(9).Text = $Data[6]
+endfunction
+
+function Pesquisar_Cliente(Optional $Not)
+	Dim
+		$Tipo, $Busca,
+		$Result, $ID,
+		$Data, $line, $i, $Pesquisar_Cliente
+	if ($Tx_Pes_Cliente.KeyCode <> 13) And Not ($Not)
+		Exit 0
+	endif
+
+	if ($Tx_Pes_Cliente.Text = '')
+		if ($Tab_C_GridView.Rows.Count < tb_GetDataLines('Clientes'))
+			$Tab_C_GridView.BeginUpdate
+				$Tab_C_GridView.Rows.Clear
+				Add_Data(1)
+			$Tab_C_GridView.EndUpdate
+		endif
+		exit 0
+	endif
+	$Tipo	= Split($Tx_Pes_Cliente.Text, '::')
+	if (Ubound($Tipo) > 0)
+		$Tipo	= $Tipo[0]
+		$Busca	= Substr($Tx_Pes_Cliente.Text, InStr($Tx_Pes_Cliente.Text, '::')+2)
+	else
+		$Busca	= Join($Tipo, '')
+		$Tipo	= 'Nome'
+	endif
+	if (Trim($Busca) = '')
+		;if ($Tab_C_GridView.Items.Count < tb_GetDataLines('Clientes'))
+		;	$Tab_C_GridView.BeginUpdate
+		;		Add_Data(1)
+		;	$Tab_C_GridView.EndUpdate
+		;endif
+		Exit 0
+	endif
+	
+	$Result = tb_Find_StringMath_Data('Clientes.IDCODIGO', $Tipo, $Busca)
+	$Tab_C_GridView.BeginUpdate
+		$Tab_C_GridView.Rows.Clear
+
+		$line=0
+		for each $ID in $Result
+			$Data = tb_GetDataLine('Clientes.IDCODIGO', $ID)
+			$=$Tab_C_GridView.Rows.Add()
+			for $i=1 To Ubound($Data)+1
+				$Tab_C_GridView.Cells($line, $i).Text = $Data[$i-1]
+			next
+			$line=$line+1
+		next
+	$Tab_C_GridView.EndUpdate
+endfunction
+
+Function Clear($obj1, $obj2)
+	$obj1.Controls(1).Text = ''
+	$obj1.Controls(3).Text = ''
+	$obj2.Controls(1).Text = ''
+	$obj2.Controls(3).Text = ''
+	$obj2.Controls(5).Text = ''
+	$obj2.Controls(7).Text = ''
+	$obj2.Controls(9).Text = ''
+EndFunction

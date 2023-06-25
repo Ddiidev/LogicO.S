@@ -1,0 +1,37 @@
+##01:49:03,598 | 2017/11/10##
+##03:47:27,667 | 2017/11/20##
+##Ordem de serviços da empresa.##
+##O_S##
+####
+##Begin##
+
+<IDCODIGO>
+0=1
+1=2
+</IDCODIGO>
+
+<DESCRIÇÃO>
+0=Concerto de TV e Venda
+1=Computador
+</DESCRIÇÃO>
+
+<IDS-SERVIÇO>
+0=1,2
+1=1,3
+</IDS-SERVIÇO>
+
+<ID-CLIENTE>
+0=2
+1=1
+</ID-CLIENTE>
+
+<IDS-PRODUTO>
+0=1,2
+1=1,3
+</IDS-PRODUTO>
+
+<DATA_CAD>
+0=11/11/2017|15:36:30
+1=17/11/2017|11:56:35
+</DATA_CAD>
+

@@ -1,0 +1,47 @@
+;Function:	GetURL()
+;
+;Authors:	Bryce
+;
+;Version:	1.0 (12-2-2003)
+;
+;Action:	Gets the HTML from a given web page or FTP site.
+;
+;Syntax:	GetURL("URL",["USERNAME"],["PASSWORD"])
+;
+;Parameters:
+;		URL	: full Path to the URL you want to get
+;		USERNAME: Optional, a given username to be used
+;		PASSWORD: Optional, A password to be used for the username
+;
+;Returns:
+;		The HTML of the given URL
+;
+;		on error errorcodes returned and set:
+;			1 -failed to initialize http-object
+;			3 -failed to open connection
+;
+;Dependencies:
+;		IE5 or higher
+;
+;Remarks:
+;		I stole the error routines to match up with lonkeros own FTPGet() Udf
+;
+;Example:	
+;		"Getting HTML Code from http://kix.isorg.com/other_scripts"
+;		$html = GetURL("http://kix.isorg.com/other_scripts/")
+;		? $html
+;Source:
+function GetURL($url,Optional $user, optional $passwd)
+	dim $G_IECOM
+	$G_IECOM = createobject("microsoft.xmlhttp")
+	if @error exit(1) endif
+
+	if $user and $passwd
+		$g_iecom.open("GET", $url, not 1,$user,$passwd)
+	else
+		$g_iecom.open("GET", $url, not 1)
+	endif
+	if @error exit(3) endif
+	$g_iecom.send
+	$GetUrl = $g_iecom.responsetext
+endfunction

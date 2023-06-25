@@ -1,0 +1,432 @@
+Global
+	$Bt_Add_Prod_Catg, $Bt_Del_Prod_Catg,
+	$Bt_Edit_Prod_Catg,
+	$Tx_Pes_Prod_Catg, $Bt_Pes_Prod_Catg,
+	$GridView_Prod_Catg, $GB_Add_Prod_Catg,
+	$GB_Prod_Catg
+
+;;<BUTÕES DE CONTROLE>
+	$Bt_Add_Prod_Catg				= $Tab_Prod_Categoria.Controls.ToolButton
+	$Bt_Add_Prod_Catg.Alignment		= 0
+	$Bt_Add_Prod_Catg.BorderStyle	= 0
+	$Bt_Add_Prod_Catg.FlatStyle		= 0
+	$Bt_Add_Prod_Catg.Cursor		= 16
+	$Bt_Add_Prod_Catg.Location		= 7, 10
+	$Bt_Add_Prod_Catg.Size			= 150, 40
+	$Bt_Add_Prod_Catg.BackColor		= 255, 255, 255
+	$Bt_Add_Prod_Catg.Text			= 'Adicionar uma categoria'
+	$Bt_Add_Prod_Catg.Icon			= $ICO.Images(16)
+	$Bt_Add_Prod_Catg.OnClick		=
+	'
+		if ($$GB_Add_Prod_Catg.Visible)
+			if (Trim($$GB_Add_Prod_Catg.Controls(1).Text) <> "")
+				if (MSG("Deseja cancelar as alterações?"+@@crlf+"você perdera todas aterações feitas!", "você perdera as aterações feitas!", 48 + 4) = 7)
+					$$GB_Add_Prod_Catg.Controls(1).SetFocus()
+					exit 0
+				endif
+			endif
+			$$GB_Add_Prod_Catg.Controls(1).Text = ""
+			$$GB_Add_Prod_Catg.Visible	= 0
+			$$GB_Prod_Catg.Visible		= 1
+			
+			$$Bt_Del_Prod_Catg.Enabled	= 1
+			$$Bt_Edit_Prod_Catg.Enabled	= 1
+			
+			$$Bt_Add_Prod_Catg.Text		= "Adicionar um produto"
+			$$Bt_Add_Prod_Catg.Icon		= $$ICO.Images(16)
+			$$Tx_Pes_Prod_Catg.SetFocus()
+		else
+			$$GB_Add_Prod_Catg.Visible	= 1
+			$$GB_Prod_Catg.Visible		= 0
+			
+			$$Bt_Del_Prod_Catg.Enabled	= 0
+			$$Bt_Edit_Prod_Catg.Enabled	= 0
+			$$Bt_Add_Prod_Catg.Text		= "< Voltar"
+			$$Bt_Add_Prod_Catg.Icon		= $$ICO.Images(14)
+			$$GB_Add_Prod_Catg.Controls(1).SetFocus()
+		endif
+	'
+
+	$Bt_Del_Prod_Catg					= $Tab_Prod_Categoria.Controls.ToolButton
+	$Bt_Del_Prod_Catg.Alignment		= 0
+	$Bt_Del_Prod_Catg.BorderStyle	= 0
+	$Bt_Del_Prod_Catg.FlatStyle		= 0
+	$Bt_Del_Prod_Catg.Cursor			= 16
+	$Bt_Del_Prod_Catg.Location		= $Bt_Add_Prod_Catg.Right+5, 10
+	$Bt_Del_Prod_Catg.Size			= 150, 40
+	$Bt_Del_Prod_Catg.BackColor		= 255, 255, 255
+	$Bt_Del_Prod_Catg.Text			= 'Deletar categoria(s)'
+	$Bt_Del_Prod_Catg.Icon			= $ICO.Images(17)
+	$Bt_Del_Prod_Catg.OnClick		= 'Deletar_Categoria()'
+	
+	$Bt_Edit_Prod_Catg					= $Tab_Prod_Categoria.Controls.ToolButton
+	$Bt_Edit_Prod_Catg.Alignment		= 0
+	$Bt_Edit_Prod_Catg.BorderStyle		= 0
+	$Bt_Edit_Prod_Catg.FlatStyle		= 0
+	$Bt_Edit_Prod_Catg.Cursor			= 16
+	$Bt_Edit_Prod_Catg.Location			= $Bt_Del_Prod_Catg.Right+5, 10
+	$Bt_Edit_Prod_Catg.Size				= 150, 40
+	$Bt_Edit_Prod_Catg.BackColor		= 255, 255, 255
+	$Bt_Edit_Prod_Catg.Text				= 'Editar categoria'
+	$Bt_Edit_Prod_Catg.Icon				= $ICO.Images(20)
+	$Bt_Edit_Prod_Catg.OnClick			=
+	'
+		if ($$GB_Add_Prod_Catg.Visible)
+			$$GB_Add_Prod_Catg.tag				= 0
+			$$GB_Add_Prod_Catg.Visible			= 0
+			$$GB_Prod_Catg.Visible				= 1
+
+			$$Bt_Del_Prod_Catg.Enabled			= 1
+			$$Bt_Add_Prod_Catg.Enabled			= 1
+
+			$$Bt_Edit_Prod_Catg.Text			= "Editar categoria"
+			$$Bt_Edit_Prod_Catg.Icon			= $$ICO.Images(20)
+			$$GB_Add_Prod_Catg.Controls(1).Text = ""
+			$$Tx_Pes_Prod.SetFocus()
+		else
+			if ($$GridView_Prod_Catg.CurrentRow.Index <> -1)
+				$$GB_Add_Prod_Catg.Controls(1).Text = $$GridView_Prod_Catg.Cells($$GridView_Prod_Catg.CurrentRow.Index, 2).text
+				$$GB_Add_Prod_Catg.tag		= 1
+				$$GB_Add_Prod_Catg.Visible	= 1
+				$$GB_Prod_Catg.Visible		= 0
+
+				$$Bt_Del_Prod_Catg.Enabled	= 0
+				$$Bt_Add_Prod_Catg.Enabled	= 0
+
+				$$Bt_Edit_Prod_Catg.Text		= "< Voltar"
+				$$Bt_Edit_Prod_Catg.Icon		= $$ICO.Images(14)
+				$$Bt_Add_Prod_Catg.Controls(1).SetFocus()
+			endif
+		endif
+	'
+	
+;;<GRUPOS PARA ADICIONAR DADOS>
+	$GB_Add_Prod_Catg					= $Tab_Prod_Categoria.Controls.GroupBox
+	$GB_Add_Prod_Catg.Visible		= 0
+	$GB_Add_Prod_Catg.BorderStyle	= 2
+	$GB_Add_Prod_Catg.Location		= 5, 55
+	$GB_Add_Prod_Catg.ClientSize	= 560, 285
+	$GB_Add_Prod_Catg.BackColor		= 202, 202, 181
+	$GB_Add_Prod_Catg.Anchor		= 1 + 2 + 4
+	$GB_Add_Prod_Catg.Text			= 'Cadastro de categoria'
+
+	$GB_Prod_Catg					= $Tab_Prod_Categoria.Controls.GroupBox
+	$GB_Prod_Catg.BorderStyle		= 0
+	$GB_Prod_Catg.Location			= 7, 95
+	$GB_Prod_Catg.ClientSize		= 585, 340
+	$GB_Prod_Catg.BackColor			= 202, 202, 181
+	$GB_Prod_Catg.Anchor			= 1 + 2 + 4 + 8
+;;</GRUPOS PARA ADICIONAR DADOS>
+	
+	$GridView_Prod_Catg							= $GB_Prod_Catg.Controls.GridView()
+	$GridView_Prod_Catg.Anchor					= 1 + 2 + 4 + 8
+	$GridView_Prod_Catg.BorderStyle				= 0
+	$GridView_Prod_Catg.ReadOnly				= 1
+	$GridView_Prod_Catg.FullRowSelect			= 1
+	$GridView_Prod_Catg.ScrollBars				= 2
+	$GridView_Prod_Catg.Fontsize				= 15
+	$GridView_Prod_Catg.SelectionForeColor		= 0,0,0
+	$GridView_Prod_Catg.Location				= 10, $Tx_Pes_Prod_Catg.Bottom+6
+	$GridView_Prod_Catg.size					= $GB_Prod_Catg.Width-14, 325
+	$GridView_Prod_Catg.HeaderStyle				= 1
+	$GridView_Prod_Catg.AlternatingBackColor	= &0F7EBE7
+	$GridView_Prod_Catg.SelectionBackColor		= 169,178,202
+	$GridView_Prod_Catg.BackColor				= "White";"GhostWhite"
+	$GridView_Prod_Catg.GridLineColor			= &E7BE94 ;"RoyalBlue"
+	$GridView_Prod_Catg.ForeColor				= "Black" ;"MidnightBlue"
+	$GridView_Prod_Catg.Font					= $System.Font("Segeo UI", 10)
+	$GridView_Prod_Catg.Onclick					= 'Order_Click_Catg_1()'
+;;</BUTÕES DE CONTROLE>
+
+;;<PESQUISA>
+	$Tx_Pes_Prod_Catg				= $Tab_Prod_Categoria.Controls.TextBox
+	$Tx_Pes_Prod_Catg.BorderStyle	= 0
+	$Tx_Pes_Prod_Catg.FontSize		= 17
+	$Tx_Pes_Prod_Catg.Height			= 30
+	$Tx_Pes_Prod_Catg.FontName		= 'Segeo UI'
+	$Tx_Pes_Prod_Catg.Left			= $Bt_Add_Prod_Catg.Left
+	$Tx_Pes_Prod_Catg.Width			= $Bt_Del_Prod_Catg.Right-10
+	$Tx_Pes_Prod_Catg.Top				= $Bt_Del_Prod_Catg.Bottom+5
+	$Tx_Pes_Prod_Catg.OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$Tx_Pes_Prod_Catg)
+		Pesquisar_Categoria_Produtos()
+	'
+
+	$Bt_Pes_Prod_Catg					= $Tab_Prod_Categoria.Controls.ToolButton
+	$Bt_Pes_Prod_Catg.Alignment		= 0
+	$Bt_Pes_Prod_Catg.BorderStyle	= 0
+	$Bt_Pes_Prod_Catg.FlatStyle		= 0
+	$Bt_Pes_Prod_Catg.Cursor			= 16
+	$Bt_Pes_Prod_Catg.Size			= 150, 30
+	$Bt_Pes_Prod_Catg.FontSize		= 12
+	$Bt_Pes_Prod_Catg.ForeColor		= 'white'
+	$Bt_Pes_Prod_Catg.BackColor		= 'black'
+	$Bt_Pes_Prod_Catg.Text			= 'Pesquisar'
+	$Bt_Pes_Prod_Catg.Icon			= $ICO.Images(15)
+	$Bt_Pes_Prod_Catg.Left			= $Bt_Del_Prod_Catg.Right+5
+	$Bt_Pes_Prod_Catg.Top				= $Bt_Del_Prod_Catg.Bottom+5
+	$Bt_Pes_Prod_Catg.Onclick		= 'Pesquisar_Categoria_Produtos(1)'
+;;</PESQUISA>
+
+;;<GRUPO DE BUTÕES TELA PRODUTOS>
+	;;NOME
+	$=$GB_Add_Prod_Catg.Controls.LABEL
+	$GB_Add_Prod_Catg.Controls(0).FontBold			= 0
+	$GB_Add_Prod_Catg.Controls(0).FontSize			= 14
+	$GB_Add_Prod_Catg.Controls(0).Width				= 140
+	$GB_Add_Prod_Catg.Controls(0).Height			= $GB_Add_Prod_Catg.Controls(0).Height
+	$GB_Add_Prod_Catg.Controls(0).Left				= 15
+	$GB_Add_Prod_Catg.Controls(0).Top				= 18
+	$GB_Add_Prod_Catg.Controls(0).ForeColor			= 'Black'
+	$GB_Add_Prod_Catg.Controls(0).BackColor			= 'Transparent'
+	$GB_Add_Prod_Catg.Controls(0).FontName			= 'Segeo UI'
+	$GB_Add_Prod_Catg.Controls(0).Text				= 'Nome'
+
+	$=$GB_Add_Prod_Catg.Controls.TextBox
+	$GB_Add_Prod_Catg.Controls(1).BorderStyle		= 0
+	$GB_Add_Prod_Catg.Controls(1).FontSize			= 15
+	$GB_Add_Prod_Catg.Controls(1).Width				= 140
+	$GB_Add_Prod_Catg.Controls(1).FontName			= 'Segeo UI'
+	$GB_Add_Prod_Catg.Controls(1).Height			= $GB_Add_Prod_Catg.Controls(1).Height-5
+	$GB_Add_Prod_Catg.Controls(1).Location			= 15, $GB_Add_Prod_Catg.Controls(0).Bottom+2
+	$GB_Add_Prod_Catg.Controls(1).OnKeyDown			=
+	'
+		if ($$GB_Add_Prod_Catg.Controls(1).KeyCode = 13)
+			Salvar_Categoria()
+		endif
+		$=fKeyCode_Temp($$GB_Add_Prod_Catg.Controls(1))
+	'
+	$=$GB_Add_Prod_Catg.Controls.ToolButton
+	$GB_Add_Prod_Catg.Controls(2).FlatStyle			= 0
+	$GB_Add_Prod_Catg.Controls(2).BorderStyle		= 0
+	$GB_Add_Prod_Catg.Controls(2).Dock				= 2
+	$GB_Add_Prod_Catg.Controls(2).Width				= 180
+	$GB_Add_Prod_Catg.Controls(2).Height			= 30
+	$GB_Add_Prod_Catg.Controls(2).ForeColor			= 'Black'
+	$GB_Add_Prod_Catg.Controls(2).HotForeColor		= 'White'
+	$GB_Add_Prod_Catg.Controls(2).FontName			= 'Segeo UI'
+	$GB_Add_Prod_Catg.Controls(2).BackColor			= 'White'
+	$GB_Add_Prod_Catg.Controls(2).HotBackColor		= 'Black'
+	$GB_Add_Prod_Catg.Controls(2).Text				= 'Salvar'
+	$GB_Add_Prod_Catg.Controls(2).Icon				= $ICO.Images(19)
+	$GB_Add_Prod_Catg.Controls(2).Location			= 190, $GB_Add_Prod_Catg.Height-$GB_Add_Prod_Catg.Controls(2).Height-10
+	$GB_Add_Prod_Catg.Controls(2).OnClick			= 'Salvar_Categoria()'
+;;<GRUPO DE BUTÕES TELA PRODUTOS>
+Add_Data_Tab_Prod_Catg(1)
+
+
+function Add_Data_Tab_Prod_Catg($Not)
+	Dim
+		$i, $text
+	if $Not
+		$=$GridView_Prod_Catg.Columns.add('')
+		$GridView_Prod_Catg.Columns(0).width = 20
+		$GridView_Prod_Catg.Columns(0).valuetype = 11
+		kdb_field_GridView($GridView_Prod_Catg, 'Categoria_Produtos')
+	endif
+	for each $text in tb_getField('Categoria_Produtos')
+		$i=$i+1
+		kdb_fData_GridView($GridView_Prod_Catg, 'Categoria_Produtos.'+$text, $i)
+	next
+endfunction
+
+function Order_Click_Catg_1()
+	if ($GridView_Prod_Catg.CurrentColumn.Index = 0)
+		$GridView_Prod_Catg.Cells($GridView_Prod_Catg.CurrentRow.Index, $GridView_Prod_Catg.CurrentColumn.Index).Value = Not $GridView_Prod_Catg.Cells($GridView_Prod_Catg.CurrentRow.Index, $GridView_Prod_Catg.CurrentColumn.Index).Value
+	endif
+endfunction
+
+function Pesquisar_Categoria_Produtos(Optional $Not)
+	Dim
+		$Tipo, $Busca,
+		$Result, $ID,
+		$Data, $line, $i
+	if ($Tx_Pes_Prod_Catg.KeyCode <> 13) And Not ($Not)
+		Exit 0
+	endif
+
+	if ($Tx_Pes_Prod_Catg.Text = '')
+		if ($GridView_Prod_Catg.Rows.Count < tb_GetDataLines('Categoria_Produtos'))
+			$GridView_Prod_Catg.BeginUpdate
+				$GridView_Prod_Catg.Rows.Clear
+				Add_Data_Tab_Prod_Catg(0)
+			$GridView_Prod_Catg.EndUpdate
+		endif
+		exit 0
+	endif
+	$Tipo	= Split($Tx_Pes_Prod_Catg.Text, '::')
+	if (Ubound($Tipo) > 0)
+		$Tipo	= $Tipo[0]
+		$Busca	= Substr($Tx_Pes_Prod_Catg.Text, InStr($Tx_Pes_Prod_Catg.Text, '::')+2)
+	else
+		$Busca	= Join($Tipo, '')
+		$Tipo	= 'Nome'
+	endif
+	if (Trim($Busca) = '')
+		;if ($GridView_Prod_Catg.Items.Count < tb_GetDataLines('Clientes'))
+		;	$GridView_Prod_Catg.BeginUpdate
+		;		Add_Data(1)
+		;	$GridView_Prod_Catg.EndUpdate
+		;endif
+		Exit 0
+	endif
+	
+	$form.Enabled = $form.Enabled
+	$Result = tb_Find_StringMath_Data('Categoria_Produtos.IDCODIGO', $Tipo, $Busca)
+	$form.Enabled = $form.Enabled
+	$GridView_Prod_Catg.BeginUpdate
+		$GridView_Prod_Catg.Rows.Clear
+
+		$line=0
+		for each $ID in $Result
+			$Data = tb_GetDataLine('Categoria_Produtos.IDCODIGO', $ID)
+			$=$GridView_Prod_Catg.Rows.Add()
+			for $i=1 To Ubound($Data)+1
+				$GridView_Prod_Catg.Cells($line, $i).Text = $Data[$i-1]
+			next
+			$line=$line+1
+		next
+	$GridView_Prod_Catg.EndUpdate
+endfunction
+
+function Salvar_Categoria()
+		Dim
+		$i, $Not
+	$Not = $GB_Add_Prod_Catg.Tag
+	if (tb_GetDataCond('Categoria_Produtos.NOME', 'NOME', $GB_Add_Prod_Catg.Controls(1).Text) <> '') And Not $Not
+		$=Msg('Já existe esta categoria "'+$GB_Add_Prod_Catg.Controls(1).Text+'".', 'Categoria já existente!', 48 + 4096)
+		$GB_Add_Prod_Catg.Controls(1).SetFocus()
+		Exit 0
+	endif
+	
+	;;<VERIFICANDO SE HÁ CAMPOS VÁZIOS>
+		for each $i in Split('1', ',')
+			$i=Cint($i)
+			if (Trim($GB_Add_Prod_Catg.Controls($i).Text) = '')
+				$GB_Add_Prod_Catg.Controls($i).BackColor = 'red'
+				$=msg("Você precisa preencher o campo "+$GB_Add_Prod_Catg.Controls($i-1).Text+".", "Atenção!!", 48 + 4096)
+				$GB_Add_Prod_Catg.Controls($i).SetFocus()
+				$GB_Add_Prod_Catg.Controls($i).BackColor = 'white'
+				Exit 0
+			endif
+		next
+	;;</VERIFICANDO SE HÁ CAMPOS VÁZIOS>
+
+	if (msg('Você deseja realmente salvar a categoria "'+$GB_Add_Prod_Catg.Controls(1).Text+'"?', 'Deseja salva o produto?', 32 + 3 + 4096) = 6)
+		Dim
+			$temp, $Array[1], $ID, $i
+		;;<PEGANDO A ÚLTIMA ID>
+			$ID	= tb_GetData('Categoria_Produtos.IDCODIGO', 'max')
+			$ID	= Cint($ID[Ubound($ID)])+1
+		;;</PEGANDO A ÚLTIMA ID>
+
+		;;<ORGANIZANDO OS DADOS>
+			$Array =
+				$ID, $GB_Add_Prod_Catg.Controls(1).Text
+		;;</ORGANIZANDO OS DADOS>
+
+		;;<INSERINDO NA TABELA>
+			if $Not
+				Dim
+					$i $i=0
+				$Array[0] = $GridView_Prod_Catg.Cells($GridView_Prod_Catg.CurrentRow.Index, 1).text
+				for each $temp in tb_getfield('Categoria_Produtos')
+					tb_UpdateData('Categoria_Produtos.'+$temp, $Array[0], $Array[$i], 'IDCODIGO')
+					$i=$i+1
+				next
+			else
+				tb_InsertData('Categoria_Produtos', $Array)
+			endif
+			$form.Enabled = $form.Enabled
+			tb_Save2('Categoria_Produtos', @CurDir+'\Banco-d-Dados\Categoria_Produtos.ktb')
+			$form.Enabled = $form.Enabled
+		;;</INSERINDO NA TABELA>
+
+		;;<INSERINDO NA GRID>
+			$GridView_Prod_Catg.BeginUpdate()
+			if Not $Not
+				$=$GridView_Prod_Catg.Rows.Add('')
+			endif
+			for $i=1 to Ubound($Array)+1
+				if Not $Not
+					$GridView_Prod_Catg.Cells($GridView_Prod_Catg.Rows.Count-1, $i).Text = $Array[$i-1]
+				else
+					$GridView_Prod_Catg.Cells($GridView_Prod_Catg.CurrentRow.Index, $i).Text = $Array[$i-1]
+				endif
+			next
+			$GridView_Prod_Catg.EndUpdate()
+		;;</INSERINDO NA GRID>
+
+		;;<VOLTANDO PARA TELA VISULIZAÇÃO DE PRODUTOS>
+			$GB_Add_Prod_Catg.Controls(0).text = ''
+			if $Not
+				$=Execute($Bt_Edit_Prod_Catg.OnClick)
+			else
+				$GB_Add_Prod_Catg.Tag = 0
+				$GB_Add_Prod_Catg.Controls(1).Text = ""
+				$GB_Add_Prod_Catg.Visible	= 0
+				$GB_Prod_Catg.Visible		= 1
+				
+				$Bt_Del_Prod_Catg.Enabled	= 1
+				$Bt_Edit_Prod_Catg.Enabled	= 1
+				
+				$Bt_Add_Prod_Catg.Text		= "Adicionar uma categoria"
+				$Bt_Add_Prod_Catg.Icon		= $ICO.Images(16)
+				$Tx_Pes_Prod_Catg.SetFocus()
+			endif
+		;;</VOLTANDO PARA TELA VISULIZAÇÃO DE PRODUTOS>
+		endif
+endfunction
+
+function Deletar_Categoria()
+	Dim
+		$i, $count, $error
+
+	$GridView_Prod_Catg.BeginUpdate
+	$count = 0
+	for $i=0 to $GridView_Prod_Catg.Rows.Count
+		if ($GridView_Prod_Catg.Cells($i, 0).Value <> 0)
+			$count = $count+1
+		endif
+	next
+
+	if ($count = 0)
+		if ($GridView_Prod_Catg.CurrentRowIndex <> -1)
+			if (Msg('Deseja realmente deletar a categoria "'+$GridView_Prod_Catg.Cells($GridView_Prod_Catg.CurrentRow.Index, 2).Text+'"', 'Atenção!', 64+3+4096) = 6)
+				Dim
+					$IDCODIGO
+				$IDCODIGO	= $GridView_Prod_Catg.Cells($GridView_Prod_Catg.CurrentRow.Index, 1).Text
+				tb_DelData_Cond('Categoria_Produtos.IDCODIGO', $IDCODIGO)
+				$=$GridView_Prod_Catg.rows.Removeat($GridView_Prod_Catg.CurrentRow.Index)
+				$form.Enabled = $form.Enabled
+				tb_Save2('Categoria_Produtos', @CurDir+'\Banco-d-Dados\Categoria_Produtos.ktb')
+				$form.Enabled = $form.Enabled
+			endif
+		endif
+		$GridView_Prod_Catg.EndUpdate
+		exit 200
+	endif
+
+	Select
+		Case ($count > 1)
+			$error = Msg('Deseja realmente deletar as ('+$count+') categorias', 'Atenção!', 64+3+4096)
+		Case ($count = 1)
+			$error = Msg('Deseja realmente deletar a categoria "'+$GridView_Prod_Catg.Cells($GridView_Prod_Catg.CurrentRow.Index, 2).Text+'"', 'Atenção!', 64+3+4096)
+		Case ($count = 0)
+			exit 0
+	Endselect
+	if ($error <> 6)
+		Exit 404
+	endif
+	for $i=$GridView_Prod_Catg.Rows.Count To 0 step -1
+		if ($GridView_Prod_Catg.Cells($i, 0).Value <> 0)
+			tb_DelData_Cond('Categoria_Produtos.IDCODIGO', $GridView_Prod_Catg.Cells($i, 1).Text)
+			$=$GridView_Prod_Catg.Rows.RemoveAt($i)
+		endif
+	next
+	$GridView_Prod_Catg.EndUpdate
+	$form.Enabled = $form.Enabled
+	tb_Save2('Categoria_Produtos', @CurDir+'\Banco-d-Dados\Categoria_Produtos.ktb') ;SALVANDO OS DADOS!
+	$form.Enabled = $form.Enabled
+endfunction

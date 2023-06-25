@@ -1,0 +1,4 @@
+Function Rand(Optional $Len)
+	$Rand=Cstr(Rnd(15)+Right(@Time, 2)+Right(@Ticks, 10))
+	$Rand=Cint(Right($Rand,Iif(Not $Len > 0, 10, $Len)))
+EndFunction

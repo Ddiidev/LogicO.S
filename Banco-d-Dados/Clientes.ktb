@@ -1,0 +1,62 @@
+##08:48:45,954 | 2017/10/17##
+##11:30:24,200 | 2023/06/23##
+##Tabela de clientes##
+##Clientes##
+####
+##Begin##
+
+<IDCODIGO>
+0=1
+1=2
+</IDCODIGO>
+
+<NOME>
+0=teste
+1=teste1
+</NOME>
+
+<TEL>
+0=() 
+1=() 
+</TEL>
+
+<CEP>
+0=58063580
+1=58064461
+</CEP>
+
+<UF>
+0=PB
+1=
+</UF>
+
+<LOCALIDADE>
+0=João Pessoa
+1=
+</LOCALIDADE>
+
+<BAIRRO>
+0=Valentina de Figueiredo
+1=
+</BAIRRO>
+
+<ENDEREÇO>
+0=Rua Professora Maria da Luz Barros Barbosa
+1=
+</ENDEREÇO>
+
+<DATA_CAD>
+0=2023/06/23
+1=2023/06/23
+</DATA_CAD>
+
+<COMPRAS>
+0=0
+1=0
+</COMPRAS>
+
+<SERVIÇOS>
+0=0
+1=0
+</SERVIÇOS>
+

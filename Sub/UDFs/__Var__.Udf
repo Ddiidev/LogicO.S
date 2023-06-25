@@ -1,0 +1,107 @@
+;;AUTHOR		: André Luiz
+;;VERSION		: 2.2.0.1
+Global
+	$_KixDB__INDEX_/*ID*/, $_KixDB__VALUE_/*CONTEÚDO*/,
+	$_KixDB__
+
+function __AddCollection__($key, Optional $value)
+	Dim $__AddCollection__, $
+	if (VarType($value) <> 8204)
+		$value = $value + ''
+	endif
+	$ = Ascan($_KixDB__INDEX_, $key)
+	if ($ = -1)
+		$ = Ubound($_KixDB__INDEX_) + 1
+		Redim
+			PRESERVE $_KixDB__INDEX_[$],
+			PRESERVE $_KixDB__VALUE_[$]
+	endif
+	$_KixDB__INDEX_[$]	= $key
+	$_KixDB__VALUE_[$]	= $value
+	exit 0
+endfunction
+
+function __Append_Array__($key, optional $value)
+	dim $, $__Append_Array__
+	$=Ascan($_KixDB__INDEX_, $key)
+	; if ($ <> -1)
+		$__Append_Array__ = $_KixDB__VALUE_[$]
+
+		$key = ubound($__Append_Array__)+1
+		Redim PRESERVE $__Append_Array__[$key]
+		$__Append_Array__[$key]	= $value
+		$_KixDB__VALUE_[$]		= $__Append_Array__
+		exit 0
+	; endif
+endfunction
+
+function __UpData_Array__($key, $id, $value)
+	dim $
+	$=Ascan($_KixDB__INDEX_, $key)
+	if ($id <= Ubound($_KixDB__VALUE_[$]))
+		$_KixDB__VALUE_[$][$id] = $value
+		exit 0
+	else
+		exit 1
+	endif
+endfunction
+
+function __Rename__($key, $ToKey)
+	Dim
+		$__Rename__
+	$__Rename__ = AsCan($_KixDB__INDEX_, $key)
+	if ($__Rename__ <> -1) and (AsCan($_KixDB__INDEX_, $ToKey) = -1)
+		$_KixDB__INDEX_[$__Rename__] = $ToKey
+		exit 0
+	else
+		exit 1
+	endif
+endfunction
+
+function __del__($key)
+	Dim
+		$__del__, $ub, $i
+	$ = Ascan($_KixDB__INDEX_, $key)
+	; if ($ <> -1)
+		$ub = ubound($_KixDB__INDEX_)
+
+		if ($ub = 0)
+			$ub = $ub+1
+		endif
+
+		dim
+			$ID_Replace[$ub-1], $STR_Replace[$ub-1], $x
+		$x=-1
+		for $i=0 to $ub-1
+			if ($i <> $)
+				$x=$x+1
+				$STR_Replace[$x]	= $_KixDB__VALUE_[$i]
+				$ID_Replace[$x]	= $_KixDB__INDEX_[$i]
+			endif
+		next
+		$_KixDB__INDEX_	= $ID_Replace
+		$_KixDB__VALUE_	= $STR_Replace
+		exit 0
+	; else
+		; exit 1
+	; endif
+endfunction
+
+function __View__($key)
+	dim $
+	$=Ascan($_KixDB__INDEX_, $key)
+	; if ($ <> -1)
+		$__View__ = $_KixDB__VALUE_[$]
+		exit 0
+	; else
+		; exit 1
+	; endif
+endfunction
+
+function __isCollection__($key)
+	$__isCollection__ = (Ascan($_KixDB__INDEX_, $key) <> -1)
+endfunction
+
+function __ListCollection__()
+	$__ListCollection__ = $_KixDB__INDEX_
+endfunction

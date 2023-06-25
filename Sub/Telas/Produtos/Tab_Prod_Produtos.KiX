@@ -1,0 +1,1252 @@
+Global
+	$Bt_Add_Prod, $Bt_Del_Prod,
+	$Bt_Edit_Prod, $Pixel_Preview,
+	$Tx_Pes_Prod, $Bt_Pes_Prod,
+	$GridView_Prod, $GB_Prod, $GB_Add_Prod
+Global
+	$temp
+
+;;<BUTÕES DE CONTROLE>
+	$Bt_Add_Prod				= $Tab_Prod_Produtos.Controls.ToolButton
+	$Bt_Add_Prod.Alignment		= 0
+	$Bt_Add_Prod.BorderStyle	= 0
+	$Bt_Add_Prod.FlatStyle		= 0
+	$Bt_Add_Prod.Cursor			= 16
+	$Bt_Add_Prod.Location		= 7, 10
+	$Bt_Add_Prod.Size			= 150, 40
+	$Bt_Add_Prod.BackColor		= 255, 255, 255
+	$Bt_Add_Prod.Text			= 'Adicionar um produto'
+	$Bt_Add_Prod.Icon			= $ICO.Images(16)
+	$Bt_Add_Prod.OnClick		=
+	'
+		if ($$GB_Add_Prod.Visible)
+			if (Length_Produtos() > 0)
+				if (MSG("Deseja cancelar as alterações?"+@@crlf+"você perdera todas aterações feitas!", "você perdera as aterações feitas!", 48 + 4) = 7)
+					Clear_Data_Prod()
+					Exit 0
+				endif
+			endif
+			$$GB_Add_Prod.Visible		= 0
+			$$GB_Prod.Visible			= 1
+			
+			$$Bt_Del_Prod.Enabled		= 1
+			$$Bt_Edit_Prod.Enabled	= 1
+			
+			$$Bt_Add_Prod.Text		= "Adicionar um produto"
+			$$Bt_Add_Prod.Icon		= $$ICO.Images(16)
+			$$Pixel_Preview.Visible	= 1
+			$$Tx_Pes_Prod.SetFocus()
+		else
+			$$GB_Add_Prod.Visible		= 1
+			$$GB_Prod.Visible			= 0
+			
+			$$Bt_Del_Prod.Enabled		= 0
+			$$Bt_Edit_Prod.Enabled	= 0
+			$$Bt_Add_Prod.Text		= "< Voltar"
+			$$Bt_Add_Prod.Icon		= $$ICO.Images(14)
+			$$Pixel_Preview.text		= ""
+			$$Pixel_Preview.Image		= ""
+			$$Pixel_Preview.Visible	= 0
+			$$Pixel_Preview.Refresh()
+			$$Bt_Add_Prod.Controls(1).SetFocus()
+		endif
+	'
+
+	$Bt_Del_Prod					= $Tab_Prod_Produtos.Controls.ToolButton
+	$Bt_Del_Prod.Alignment		= 0
+	$Bt_Del_Prod.BorderStyle		= 0
+	$Bt_Del_Prod.FlatStyle		= 0
+	$Bt_Del_Prod.Cursor			= 16
+	$Bt_Del_Prod.Location			= $Bt_Add_Prod.Right+5, 10
+	$Bt_Del_Prod.Size				= 150, 40
+	$Bt_Del_Prod.BackColor		= 255, 255, 255
+	$Bt_Del_Prod.Text				= 'Deletar produto(s)'
+	$Bt_Del_Prod.Icon				= $ICO.Images(17)
+	$Bt_Del_Prod.OnClick			= 'Deletar_Produto()'
+	
+	$Bt_Edit_Prod					= $Tab_Prod_Produtos.Controls.ToolButton
+	$Bt_Edit_Prod.Alignment		= 0
+	$Bt_Edit_Prod.BorderStyle	= 0
+	$Bt_Edit_Prod.FlatStyle		= 0
+	$Bt_Edit_Prod.Cursor			= 16
+	$Bt_Edit_Prod.Location		= $Bt_Del_Prod.Right+5, 10
+	$Bt_Edit_Prod.Size			= 150, 40
+	$Bt_Edit_Prod.BackColor		= 255, 255, 255
+	$Bt_Edit_Prod.Text			= 'Editar produto'
+	$Bt_Edit_Prod.Icon			= $ICO.Images(20)
+	$Bt_Edit_Prod.OnClick			=
+	'
+		if ($$GB_Add_Prod.Visible)
+			if (Length_Produtos() > 0)
+				if (MSG("Deseja cancelar as alterações?"+@@crlf+"você perdera todas aterações feitas!", "você perdera as aterações feitas!", 48 + 4) = 7)
+					Clear_Data_Prod()
+					Exit 0
+				endif
+			endif
+			$$GB_Add_Prod.tag			= 0
+			$$GB_Add_Prod.Visible		= 0
+			$$GB_Prod.Visible			= 1
+
+			$$Bt_Del_Prod.Enabled		= 1
+			$$Bt_Add_Prod.Enabled		= 1
+
+			$$Bt_Edit_Prod.Text		= "Editar um produto"
+			$$Bt_Edit_Prod.Icon		= $$ICO.Images(20)
+			$$Pixel_Preview.Visible	= 1
+			Clear_Data_Prod()
+			$$Tx_Pes_Prod.SetFocus()
+		else
+			if ($$GridView_Prod.CurrentRow.Index <> -1)
+				Editar_Produto()
+				$$GB_Add_Prod.tag			= 1
+				$$GB_Add_Prod.Visible		= 1
+				$$GB_Prod.Visible			= 0
+
+				$$Bt_Del_Prod.Enabled		= 0
+				$$Bt_Add_Prod.Enabled		= 0
+				$$Bt_Edit_Prod.Text		= "< Voltar"
+				$$Bt_Edit_Prod.Icon		= $$ICO.Images(14)
+				$$Pixel_Preview.text		= ""
+				$$Pixel_Preview.Image		= ""
+				$$Pixel_Preview.Visible	= 0
+				$$Pixel_Preview.Refresh()
+				$$Bt_Add_Prod.Controls(1).SetFocus()
+			endif
+		endif
+	'
+	
+	$Pixel_Preview = $Tab_Prod_Produtos.Controls.PictureBox
+	$Pixel_Preview.BorderStyle		= 0
+	$Pixel_Preview.SizeMode			= 1
+	$Pixel_Preview.Cursor			= 16
+	$Pixel_Preview.Width			= 90
+	$Pixel_Preview.Height			= 75
+	$Pixel_Preview.FontName			= 'Segeo UI'
+	$Pixel_Preview.ForeColor		= 'Black'
+	$Pixel_Preview.BackColor		= 'Black'
+	$Pixel_Preview.ToolTipText		= 'Aqui fica um prévisualização do produto.'
+	$Pixel_Preview.Location			= $Bt_Edit_Prod.Right+5, $Bt_Edit_Prod.Top
+	$Pixel_Preview.OnClick			= 'View_PictureBox_Prod($$Pixel_Preview.Text, "Previsualização da imagem do produto.")'
+	
+	$GB_Add_Prod					= $Tab_Prod_Produtos.Controls.GroupBox
+	$GB_Add_Prod.Visible			= 0
+	$GB_Add_Prod.BorderStyle		= 2
+	$GB_Add_Prod.Location			= 5, 55
+	$GB_Add_Prod.Size				= 560, 350
+	$GB_Add_Prod.BackColor			= 202, 202, 181
+	$GB_Add_Prod.Anchor				= 1 + 2 + 4
+	$GB_Add_Prod.Text				= 'Cadastro de produtos'
+	
+	$GB_Prod						= $Tab_Prod_Produtos.Controls.GroupBox
+	$GB_Prod.BorderStyle			= 0
+	$GB_Prod.Location				= 7, 95
+	$GB_Prod.ClientSize				= 585, 340
+	$GB_Prod.BackColor				= 202, 202, 181
+	$GB_Prod.Anchor					= 1 + 2 + 4 + 8
+	
+	$GridView_Prod							= $GB_Prod.Controls.GridView()
+	$GridView_Prod.Anchor					= 1 + 2 + 4 + 8
+	$GridView_Prod.BorderStyle				= 0
+	$GridView_Prod.ReadOnly					= 1
+	$GridView_Prod.FullRowSelect			= 1
+	$GridView_Prod.ScrollBars				= 2
+	$GridView_Prod.Fontsize					= 15
+	$GridView_Prod.SelectionForeColor		= 0,0,0
+	$GridView_Prod.Location					= 10, $Tx_Pes_Prod.Bottom+6
+	$GridView_Prod.size						= $GB_Prod.Width-14, 325
+	$GridView_Prod.HeaderStyle				= 1
+	$GridView_Prod.AlternatingBackColor		= &0F7EBE7
+	$GridView_Prod.SelectionBackColor		= 169,178,202
+	$GridView_Prod.BackColor				= "White";"GhostWhite"
+	$GridView_Prod.GridLineColor			= &E7BE94 ;"RoyalBlue"
+	$GridView_Prod.ForeColor				= "Black" ;"MidnightBlue"
+	$GridView_Prod.Font						= $System.Font("Segeo UI", 10)
+	$GridView_Prod.OnDoubleClick			= 'Order_Click_Prod_2()'
+	$GridView_Prod.OnClick					= 'Order_Click_Prod_1()'
+;;</BUTÕES DE CONTROLE>
+
+;;<PESQUISA>
+	$Tx_Pes_Prod					= $Tab_Prod_Produtos.Controls.TextBox
+	$Tx_Pes_Prod.BorderStyle		= 0
+	$Tx_Pes_Prod.FontSize			= 17
+	$Tx_Pes_Prod.Height				= 30
+	$Tx_Pes_Prod.FontName			= 'Segeo UI'
+	$Tx_Pes_Prod.Left				= $Bt_Add_Prod.Left
+	$Tx_Pes_Prod.Width				= $Bt_Del_Prod.Right-10
+	$Tx_Pes_Prod.Top				= $Bt_Del_Prod.Bottom+5
+	$Tx_Pes_Prod.OnKeyDown			=
+	'
+		$=fKeyCode_Temp($$Tx_Pes_Prod)
+		Pesquisar_Produto()
+	'
+
+	$Bt_Pes_Prod					= $Tab_Prod_Produtos.Controls.ToolButton
+	$Bt_Pes_Prod.Alignment			= 0
+	$Bt_Pes_Prod.BorderStyle		= 0
+	$Bt_Pes_Prod.FlatStyle			= 0
+	$Bt_Pes_Prod.Cursor				= 16
+	$Bt_Pes_Prod.Size				= 150, 30
+	$Bt_Pes_Prod.FontSize			= 12
+	$Bt_Pes_Prod.ForeColor			= 'white'
+	$Bt_Pes_Prod.BackColor			= 'black'
+	$Bt_Pes_Prod.Text				= 'Pesquisar'
+	$Bt_Pes_Prod.Icon				= $ICO.Images(15)
+	$Bt_Pes_Prod.Left				= $Bt_Del_Prod.Right+5
+	$Bt_Pes_Prod.Top				= $Bt_Del_Prod.Bottom+5
+	$Bt_Pes_Prod.OnClick			= 'Pesquisar_Produto(1)'
+;;</PESQUISA>
+Add_Data_Tab_Prod(1)
+
+
+;;<GRUPO DE BUTÕES TELA PRODUTOS>
+	;;CÓDIGO DE BARRA
+	$=$GB_Add_Prod.Controls.LABEL
+	$GB_Add_Prod.Controls(0).FontBold			= 0
+	$GB_Add_Prod.Controls(0).FontSize			= 14
+	$GB_Add_Prod.Controls(0).Width				= 140
+	$GB_Add_Prod.Controls(0).Height				= $GB_Add_Prod.Controls(0).Height
+	$GB_Add_Prod.Controls(0).Left				= 15
+	$GB_Add_Prod.Controls(0).Top				= 18
+	$GB_Add_Prod.Controls(0).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(0).BackColor			= 'Transparent'
+	$GB_Add_Prod.Controls(0).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(0).Text				= 'Código de barra'
+
+	$=$GB_Add_Prod.Controls.TextBox
+	$GB_Add_Prod.Controls(1).BorderStyle		= 0
+	$GB_Add_Prod.Controls(1).FontSize			= 15
+	$GB_Add_Prod.Controls(1).Width				= 140
+	$GB_Add_Prod.Controls(1).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(1).Height				= $GB_Add_Prod.Controls(1).Height-5
+	$GB_Add_Prod.Controls(1).Location			= 15, $GB_Add_Prod.Controls(0).Bottom+2
+	$GB_Add_Prod.Controls(1).OnKeyDown			=
+	'
+		if ($$GB_Add_Prod.Controls(1).KeyCode = 13)
+			$$GB_Add_Prod.Controls(3).SelectionStart = 0
+			$$GB_Add_Prod.Controls(3).SelectionLength = Len($$GB_Add_Prod.Controls(3).Text)
+			$$GB_Add_Prod.Controls(3).SetFocus()
+		endif
+		$=fKeyCode_Temp($$GB_Add_Prod.Controls(1))
+	'
+
+	;;CATEGORIA
+	
+	$=$GB_Add_Prod.Controls.Label
+	$GB_Add_Prod.Controls(2).FontSize			= 15
+	$GB_Add_Prod.Controls(2).Width				= 100
+	$GB_Add_Prod.Controls(2).BackColor			= 'Transparent'
+	$GB_Add_Prod.Controls(2).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(2).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(2).Location			= $GB_Add_Prod.Controls(1).Right+15, $GB_Add_Prod.Controls(0).Top
+	$GB_Add_Prod.Controls(2).Text				= 'Categoria'
+	$GB_Add_Prod.Controls(2).Cursor				= 14
+	$GB_Add_Prod.Controls(2).OnMouseMove		=
+	'
+		$$GB_Add_Prod.Controls(2).ToolTipText = tb_GetData("Categoria_Produtos.Nome", "IDCODIGO", $$GB_Add_Prod.Controls(3).Text)
+	'
+
+	$=$GB_Add_Prod.Controls.TextBox
+	$GB_Add_Prod.Controls(3).BorderStyle		= 0
+	$GB_Add_Prod.Controls(3).FontSize			= 15
+	$GB_Add_Prod.Controls(3).Width				= 100
+	$GB_Add_Prod.Controls(3).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(3).Height				= $GB_Add_Prod.Controls(3).Height-5
+	$GB_Add_Prod.Controls(3).Location			= $GB_Add_Prod.Controls(1).Right+15, $GB_Add_Prod.Controls(0).Bottom+2
+	$GB_Add_Prod.Controls(3).OnMouseMove		=
+	'
+		$$GB_Add_Prod.Controls(3).ToolTipText = tb_GetData("Categoria_Produtos.Nome", "IDCODIGO", $$GB_Add_Prod.Controls(3).Text)
+	'
+	$GB_Add_Prod.Controls(3).OnKeyDown			=
+	'
+		if ($$GB_Add_Prod.Controls(3).KeyCode = 45)
+			$$=Execute($$GB_Add_Prod.Controls(3).Controls(0).OnClick)
+		endif
+		if ($$GB_Add_Prod.Controls(3).KeyCode = 13)
+			$$GB_Add_Prod.Controls(5).SelectionStart = 0
+			$$GB_Add_Prod.Controls(5).SelectionLength = Len($$GB_Add_Prod.Controls(5).Text)
+			$$GB_Add_Prod.Controls(5).SetFocus()
+		endif
+		$=fKeyCode_Temp($$GB_Add_Prod.Controls(3))
+	'
+	$=$GB_Add_Prod.Controls(3).Controls.Button
+	$GB_Add_Prod.Controls(3).Controls(0).Text		= '...'
+	$GB_Add_Prod.Controls(3).Controls(0).TextAlign	= 32
+	$GB_Add_Prod.Controls(3).Controls(0).Width		= 30
+	$GB_Add_Prod.Controls(3).Controls(0).Dock		= 4
+	$GB_Add_Prod.Controls(3).Controls(0).OnMouseMove=
+	'
+		$$GB_Add_Prod.Controls(3).Controls(0).ToolTipText = tb_GetData("Categoria_Produtos.Nome", "IDCODIGO", $$GB_Add_Prod.Controls(3).Text)
+	'
+	$GB_Add_Prod.Controls(3).Controls(0).OnClick	= 'Categoria_Select()'
+
+	;;DESCRIÇÃO
+
+	$=$GB_Add_Prod.Controls.Label
+	$GB_Add_Prod.Controls(4).Cursor				= 14
+	$GB_Add_Prod.Controls(4).FontSize			= 15
+	$GB_Add_Prod.Controls(4).Width				= 200
+	$GB_Add_Prod.Controls(4).BackColor			= 'Transparent'
+	$GB_Add_Prod.Controls(4).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(4).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(4).Location			= $GB_Add_Prod.Controls(2).Right+15, $GB_Add_Prod.Controls(0).Top
+	$GB_Add_Prod.Controls(4).Text				= 'Descrição'
+	$GB_Add_Prod.Controls(4).ToolTipText		= 'Nesta área você ponhe a descrição(Nome) deste produto.'
+
+	$=$GB_Add_Prod.Controls.TextBox
+	$GB_Add_Prod.Controls(5).BorderStyle		= 0
+	$GB_Add_Prod.Controls(5).FontSize			= 15
+	$GB_Add_Prod.Controls(5).Width				= 260
+	$GB_Add_Prod.Controls(5).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(5).Height				= $GB_Add_Prod.Controls(5).Height-5
+	$GB_Add_Prod.Controls(5).Location			= $GB_Add_Prod.Controls(3).Right+15, $GB_Add_Prod.Controls(0).Bottom+2
+	$GB_Add_Prod.Controls(5).OnKeyDown			=
+	'
+		if ($$GB_Add_Prod.Controls(5).KeyCode = 13)
+			$$GB_Add_Prod.Controls(7).SelectionStart = 0
+			$$GB_Add_Prod.Controls(7).SelectionLength = Len($$GB_Add_Prod.Controls(7).Text)
+			$$GB_Add_Prod.Controls(7).SetFocus()
+		endif
+		$=fKeyCode_Temp($$GB_Add_Prod.Controls(5))
+	'
+
+	;;COMPLEMENTO
+
+	$=$GB_Add_Prod.Controls.Label
+	$GB_Add_Prod.Controls(6).Cursor				= 14
+	$GB_Add_Prod.Controls(6).FontSize			= 15
+	$GB_Add_Prod.Controls(6).Width				= 200
+	$GB_Add_Prod.Controls(6).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(6).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(6).BackColor			= 'Transparent'
+	$GB_Add_Prod.Controls(6).Text				= 'Complemento'
+	$GB_Add_Prod.Controls(6).ToolTipText		= 'Nesta área você ponhe uma informação extra do produto.'
+	$GB_Add_Prod.Controls(6).Location			= $GB_Add_Prod.Controls(0).Left, $GB_Add_Prod.Controls(1).Bottom+4
+
+	$=$GB_Add_Prod.Controls.TextBox
+	$GB_Add_Prod.Controls(7).BorderStyle		= 0
+	$GB_Add_Prod.Controls(7).FontSize			= 15
+	$GB_Add_Prod.Controls(7).Width				= 200
+	$GB_Add_Prod.Controls(7).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(7).Height				= $GB_Add_Prod.Controls(7).Height-5
+	$GB_Add_Prod.Controls(7).Location			= 15, $GB_Add_Prod.Controls(6).Bottom+4
+	$GB_Add_Prod.Controls(7).OnKeyDown			=
+	'
+		if ($$GB_Add_Prod.Controls(7).KeyCode = 13)
+			$$GB_Add_Prod.Controls(9).SelectionStart = 0
+			$$GB_Add_Prod.Controls(9).SelectionLength = Len($$GB_Add_Prod.Controls(9).Text)
+			$$GB_Add_Prod.Controls(9).SetFocus()
+		endif
+		$=fKeyCode_Temp($$GB_Add_Prod.Controls(7))
+	'
+
+	;;VALOR UNITÁRIO
+
+	$=$GB_Add_Prod.Controls.Label
+	$GB_Add_Prod.Controls(8).Cursor				= 14
+	$GB_Add_Prod.Controls(8).FontSize			= 15
+	$GB_Add_Prod.Controls(8).Width				= 150
+	$GB_Add_Prod.Controls(8).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(8).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(8).BackColor			= 'Transparent'
+	$GB_Add_Prod.Controls(8).Text				= 'Valor de compra'
+	$GB_Add_Prod.Controls(8).ToolTipText		= 'Preço de compra do produto.'
+	$GB_Add_Prod.Controls(8).Location			= $GB_Add_Prod.Controls(6).Right+4, $GB_Add_Prod.Controls(6).Top
+
+	$=$GB_Add_Prod.Controls.TextBox
+	$GB_Add_Prod.Controls(9).BorderStyle		= 0
+	$GB_Add_Prod.Controls(9).FontSize			= 15
+	$GB_Add_Prod.Controls(9).Width				= 150
+	$GB_Add_Prod.Controls(9).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(9).Height				= $GB_Add_Prod.Controls(9).Height-5
+	$GB_Add_Prod.Controls(9).Location			= $GB_Add_Prod.Controls(8).Left, $GB_Add_Prod.Controls(7).Top
+	$GB_Add_Prod.Controls(9).OnKeyDown			=
+	'
+		$$temp = $$GB_Add_Prod.Controls(9).SelectionStart
+		$$GB_Add_Prod.Controls(9).Text = MaskTextBox($$GB_Add_Prod.Controls(9).Text, Split("0\1\2\3\4\5\6\7\8\9\,\.", "\"))
+		$$GB_Add_Prod.Controls(9).SelectionStart = $$temp
+		if ($$GB_Add_Prod.Controls(9).KeyCode = 13) Or ($$GB_Add_Prod.Controls(9).KeyCode = 9)
+			$$GB_Add_Prod.Controls(18).SelectionStart = 0
+			$$GB_Add_Prod.Controls(18).SelectionLength = Len($$GB_Add_Prod.Controls(18).Text)
+			$$GB_Add_Prod.Controls(18).SetFocus()
+		endif
+		$=fKeyCode_Temp($$GB_Add_Prod.Controls(9))
+	'
+
+	;;PICTUREBOX
+
+	$=$GB_Add_Prod.Controls.PictureBox
+	$GB_Add_Prod.Controls(10).Cursor			= 14
+	$GB_Add_Prod.Controls(10).Width				= 186
+	$GB_Add_Prod.Controls(10).Height			= 180
+	$GB_Add_Prod.Controls(10).SizeMode			= 1
+	$GB_Add_Prod.Controls(10).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(10).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(10).BackColor			= 'Black'
+	$GB_Add_Prod.Controls(10).ToolTipText		= 'Aqui fica um prévisualização do produto.'
+	$GB_Add_Prod.Controls(10).Location			= $GB_Add_Prod.Controls(9).Right, $GB_Add_Prod.Controls(9).Bottom+10
+	$GB_Add_Prod.Controls(10).OnClick			= 'View_PictureBox_Prod($$GB_Add_Prod.Controls(10).Text, "Previsualização da imagem do produto.")'
+
+	$=$GB_Add_Prod.Controls.ToolButton
+	$GB_Add_Prod.Controls(11).FlatStyle			= 0
+	$GB_Add_Prod.Controls(11).BorderStyle		= 0
+	$GB_Add_Prod.Controls(11).Width				= 116
+	$GB_Add_Prod.Controls(11).Height			= 30
+	$GB_Add_Prod.Controls(11).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(11).HotForeColor		= 'White'
+	$GB_Add_Prod.Controls(11).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(11).BackColor			= 'White'
+	$GB_Add_Prod.Controls(11).HotBackColor		= 'Black'
+	$GB_Add_Prod.Controls(11).Text				= 'Abrir uma imagem'
+	$GB_Add_Prod.Controls(11).ToolTipText		= 'Aqui fica um prévisualização do produto.'
+	$GB_Add_Prod.Controls(11).Location			= $GB_Add_Prod.Controls(10).Left, $GB_Add_Prod.Controls(10).Bottom
+	$GB_Add_Prod.Controls(11).Temp				= ''
+	$GB_Add_Prod.Controls(11).OnClick			=
+	'
+		$$GB_Add_Prod.Controls(11).Temp = $$GB_Add_Prod.Controls(10).Text
+		Abrir_IMG()
+	'
+
+	;;PESÁVEL (SIM/NÃO)
+
+	$=$GB_Add_Prod.Controls.CheckBox
+	$GB_Add_Prod.Controls(12).Cursor			= 14
+	$GB_Add_Prod.Controls(12).Width				= 150
+	$GB_Add_Prod.Controls(12).Height			= 80
+	$GB_Add_Prod.Controls(12).FontBold			= 1
+	$GB_Add_Prod.Controls(12).FontSize			= 12
+	$GB_Add_Prod.Controls(12).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(12).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(12).Text				= 'Este é um produto pesável(kg)?'
+	$GB_Add_Prod.Controls(12).ToolTipText		= 'Aqui você diz se este é um produto vendido por peso(kg).'
+	$GB_Add_Prod.Controls(12).Location			= $GB_Add_Prod.Controls(6).Left, $GB_Add_Prod.Controls(7).Bottom
+	
+	;;ESTOQUE
+	
+	$=$GB_Add_Prod.Controls.Label
+	$GB_Add_Prod.Controls(13).Cursor			= 14
+	$GB_Add_Prod.Controls(13).FontSize			= 15
+	$GB_Add_Prod.Controls(13).Width				= 100
+	$GB_Add_Prod.Controls(13).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(13).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(13).BackColor			= 'Transparent'
+	$GB_Add_Prod.Controls(13).Text				= 'Estoque'
+	$GB_Add_Prod.Controls(13).ToolTipText		=
+		'Aqui você ponhe a quantidade no estoque, mesmo que seja pesável.'+@Crlf+
+		'Se for pesável ou não coleque neste mesmo modelo: "10".'
+	$GB_Add_Prod.Controls(13).Location			= $GB_Add_Prod.Controls(12).Right+15, $GB_Add_Prod.Controls(12).Top+10
+	
+	$=$GB_Add_Prod.Controls.TextBox
+	$GB_Add_Prod.Controls(14).BorderStyle		= 0
+	$GB_Add_Prod.Controls(14).FontSize			= 15
+	$GB_Add_Prod.Controls(14).Width				= 188
+	$GB_Add_Prod.Controls(14).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(14).Height			= $GB_Add_Prod.Controls(14).Height-5
+	$GB_Add_Prod.Controls(14).Location			= $GB_Add_Prod.Controls(12).Right+15, $GB_Add_Prod.Controls(13).Bottom+2
+	$GB_Add_Prod.Controls(14).OnKeyDown			=
+	'
+		if ($$GB_Add_Prod.Controls(14).KeyCode = 9)
+			$$GB_Add_Prod.Controls(1).SelectionStart = 0
+			$$GB_Add_Prod.Controls(1).SelectionLength = Len($$GB_Add_Prod.Controls(1).Text)
+			$$GB_Add_Prod.Controls(1).SetFocus()
+		endif
+		if ($$GB_Add_Prod.Controls(14).KeyCode = 13)
+			Salvar_Produto()
+		endif
+		$=fKeyCode_Temp($$GB_Add_Prod.Controls(14))
+	'
+	$=$GB_Add_Prod.Controls.ToolButton
+	$GB_Add_Prod.Controls(15).FlatStyle			= 0
+	$GB_Add_Prod.Controls(15).BorderStyle		= 0
+	$GB_Add_Prod.Controls(15).Dock				= 2
+	$GB_Add_Prod.Controls(15).Width				= 180
+	$GB_Add_Prod.Controls(15).Height			= 30
+	$GB_Add_Prod.Controls(15).ForeColor			= 'Black'
+	$GB_Add_Prod.Controls(15).HotForeColor		= 'White'
+	$GB_Add_Prod.Controls(15).FontName			= 'Segeo UI'
+	$GB_Add_Prod.Controls(15).BackColor			= 'White'
+	$GB_Add_Prod.Controls(15).HotBackColor		= 'Black'
+	$GB_Add_Prod.Controls(15).Text				= 'Salvar'
+	$GB_Add_Prod.Controls(15).Icon				= $ICO.Images(19)
+	$GB_Add_Prod.Controls(15).Location			= $GB_Add_Prod.Controls(12).Left+100, $GB_Add_Prod.Controls(12).Bottom+40
+	$GB_Add_Prod.Controls(15).OnClick			= 'Salvar_Produto()'
+
+	;;<Clear Imagem>
+		$=$GB_Add_Prod.Controls.ToolButton
+		$GB_Add_Prod.Controls(16).FlatStyle			= 0
+		$GB_Add_Prod.Controls(16).BorderStyle		= 0
+		$GB_Add_Prod.Controls(16).Width				= 70
+		$GB_Add_Prod.Controls(16).Height			= 30
+		$GB_Add_Prod.Controls(16).ForeColor			= 'Black'
+		$GB_Add_Prod.Controls(16).HotForeColor		= 'White'
+		$GB_Add_Prod.Controls(16).FontName			= 'Segeo UI'
+		$GB_Add_Prod.Controls(16).BackColor			= 'White'
+		$GB_Add_Prod.Controls(16).HotBackColor		= 'Black'
+		$GB_Add_Prod.Controls(16).Text				= 'Remover'
+		$GB_Add_Prod.Controls(16).ToolTipText		= 'Remove a imagem.'
+		$GB_Add_Prod.Controls(16).Location			= $GB_Add_Prod.Controls(11).Right, $GB_Add_Prod.Controls(10).Bottom
+		$GB_Add_Prod.Controls(16).OnClick			=
+		'
+			$$temp = Split($$GB_Add_Prod.Controls(10).Text, "\")
+			$$temp = $$temp[ubound($$temp)-1]
+			if ($$temp = "IMG_Temp")
+				Del $$GB_Add_Prod.Controls(10).Text
+			endif
+			$$GB_Add_Prod.Controls(10).Image		= ""
+			$$GB_Add_Prod.Controls(10).Text 		= "||-||"+$$GB_Add_Prod.Controls(10).Text
+			$$GB_Add_Prod.Controls(10).BackColor	= "Black"
+			$$GB_Add_Prod.Controls(10).ForeColor	= "Black"
+			$$GB_Add_Prod.Controls(10).Rectangle(0,0, $$GB_Add_Prod.Controls(10).width, $$GB_Add_Prod.Controls(10).height)
+			$$GB_Add_Prod.Controls(10).Refresh()
+		'
+		$=$GB_Add_Prod.Controls.Label
+		$GB_Add_Prod.Controls(17).Cursor			= 14
+		$GB_Add_Prod.Controls(17).FontSize			= 15
+		$GB_Add_Prod.Controls(17).Location			= $GB_Add_Prod.Controls(8).Right+10, $GB_Add_Prod.Controls(8).Top
+		$GB_Add_Prod.Controls(17).Width				= 95
+		$GB_Add_Prod.Controls(17).ForeColor			= 'Black'
+		$GB_Add_Prod.Controls(17).FontName			= 'Segeo UI'
+		$GB_Add_Prod.Controls(17).BackColor			= 'Transparent'
+		$GB_Add_Prod.Controls(17).Text				= 'Valor total'
+	
+		$=$GB_Add_Prod.Controls.TextBox
+		$GB_Add_Prod.Controls(18).BorderStyle		= 0
+		$GB_Add_Prod.Controls(18).FontSize			= 15
+		$GB_Add_Prod.Controls(18).Width				= 155
+		$GB_Add_Prod.Controls(18).FontName			= 'Segeo UI'
+		$GB_Add_Prod.Controls(18).Height			= $GB_Add_Prod.Controls(18).Height-5
+		$GB_Add_Prod.Controls(18).Location			= $GB_Add_Prod.Controls(17).Left, $GB_Add_Prod.Controls(9).Top
+		$GB_Add_Prod.Controls(18).OnKeyDown			=
+		'
+			if ($$GB_Add_Prod.Controls(18).KeyCode = 45)
+				$$=Execute($$GB_Add_Prod.Controls(18).Controls(0).OnClick)
+			endif
+			$$temp = $$GB_Add_Prod.Controls(18).SelectionStart
+			$$GB_Add_Prod.Controls(18).Text = MaskTextBox($$GB_Add_Prod.Controls(18).Text, Split("0\1\2\3\4\5\6\7\8\9\,\.", "\"))
+			$$GB_Add_Prod.Controls(18).SelectionStart = $$temp
+			if ($$GB_Add_Prod.Controls(18).KeyCode = 13) Or ($$GB_Add_Prod.Controls(18).KeyCode = 9)
+				$$GB_Add_Prod.Controls(14).SelectionStart = 0
+				$$GB_Add_Prod.Controls(14).SelectionLength = Len($$GB_Add_Prod.Controls(14).Text)
+				$$GB_Add_Prod.Controls(14).SetFocus()
+			endif
+			$=fKeyCode_Temp($$GB_Add_Prod.Controls(18))
+		'
+		
+		$=$GB_Add_Prod.Controls.Label
+		$GB_Add_Prod.Controls(19).Cursor			= 14
+		$GB_Add_Prod.Controls(19).FontSize			= 10
+		$GB_Add_Prod.Controls(19).FontBold			= True()
+		$GB_Add_Prod.Controls(19).Location			= $GB_Add_Prod.Controls(17).Right, $GB_Add_Prod.Controls(17).Top
+		$GB_Add_Prod.Controls(19).Width				= 150
+		$GB_Add_Prod.Controls(19).ForeColor			= 'Darkgreen'
+		$GB_Add_Prod.Controls(19).FontName			= 'Segeo UI'
+		$GB_Add_Prod.Controls(19).BackColor			= 'Transparent'
+		$GB_Add_Prod.Controls(19).Text				= '0%'
+
+		$=$GB_Add_Prod.Controls(18).Controls.ToolButton
+		$GB_Add_Prod.Controls(18).Controls(0).left			= $GB_Add_Prod.Controls(18).Controls(0).left+125
+		$GB_Add_Prod.Controls(18).Controls(0).Anchor		= 8
+		$GB_Add_Prod.Controls(18).Controls(0).Width			= 30
+		$GB_Add_Prod.Controls(18).Controls(0).Height		= 25
+		$GB_Add_Prod.Controls(18).Controls(0).ForeColor		= 'Black'
+		$GB_Add_Prod.Controls(18).Controls(0).FontName		= 'Segeo UI'
+		$GB_Add_Prod.Controls(18).Controls(0).Text			= '...'
+		$GB_Add_Prod.Controls(18).Controls(0).ToolTipText	= 'Configurar porcentagem de lucro sobre o produto.'
+		$GB_Add_Prod.Controls(18).Controls(0).OnClick		=
+		'
+			$$Temp	= Form_Math_Porcentagem($$GB_Add_Prod.Controls(9).Text, Replace($$GB_Add_Prod.Controls(19).Text, "%%", ""))
+			$$GB_Add_Prod.Controls(19).Text	= Cstr($$Temp[1])+"%%"
+			$$GB_Add_Prod.Controls(18).Text	= FormatNumber($$Temp[0], 2)
+		'
+	;;</Clear Imagem>
+;;</GRUPO DE BUTÕES TELA PRODUTOS>
+
+function Add_Data_Tab_Prod($Not)
+	Dim
+		$i, $text
+	$=$GridView_Prod.Columns.Add('')
+	$GridView_Prod.Columns(0).ValueType = 11
+	if $Not
+		kdb_field_GridView($GridView_Prod, 'Produtos', 'DATA-CAD;DATA-ALTERAÇÃO;FUNC-ALTERAÇÃO;MOTIVO-ALTERAÇÃO')
+		$GridView_Prod.Columns(0).Width		= 20
+		$GridView_Prod.Columns(6).ValueType	= 8
+		$GridView_Prod.Columns(8).ValueType	= 8
+	endif
+	for each $text in tb_getField('Produtos')
+		$i=$i+1
+		kdb_fData_GridView($GridView_Prod, 'Produtos.'+$text, $i)
+	next
+	for $i=0 to $GridView_Prod.Rows.count
+		$GridView_Prod.Cells($i, 3).text = tb_GetData('Categoria_Produtos.Nome', 'IDCODIGO', $GridView_Prod.Cells($i, 3).text)
+	next
+	$GridView_Prod.Columns(1).text		= 'ID'
+	$GridView_Prod.Columns(1).width		= 40
+	;;
+	$GridView_Prod.Columns(2).text		= 'Código de barra'
+	$GridView_Prod.Columns(2).width		= 150
+	;;
+	$GridView_Prod.Columns(5).width		= 115
+	;;
+	$GridView_Prod.Columns(6).text 		= 'Valor de compra'
+	$GridView_Prod.Columns(6).width		= 110
+	;;
+	$GridView_Prod.Columns(8).text 		= 'Valor total'
+	$GridView_Prod.Columns(8).width		= 110
+	;;
+	$GridView_Prod.Columns(9).text		= 'Estoque'
+	;;
+	$GridView_Prod.Columns(10).width	= 100
+	debug on
+endfunction
+
+function Order_Click_Prod_1()
+	if ($GridView_Prod.CurrentColumn.Index = 0)
+		$GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, $GridView_Prod.CurrentColumn.Index).Value = Not $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, $GridView_Prod.CurrentColumn.Index).Value
+	else
+		$Pixel_Preview.Text	= DeAlternator($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 10).Text)
+		$Pixel_Preview.Text = Replace($Pixel_Preview.Text, '||curdir', @curdir)
+		if not exist($Pixel_Preview.Text)
+			$Pixel_Preview.Text = @Curdir+'\Gráficos\ERROR-404.bmp'
+		endif
+		$Pixel_Preview.Image	= $Pixel_Preview.Text
+
+		sleep 0.1
+		$Pixel_Preview.Refresh()
+	endif
+endfunction
+
+function Order_Click_Prod_2()
+	select
+		Case ($GridView_Prod.CurrentColumn.Index = 10)
+			View_PictureBox_Prod($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 10).Text, 'Previsualização do produto.')
+	endselect
+endfunction
+
+function Categoria_Select()
+	Dim
+		$Form_Temp, $ListView_,
+		$text, $i, $Categoria_Select
+	$Categoria_Select		= $GB_Add_Prod.Controls(3).Text
+	$Form_Temp				= $System.Form($Form)
+	$Form_Temp.Text			= 'De um duplo click na categoria preferida.'
+	$Form_Temp.Width		= 450
+	$Form_Temp.Resizable	= False()
+	$Form_Temp.MaximizeBox	= False()
+	$Form_Temp.MinimizeBox	= False()
+	$Form_Temp.OnKeyUp		=
+	'
+		if ($$Form_Temp.KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+	
+	$=$Form_Temp.Controls.Label
+	$Form_Temp.Controls(0).FontName		= 'Segeo UI'
+	$Form_Temp.Controls(0).BackColor	= 'Black'
+	$Form_Temp.Controls(0).ForeColor	= 'White'
+	$Form_Temp.Controls(0).Width		= 450
+	$Form_Temp.Controls(0).Height		= 26
+	$Form_Temp.Controls(0).FontSize		= 11
+	$Form_Temp.Controls(0).FontBold		= 1
+	$Form_Temp.Controls(0).Left			= 0
+	$Form_Temp.Controls(0).TextAlign	= 32
+	$Form_Temp.Controls(0).Anchor		= 1 + 4 + 8
+	$Form_Temp.Controls(0).Text			= 'De um duplo click na categoria preferida.'
+	$Form_Temp.Controls(0).OnKeyDown	=
+	'
+		if ($$Form_Temp.Controls(0).KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+
+	$ListView_					= $Form_Temp.Controls.GridView
+	$ListView_.Width			= $Form_Temp.Width-5
+	$ListView_.Height			= $Form_Temp.Height-$Form_Temp.Controls(0).Height-25
+	$ListView_.ReadOnly			= True()
+	$ListView_.HeaderStyle		= True()
+	$ListView_.FullRowSelect	= True()
+	$ListView_.Top				= 25
+	$ListView_.OnKeyDown		=
+	'
+		if ($$ListView_.KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+	$ListView_.OnDoubleClick	=
+	'
+		$$Categoria_Select = $$ListView_.Cells($$ListView_.CurrentRow.Index, 0).Text
+		$$Form_Temp.Hide()
+	'
+
+	kdb_field_GridView($ListView_, 'Categoria_Produtos')
+	for each $text in tb_getField('Categoria_Produtos')
+		kdb_fData_GridView($ListView_, 'Categoria_Produtos.'+$text, $i)
+		$i=$i+1
+	next
+	
+	$Form_Temp.ShowModal()
+	while $Form_Temp.Visible
+		$=Execute($Form_Temp.DoEvents)
+	loop
+	$GB_Add_Prod.Controls(3).Text = $Categoria_Select
+endfunction
+
+function Form_Math_Porcentagem($Valor_Compra, $PorcentagemInput)
+	Dim
+		$Form_Temp, $GB_Check,
+		$TextBox_, $Label_0, $Label_1,
+		$Label_2, $Lucro, $porcentagem
+	$Form_Math_Porcentagem	= $Valor_Compra, $PorcentagemInput
+	$Form_Temp				= $System.Form($Form)
+	$Form_Temp.Text			= 'Selectione um modo de lucro, e depois informe o campo.'
+	$Form_Temp.Width		= 450
+	$Form_Temp.Resizable	= False()
+	$Form_Temp.MaximizeBox	= False()
+	$Form_Temp.MinimizeBox	= False()
+	$Form_Temp.OnKeyUp		=
+	'
+		if ($$Form_Temp.KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+;;<PAINEL DO TOPO>
+	$=$Form_Temp.Controls.Label
+	$Form_Temp.Controls(0).FontName		= 'Segeo UI'
+	$Form_Temp.Controls(0).BackColor	= 'Black'
+	$Form_Temp.Controls(0).ForeColor	= 'White'
+	$Form_Temp.Controls(0).Width		= 450
+	$Form_Temp.Controls(0).Height		= 26
+	$Form_Temp.Controls(0).FontSize		= 11
+	$Form_Temp.Controls(0).FontBold		= 1
+	$Form_Temp.Controls(0).Left			= 0
+	$Form_Temp.Controls(0).TextAlign	= 32
+	$Form_Temp.Controls(0).Dock			= 1
+	$Form_Temp.Controls(0).Anchor		= 1 + 4 + 8
+	$Form_Temp.Controls(0).Text			= 'Selectione um modo de lucro, e depois informe o campo.'
+;;</PAINEL DO TOPO>
+
+;;<GRUPO OPÇÕES>
+	$GB_Check					= $Form_Temp.Controls.GroupBox
+	$GB_Check.FontSize			= 12
+	$GB_Check.Size				= 200, 150
+	$GB_Check.FontName			= 'Consolas'
+	$GB_Check.Text				= 'Método de lucro'
+	$GB_Check.Location			= 5, $Form_Temp.Controls(0).Bottom+30
+
+	$=$GB_Check.Controls.RadioButton
+	$GB_Check.Controls(0).Location	= 10, 45
+	$GB_Check.Controls(0).Size		= 150, 30
+	$GB_Check.Controls(0).Text		= 'Porcentagem %'
+	$GB_Check.Controls(0).OnKeyDown	=
+	'
+		if ($$GB_Check.Controls(0).KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+
+	$=$GB_Check.Controls.RadioButton
+	$GB_Check.Controls(1).Apparence	= 0
+	$GB_Check.Controls(1).Location	= 10, 45
+	$GB_Check.Controls(1).Text		= 'Valor R$0,00'
+	$GB_Check.Controls(1).Size		= 150, 30
+	$GB_Check.Controls(1).Top		= $GB_Check.Controls(0).Bottom+2
+	$GB_Check.Controls(1).OnKeyDown	=
+	'
+		if ($$GB_Check.Controls(1).KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+;;</GRUPO OPÇÕES>
+
+;;<LABEL'S>
+	$Label_0					= $Form_Temp.Controls.Label
+	$Label_0.FontSize			= 12
+	$Label_0.Size				= 250, 45
+	$Label_0.FontName			= 'Consolas'
+	$Label_0.Location			= $GB_Check.Right+2, $GB_Check.Top+10
+	$Label_0.Text				= 'Valor de compra: R$'+Cstr($Valor_Compra)
+
+	$Label_1					= $Form_Temp.Controls.Label
+	$Label_1.FontSize			= 12
+	$Label_1.Size				= 250, 45
+	$Label_1.FontName			= 'Consolas'
+	$Label_1.Location			= $GB_Check.Right+2, $Label_0.Bottom
+	$Label_1.Text				= 'Valor de lucro'
+
+	$Label_2					= $Form_Temp.Controls.Label
+	$Label_2.FontName			= 1
+	$Label_2.FontSize			= 16
+	$Label_2.BackColor			= 'black'
+	$Label_2.ForeColor			= 0,255,0
+	$Label_2.Size				= $GB_Check.Width, 50
+	$Label_2.FontName			= 'Consolas'
+	$Label_2.Location			= $GB_Check.Left, $GB_Check.Bottom+3
+	$Label_2.Text				= 'Total'
+;;</LABEL'S>
+
+;;<TEXTBOX>	
+	$TextBox_					= $Form_Temp.Controls.TextBox
+	$TextBox_.BorderStyle		= 2
+	$TextBox_.BackColor			= 'Black'
+	$TextBox_.ForeColor			= 0, 255, 0
+	$TextBox_.FontBold			= 1
+	$TextBox_.FontSize			= 20
+	$TextBox_.Size				= 180, 35
+	$TextBox_.Temp				= ''
+	$TextBox_.Location			= $GB_Check.Right+2, $Label_1.Bottom+10
+	$TextBox_.OnKeyDown			=
+	'
+		if ($$TextBox_.KeyCode = 27)
+				$$Form_Temp.Hide()
+				Exit 0
+		endif
+		if ($$TextBox_.KeyCode = 13)
+			$$=Execute($$Form_Temp.Controls("Concluir").OnClick)
+			exit 0
+		endif
+		$$TextBox_.Temp				= Len($$TextBox_.Text)
+		$$Temp						= $$TextBox_.SelectionStart
+		$$TextBox_.Text				= MaskTextBox($$TextBox_.Text, Split("0\1\2\3\4\5\6\7\8\9\,\.", "\"))
+		$$TextBox_.SelectionStart	= $$Temp+(Len($$TextBox_.Text)-$$TextBox_.Temp)
+	'
+	$TextBox_.OnTextChanged		=
+	'
+		if ($$GB_Check.Controls(0).Checked = -1)
+			$$Temp			= Porcentagem($$Valor_Compra, $$TextBox_.Text)
+			$$Porcentagem	= $$Temp[0]
+			$$Lucro			= $$Temp[2]
+			$$Label_1.Text	= "Valor de lucro: "+Flip_Currency(FormatNumber($$Temp[1], 2))+" | "+FormatNumber($$Temp[0], 2)+"%%"
+			$$Label_2.Text	= "Total: "+Flip_Currency(FormatNumber($$Temp[2], 2))
+		endif
+		if ($$GB_Check.Controls(1).Checked = -1)
+			$$Temp			= Porcentagem($$Valor_Compra, $$TextBox_.Text, 1)
+			$$Porcentagem	= $$Temp[0]
+			$$Lucro			= $$Temp[2]
+			$$Label_1.Text	= "Valor de lucro: "+Flip_Currency(FormatNumber($$Temp[1], 2))+" | "+FormatNumber($$Temp[0], 2)+"%%"
+			$$Label_2.Text	= "Total: "+Flip_Currency(FormatNumber($$Temp[2], 2))
+		endif
+	'
+;;</TEXTBOX>
+;<FINALIZAR>
+	$=$Form_Temp.Controls.ToolButton
+	$Form_Temp.Controls($Form_Temp.Controls.Count-1).Name			= 'Concluir'
+	$Form_Temp.Controls('Concluir').ForeColor		= 'green'
+	$Form_Temp.Controls('Concluir').HotForeColor	= 'black'
+	$Form_Temp.Controls('Concluir').BackColor		= 'black'
+	$Form_Temp.Controls('Concluir').HotBackColor	= 'green'
+	$Form_Temp.Controls('Concluir').BorderStyle		= 0
+	$Form_Temp.Controls('Concluir').FlatStyle		= 0
+	$Form_Temp.Controls('Concluir').FontSize		= 16
+	$Form_Temp.Controls('Concluir').Size			= $TextBox_.Width, 50
+	$Form_Temp.Controls('Concluir').Location		= $TextBox_.Left, $Label_2.Top
+	$Form_Temp.Controls('Concluir').Text			= 'Concluir'
+	$Form_Temp.Controls('Concluir').OnClick			=
+	'
+		if ($$GB_Check.Controls(0).Checked = -1)
+			$$Form_Math_Porcentagem = $$Lucro, FormatNumber($$TextBox_.Text, 2)
+		else
+			$$Form_Math_Porcentagem = $$Lucro, FormatNumber($$Porcentagem, 2)
+		endif
+		$$Form_Temp.Hide()
+	'
+;</FINALIZAR>
+	$GB_Check.Controls(0).Checked = True
+	$TextBox_.Text				= $PorcentagemInput
+	$TextBox_.SelectionStart	= 0
+	$TextBox_.SelectionLength	= Len($PorcentagemInput)
+	$TextBox_.SetFocus()
+	$Form_Temp.ShowModal()
+	while $Form_Temp.Visible
+		$=Execute($Form_Temp.DoEvents)
+	loop
+endfunction
+
+function Salvar_Produto()
+	Dim
+		$i, $Not
+	$Not = $GB_Add_Prod.Tag
+	if (tb_GetData('Produtos.ID_CODEBAR', 'ID_CODEBAR', $GB_Add_Prod.Controls(1).Text) <> '') and ($GB_Add_Prod.Controls(1).Text <> '-') and $not
+		$=Msg('O código de barra "'+$GB_Add_Prod.Controls(1).Text+'".', 'Código de barra existente!', 48 + 4096)
+		$GB_Add_Prod.Controls(1).SetFocus()
+		Exit 0
+	endif
+	;if (tb_GetData('Produtos.DESCRIÇÃO', 'DESCRIÇÃO', $GB_Add_Prod.Controls(5).Text) <> '') and not $not
+	;	$=Msg('Já existe este produto "'+$GB_Add_Prod.Controls(5).Text+'".', 'Produto já existente!', 48 + 4096)
+	;	$GB_Add_Prod.Controls(1).SetFocus()
+	;	Exit 0
+	;endif
+	;;<VERIFICANDO SE HÁ CAMPOS VÁZIOS>
+		for each $i in Split('3,5,9,18,14', ',')
+			$i=Cint($i)
+			if (Trim($GB_Add_Prod.Controls($i).Text) = '')
+				$GB_Add_Prod.Controls($i).BackColor = 'red'
+				$=msg("Você precisa preencher o campo "+$GB_Add_Prod.Controls($i-1).Text+".", "Atenção!!", 48 + 4096)
+				$GB_Add_Prod.Controls($i).SetFocus()
+				$GB_Add_Prod.Controls($i).BackColor = 'white'
+				Exit 0
+			endif
+		next
+	;;</VERIFICANDO SE HÁ CAMPOS VÁZIOS>
+
+	if (msg('Você deseja realmente salvar o produto "'+$GB_Add_Prod.Controls(5).Text+'"?', 'Deseja salva o produto?', 32 + 3 + 4096) = 6)
+		Dim
+			$temp, $Array[9], $ID, $Kg, $i
+		
+		;;<COPIANDO A IMAGEM PARA O "BANCO DE DADOS">
+			if (Len($GB_Add_Prod.Controls(10).Text) > Len(Replace($GB_Add_Prod.Controls(10).Text, '||-||', '')))
+				Del Replace($GB_Add_Prod.Controls(10).Text, '||-||', '')
+			else
+				if ($GB_Add_Prod.Controls(10).Text <> 'PictureBox')
+					if $Not And ($GB_Add_Prod.Controls(10).Text = $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 10).text)
+						$temp = $GB_Add_Prod.Controls(10).Text
+						if (Right($temp, 4) = '.jpg')
+							$temp = Substr($GB_Add_Prod.Controls(10).Text, 1, InStrRev($GB_Add_Prod.Controls(10).Text, '.')-1)
+						endif
+					else
+						$temp = Substr($GB_Add_Prod.Controls(10).Text, 1, InStrRev($GB_Add_Prod.Controls(10).Text, '.')-1)
+						$temp = Split($temp, '\')
+						$temp = '\Banco-d-Dados\IMG\'+$temp[ubound($temp)]
+						MOVE $GB_Add_Prod.Controls(10).Text @Curdir+$temp
+						$temp = '||curdir'+$temp
+					endif
+					$temp = Alternator($temp)
+				endif
+			endif
+			if ($GB_Add_Prod.Controls(11).Temp <> $GB_Add_Prod.Controls(10).Text)
+				Del $GB_Add_Prod.Controls(11).Temp
+			endif
+		;;</COPIANDO A IMAGEM PARA O "BANCO DE DADOS">
+
+		;;<PEGANDO A ÚLTIMA ID>
+			$ID	= tb_GetData('Produtos.IDCODIGO', 'max')
+			$ID	= Cint($ID[Ubound($ID)])+1
+		;;</PEGANDO A ÚLTIMA ID>
+
+		if ($GB_Add_Prod.Controls(12).Checked = -1)
+			$kg = 'Sim'
+			$GB_Add_Prod.Controls(14).Text = $GB_Add_Prod.Controls(14).Text + 'Kg'
+		else
+			$kg = 'Não'
+		endif
+
+		;;<CONVERTENDO EM FORMATO CURRENCY>
+			$GB_Add_Prod.Controls(9).Text	= Flip_Currency(FormatNumber($GB_Add_Prod.Controls(9).Text, 2))
+			$GB_Add_Prod.Controls(18).Text	= Flip_Currency(FormatNumber($GB_Add_Prod.Controls(18).Text, 2))
+		;;</CONVERTENDO EM FORMATO CURRENCY>
+
+		;;<ORGANIZANDO OS DADOS>
+			$Array =
+				$ID, $GB_Add_Prod.Controls(1).Text, $GB_Add_Prod.Controls(3).Text,
+				$GB_Add_Prod.Controls(5).Text, $GB_Add_Prod.Controls(7).Text,
+				$GB_Add_Prod.Controls(9).Text, $Kg, $GB_Add_Prod.Controls(18).Text,
+				$GB_Add_Prod.Controls(14).Text, $temp, Cstr(@Date+'|'+@time),
+				Cstr(@Date+'|'+@time), $User_Func[1], ''
+		;;</ORGANIZANDO OS DADOS>
+
+		;;<INSERINDO NA TABELA>
+			if $Not
+				Dim
+					$i $i=0
+				$Array[0] = $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 1).text
+				for each $temp in tb_getfield('Produtos')
+					tb_UpdateData('Produtos.'+$temp, $Array[0], $Array[$i], 'IDCODIGO')
+					$i=$i+1
+				next
+			else
+				tb_InsertData('Produtos', $Array)
+			endif
+			tb_Save2('Produtos', @CurDir+'\Banco-d-Dados\Produtos.ktb')
+		;;</INSERINDO NA TABELA>
+
+		;;<INSERINDO NA GRID>
+			$GridView_Prod.BeginUpdate()
+			if Not $Not
+				$=$GridView_Prod.Rows.Add('')
+			endif
+			for $i=1 to Ubound($Array)+1
+				if ($i = 3)
+					$Array[$i-1] = tb_GetData('Categoria_Produtos.NOME', 'Idcodigo', $GB_Add_Prod.Controls(3).Text)
+				endif
+				if Not $Not
+					$GridView_Prod.Cells($GridView_Prod.Rows.Count-1, $i).Text = $Array[$i-1]
+				else
+					$GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, $i).Text = $Array[$i-1]
+				endif
+			next
+			$GridView_Prod.EndUpdate()
+		;;</INSERINDO NA GRID>
+
+		;;<VOLTANDO PARA TELA VISULIZAÇÃO DE PRODUTOS>
+			Clear_Data_Prod()
+			if $Not
+				$Pixel_Preview.text		= Replace(DeAlternator($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 10).Text), '||curdir', @curdir)
+				$Pixel_Preview.Image	= $Pixel_Preview.text
+				$Pixel_Preview.Refresh()
+				$=Execute($Bt_Edit_Prod.OnClick)
+			else
+				$Pixel_Preview.text		= $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 10).Text
+				$Pixel_Preview.Image	= $Pixel_Preview.text
+				$Pixel_Preview.Refresh()
+				$=Execute($Bt_Add_Prod.OnClick)
+			endif
+		;;</VOLTANDO PARA TELA VISULIZAÇÃO DE PRODUTOS>
+		endif
+endfunction
+
+function Clear_Data_Prod()
+	Dim
+		$Clear_Data_Prod
+	$GB_Add_Prod.Controls(1).Text		= ''
+	$GB_Add_Prod.Controls(3).Text		= ''
+	$GB_Add_Prod.Controls(5).Text		= ''
+	$GB_Add_Prod.Controls(7).Text		= ''
+	$GB_Add_Prod.Controls(9).Text		= ''
+	$GB_Add_Prod.Controls(10).Text		= ''
+	$GB_Add_Prod.Controls(10).Image		= ''
+	$GB_Add_Prod.Controls(10).BackColor	= 'Black'
+	$GB_Add_Prod.Controls(10).ForeColor	= 'Black'
+	$GB_Add_Prod.Controls(10).Rectangle(0,0, $GB_Add_Prod.Controls(10).width,$GB_Add_Prod.Controls(10).height)
+	$GB_Add_Prod.Controls(10).Refresh()
+	$GB_Add_Prod.Controls(12).Checked	= 0
+	$GB_Add_Prod.Controls(14).Text		= ''
+	$GB_Add_Prod.Controls(18).Text		= ''
+	$GB_Add_Prod.Controls(19).Text		= '%%'
+endfunction
+
+function Abrir_IMG()
+	Dim
+		$temp
+	$GB_Add_Prod.Controls(10).Text = OpenFile($GB_Add_Prod.Controls(10).Text)
+
+	if exist($GB_Add_Prod.Controls(10).Text) and (@Error = 1)
+		Del $GB_Add_Prod.Controls(10).Text
+	endif
+	while ($temp = 0)
+		$temp = Rand(15)
+		if Exist(@Curdir+'\Banco-d-Dados\IMG\Produto_'+$temp)
+			$temp = 0
+		endif
+	loop
+	if (Substr($GB_Add_Prod.Controls(10).Text, InstrRev($GB_Add_Prod.Controls(10).Text, ".")) <> ".jpg")
+		$=$System.Shell('"'+@Curdir+'\Sub\UDFs\Convert.exe" "'+$GB_Add_Prod.Controls(10).Text+'" "'+@Curdir+'\Banco-d-Dados\IMG_temp\Produto_'+$temp+'.jpg"', 0, 1)
+	else
+		Copy $GB_Add_Prod.Controls(10).Text @Curdir+'\Banco-d-Dados\IMG_temp\Produto_'+$temp+'.jpg'
+	endif
+	$GB_Add_Prod.Controls(10).Text = @Curdir+'\Banco-d-Dados\IMG_temp\Produto_'+$temp+'.jpg'
+	SLEEP 0.2
+
+	$GB_Add_Prod.Controls(10).Image	= $GB_Add_Prod.Controls(10).Text
+	$GB_Add_Prod.Controls(10).Refresh()
+endfunction
+
+function View_PictureBox_Prod($IMG_DIR, $TITLE)
+	Dim
+		$View_PictureBox_Prod, $Size
+	$size = 0
+	if not exist($IMG_DIR)
+		$IMG_DIR = DeAlternator($IMG_DIR)
+		$IMG_DIR = Replace($IMG_DIR, '||curdir', @curdir)
+		if not exist($IMG_DIR)
+			$IMG_DIR = @Curdir+'\Gráficos\ERROR-404.bmp'
+		endif
+	endif
+	$View_PictureBox_Prod				= $System.Form($Form)
+	$View_PictureBox_Prod.Size			= 600, 500
+	$View_PictureBox_Prod.Text			= $Title+"| Zom:"+$Size
+	$View_PictureBox_Prod.MinimizeBox 	= 0
+	$View_PictureBox_Prod.OnKeyUp		=
+	'
+		if ($$View_PictureBox_Prod.KeyCode = 27)
+			$$View_PictureBox_Prod.Hide()
+		endif
+		if ($$View_PictureBox_Prod.KeyCode = 107)
+			if ($$Size =< 200)
+				$$Size = $$Size+20
+				$$View_PictureBox_Prod.Controls(0).width	= $$View_PictureBox_Prod.Controls(0).width+20
+				$$View_PictureBox_Prod.Controls(0).height	= $$View_PictureBox_Prod.Controls(0).height+20
+			endif
+		endif
+		if ($$View_PictureBox_Prod.KeyCode = 109)
+			if ($$size >= 20)
+				$$Size = $$Size-20
+			$$View_PictureBox_Prod.Controls(0).width	= $$View_PictureBox_Prod.Controls(0).width-20
+			$$View_PictureBox_Prod.Controls(0).height	= $$View_PictureBox_Prod.Controls(0).height-20
+			endif
+		endif
+		if ($$View_PictureBox_Prod.KeyCode = 32)
+			$$View_PictureBox_Prod.Controls(0).Center()
+		endif
+		$$View_PictureBox_Prod.Text = $$Title+"| Zom:"+$$Size
+		$$View_PictureBox_Prod.Controls(0).Refresh()
+	'
+	$View_PictureBox_Prod.Center()
+
+	$=$View_PictureBox_Prod.Controls.PictureBox
+	$View_PictureBox_Prod.Controls(0).Image				= $IMG_DIR
+	$View_PictureBox_Prod.Controls(0).BorderStyle		= 0
+	$View_PictureBox_Prod.Controls(0).SizeMode			= 1
+	$View_PictureBox_Prod.Controls(0).Dock				= 5
+	/*
+	$View_PictureBox_Prod.Controls(0).MOUSE_X			= 0
+	$View_PictureBox_Prod.Controls(0).MOUSE_Y			= 0
+	$View_PictureBox_Prod.Controls(0).OnMouseDown		=
+	'
+		$$View_PictureBox_Prod.Controls(0).MOUSE_X = $$View_PictureBox_Prod.Controls(0).MOUSEX
+		$$View_PictureBox_Prod.Controls(0).MOUSE_Y = $$View_PictureBox_Prod.Controls(0).MOUSEY
+		$$View_PictureBox_Prod.Controls(0).Refresh()
+	'
+	$View_PictureBox_Prod.Controls(0).OnMouseMove		=
+	'
+		if ($$View_PictureBox_Prod.Controls(0).MouseButton = 1)
+			$$View_PictureBox_Prod.BeginUpdate
+				$$View_PictureBox_Prod.Controls(0).Location = $$View_PictureBox_Prod.MOUSEX-$$View_PictureBox_Prod.Controls(0).MOUSE_X, $$View_PictureBox_Prod.MOUSEY-$$View_PictureBox_Prod.Controls(0).MOUSE_Y
+			$$View_PictureBox_Prod.EndUpdate
+		endif
+	'
+	*/
+
+	$View_PictureBox_Prod.ShowModal()
+	while ($View_PictureBox_Prod.Visible)
+		$=Execute($View_PictureBox_Prod.DoEvents)
+	loop
+endfunction
+
+function Deletar_Produto()
+	Dim
+		$i, $count, $error, $IMG
+
+	$GridView_Prod.BeginUpdate
+	$count = 0
+	for $i=0 to $GridView_Prod.Rows.Count
+		if ($GridView_Prod.Cells($i, 0).Value <> 0)
+			$count = $count+1
+		endif
+	next
+
+	if ($count = 0)
+		if ($GridView_Prod.CurrentRowIndex <> -1)
+			if (Msg('Deseja realmente deletar o produto "'+$GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 4).Text+'"', 'Atenção!', 64+3+4096) = 6)
+				Dim
+					$IDCODIGO
+				$IDCODIGO	= $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 1).Text
+				$IMG		= $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 10).Text
+				tb_DelData_Cond('Produtos.IDCODIGO', $IDCODIGO)
+					$=$GridView_Prod.rows.Removeat($GridView_Prod.CurrentRow.Index)
+				tb_Save2('Produtos', @CurDir+'\Banco-d-Dados\Produtos.ktb')
+				Del $IMG
+			endif
+		endif
+		$GridView_Prod.EndUpdate
+		exit 200
+	endif
+
+	Select
+		Case ($count > 1)
+			$error = Msg('Deseja realmente deletar os ('+$count+') produtos', 'Atenção!', 64+3+4096)
+		Case ($count = 1)
+			$error = Msg('Deseja realmente deletar o produto "'+$GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 4).Text+'"', 'Atenção!', 64+3+4096)
+		Case ($count = 0)
+			exit 0
+	Endselect
+	if ($error <> 6)
+		Exit 404
+	endif
+	for $i=$GridView_Prod.Rows.Count To 0 step -1
+		if ($GridView_Prod.Cells($i, 0).Value <> 0)
+			tb_DelData_Cond('Produtos.IDCODIGO', $GridView_Prod.Cells($i, 1).Text)
+			$GridView_Prod.Cells($i, 10).Text = Replace(DeAlternator($GridView_Prod.Cells($i, 10).Text), '||curdir', @curdir)
+			if Exist($GridView_Prod.Cells($i, 10).Text)
+				Del $GridView_Prod.Cells($i, 10).Text
+			endif
+			$=$GridView_Prod.Rows.RemoveAt($i)
+		endif
+	next
+	$GridView_Prod.EndUpdate
+	tb_Save2('Produtos', @CurDir+'\Banco-d-Dados\Produtos.ktb') ;SALVANDO OS DADOS!
+endfunction
+
+function Editar_Produto()
+	$GB_Add_Prod.Controls(1).Text	= $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 2).text
+	$GB_Add_Prod.Controls(3).Text	= $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 3).text
+	$GB_Add_Prod.Controls(3).Text	= tb_GetData('Categoria_Produtos.Idcodigo', 'Nome', $GB_Add_Prod.Controls(3).Text)
+	$GB_Add_Prod.Controls(5).Text	= $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 4).text
+	$GB_Add_Prod.Controls(7).Text	= $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 5).text
+	$GB_Add_Prod.Controls(18).Text	= Substr($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 8).text, 3)
+	$GB_Add_Prod.Controls(9).Text	= Substr($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 6).text, 3)
+	$GB_Add_Prod.Controls(19).Text	= FormatNumber(Porcentagem($GB_Add_Prod.Controls(9).Text, $GB_Add_Prod.Controls(18).Text, 1)[0]-100, 2)+'%%'
+
+	;;<PictureBox>
+		$GB_Add_Prod.Controls(10).Text = DeAlternator($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 10).text)
+		$GB_Add_Prod.Controls(10).Text = Replace($GB_Add_Prod.Controls(10).Text, '||curdir', @curdir)
+		$GB_Add_Prod.Controls(10).Image= $GB_Add_Prod.Controls(10).Text
+		$GB_Add_Prod.Controls(10).Refresh()
+	;;</PictureBox>
+
+	if ($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 7).text = 'Sim')
+		$GB_Add_Prod.Controls(12).Checked = -1
+		$GB_Add_Prod.Controls(14).Text = Substr($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 9).text, 1, Len($GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 9).text)-2)
+	else
+		$GB_Add_Prod.Controls(12).Checked = 0
+		$GB_Add_Prod.Controls(14).Text = $GridView_Prod.Cells($GridView_Prod.CurrentRow.Index, 9).text
+	endif
+endfunction
+
+function Length_Produtos()
+	$Length_Produtos = Len($GB_Add_Prod.Controls(1).Text)
+	$Length_Produtos = $Length_Produtos + Len($GB_Add_Prod.Controls(3).Text)
+	$Length_Produtos = $Length_Produtos + Len($GB_Add_Prod.Controls(5).Text)
+	$Length_Produtos = $Length_Produtos + Len($GB_Add_Prod.Controls(7).Text)
+	$Length_Produtos = $Length_Produtos + Len($GB_Add_Prod.Controls(9).Text)
+	$Length_Produtos = $Length_Produtos + Len($GB_Add_Prod.Controls(14).Text)
+	$Length_Produtos = $Length_Produtos + Len($GB_Add_Prod.Controls(18).Text)
+endfunction
+
+function Pesquisar_Produto(Optional $Not)
+	Dim
+		$Tipo, $Busca,
+		$Result, $ID,
+		$Data, $line, $i
+	if ($Tx_Pes_Prod.KeyCode <> 13) And Not ($Not)
+		Exit 0
+	endif
+
+	if ($Tx_Pes_Prod.Text = '')
+		if ($GridView_Prod.Rows.Count < tb_GetDataLines('Produtos'))
+			$GridView_Prod.BeginUpdate
+				$GridView_Prod.Rows.Clear
+				Add_Data_Tab_Prod(0)
+			$GridView_Prod.EndUpdate
+		endif
+		exit 0
+	endif
+	$Tipo	= Split($Tx_Pes_Prod.Text, '::')
+	if (Ubound($Tipo) > 0)
+		$Tipo	= $Tipo[0]
+		$Busca	= Substr($Tx_Pes_Prod.Text, InStr($Tx_Pes_Prod.Text, '::')+2)
+	else
+		$Busca	= Join($Tipo, '')
+		$Tipo	= 'Descrição'
+	endif
+	if (Trim($Busca) = '')
+		;if ($GridView_Prod.Items.Count < tb_GetDataLines('Clientes'))
+		;	$GridView_Prod.BeginUpdate
+		;		Add_Data(1)
+		;	$GridView_Prod.EndUpdate
+		;endif
+		Exit 0
+	endif
+	
+	$Result = tb_Find_StringMath_Data('Produtos.IDCODIGO', $Tipo, $Busca)
+	$GridView_Prod.BeginUpdate
+		$GridView_Prod.Rows.Clear
+
+		$line=0
+		for each $ID in $Result
+			$Data = tb_GetDataLine('Produtos.IDCODIGO', $ID)
+			$=$GridView_Prod.Rows.Add()
+			for $i=1 To Ubound($Data)+1
+				$GridView_Prod.Cells($line, $i).Text = $Data[$i-1]
+			next
+			$line=$line+1
+		next
+	$GridView_Prod.EndUpdate
+endfunction

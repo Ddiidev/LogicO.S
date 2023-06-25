@@ -1,0 +1,473 @@
+;FUNCTIONS
+;				isNumber(), isFloat(),
+;				Cinteger(), CFloat(),
+;				OnlyNumbers(), OnlyAlphabet(), OnlySimbol(),
+;				RemoveNumeric(), RemoveAlphabet(), RemoveSimbol(),
+;				CountEventStr(), RepeatStr(), ReverseStr(),
+;				StringToCharArray(), _StringToCharArray_()
+;
+;AUTHOR			André Luiz (AlsCompanny@gmail.com)
+;
+;CONTRIBUTORS	André Luiz
+;               none.
+;
+;ACTION ...
+;
+;SYNTAX		
+;				isNumber([INTEGER]/[STRING]/[FLOAT])
+;				isFloat([INTEGER]/[STRING]/[FLOAT])
+;				isAlphabet([INTEGER]/[STRING]/[FLOAT])
+;				isSimbol([INTEGER]/[STRING]/[FLOAT])
+;				Cinteger([INTEGER]/[STRING]/[FLOAT])
+;				CFloat([INTEGER]/[STRING]/[FLOAT])
+;				OnlyNumbers([INTEGER]/[STRING]/[FLOAT])
+;				OnlyAlphabet([INTEGER]/[STRING]/[FLOAT])
+;				OnlySimbol([INTEGER]/[STRING]/[FLOAT])
+;				RemoveNumeric([INTEGER]/[STRING]/[FLOAT])
+;				RemoveAlphabet([INTEGER]/[STRING]/[FLOAT])
+;				RemoveSimbol([INTEGER]/[STRING]/[FLOAT])
+;				CountEventStr([INTEGER]/[STRING]/[FLOAT], [INTEGER]/[STRING]/[FLOAT])
+;				RepeatStr([INTEGER]/[STRING]/[FLOAT], [INTEGER]/[STRING]/[FLOAT])
+;				ReverseStr([INTEGER]/[STRING]/[FLOAT])
+;				StringToCharArray([INTEGER]/[STRING]/[FLOAT])
+;				_StringToCharArray_([INTEGER]/[STRING]/[FLOAT])
+;
+;VERSION		1.2.0.8
+;DATE CREATED	08/11/2018
+;DATE MODIFIED	08/06/2018
+;
+;PARAMETERS 	
+;				Parameter 1
+;				{THE TYPES DESCRIBED IN THEIR RESPECTIVE FUNCTION}
+;
+;				Parameter 2
+;				{THE TYPES DESCRIBED IN THEIR RESPECTIVE FUNCTION}
+;
+;REMARKS		I created this library because I was looking at a similar library in the python language.
+;
+;RETURNS		
+;		@Error = 2 ;;WRONG TYPE!
+;
+;		isNumber() ;0=TRUE ;1=FALSE
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;
+;		isFloat() ;0=TRUE ;1=FALSE
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		isAlphabet() ;0=TRUE ;1=FALSE
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		isSimbol() ;0=TRUE ;1=FALSE
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		Cinteger() ;Returns an integer set. equivalent to that obtained in isNumber().
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		CFloat() ;Returns a "FLOAT/STRING", the string type does not ignore the "0".
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		OnlyNumbers() ;Returns a string containing only numbers.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		OnlyAlphabet() ;Returns a string containing only Alphabet.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		OnlySimbol() ;Returns a string containing only Simbols.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		RemoveNumeric() ;Returns a string, without any numeric characters.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		RemoveAlphabet() ;Returns a string, with no characters in the alphabet.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		RemoveSimbol() ;Returns a string, with no characters in the simbols.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		CountEventStr() ;Returns an [INTEGER] containing the amount of the event occurring in the string.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		RepeatStr() ;Returns a [STRING] with an object, repeated n, times.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		ReverseStr() ;Invert a string.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;		StringToCharArray() ;Creates an array with the size and data of the string passed as a parameter.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;			ps: Only for a high amount of text, over 1500 characters. "depends on _StringToCharArray_().
+;
+;		_StringToCharArray_() ;Creates an array with the size and data of the string passed as a parameter.
+;			@Error = 0 ;;TRUE!
+;			@Error = 1 ;;FALSE!
+;
+;DEPENDENCIES 	None
+;
+;KIXTART VER	4.50
+; 
+;Examples "isNumber()":
+;
+;isNumber("a-13")? ;=0
+;isNumber("1.3") ? ;=0
+;isNumber("1,3") ? ;=0
+;isNumber("-13") ? ;=1
+;isNumber("13")  ? ;=1
+;isNumber("+13") ? ;=1
+;isNumber("13+")?? ;=1
+;
+;$var = "--13"
+;if isNumber($var)
+;	$var = cinteger($var)
+;	$var?
+;endif get$
+;
+;Examples "IsFloat()":
+;
+;isFloat("a-13")?;=0
+;isFloat("1.3")	?;=1
+;isFloat("1,3")	?;=1
+;isFloat("-13")	?;=0
+;isFloat("13")	?;=0
+;isFloat("+13")	?;=0
+;isFloat("13+")	?;=0
+;isFloat("1.3+")?;=1
+;
+;$var = "-123.5312"
+;if isFloat($var)
+;	Cfloat($var)?
+;endif get$
+;Source:
+function isNumber($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	03/10/2018
+	;DATE MODIFIED	08/06/2018
+	$isNumber = 0
+	if (instr("2 3 4 5 8 ", Vartype($object)) = 0) exit 2 endif
+
+	if (len($object) =< 1)
+		$isNumber = iif((asc($object) >= 48) and (asc($object) <= 57), 1, 0)
+		exit (not $isNumber)
+	endif
+	if (instr($object, ".") or instr($object, ",")) $isNumber = 0 exit 1 endif
+	if (RemoveNumeric($object) <> '')
+		exit 2
+	endif
+
+	dim $len[1]
+	$object = Cinteger($object)
+	$len[0] = len($object)
+	$len[1] = len(cint($object))
+	
+	$isNumber = iif($len[0] <> $len[1], 0, 1)
+	exit (not $isNumber)
+endfunction
+
+function isFloat($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	10/03/2018
+	;DATE MODIFIED	11/03/2018
+	if (len($object) > 1)
+		$isFloat	= 0
+		$object		= Join(Split($object, "."), ",")
+
+		if (instr("2 3 4 5 8 ", Vartype($object)) = 0) exit 1 endif
+		if not instr($object, ",") exit 1 endif
+		if (CountEventStr($object, ",") > 1) exit 1 endif
+
+		dim $chr, $i
+		$isFloat = 1
+		for $i=1 to len($object)
+			$chr = asc(substr($object, $i, 1))
+			if not (($chr >= 48) and ($chr =< 57)) and not (($chr = 43) or ($chr = 44))
+				$isFloat=0
+				exit 1
+			endif
+		next
+	else
+		$isFloat = 0
+		exit 1
+	endif
+endfunction
+
+function isAlphabet($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	11/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i, $chr, $asc
+	$isAlphabet	= 1
+	for $i=1 to len($object)
+		$chr			= substr($object, $i, 1)
+		$asc			= asc($chr)
+		if not ((($asc >= 65) and ($asc <= 90)) or (($asc >= 97) and ($asc <= 122))
+			or (($asc >= 192) and ($asc <= 214)) or (($asc >= 217) and ($asc <= 221))
+			or (($asc >= 224) and ($asc <= 229)) or (($asc >= 249) and ($asc <= 255)))
+			$isAlphabet	= 0 exit 1
+		endif
+	next
+endfunction
+
+function isSimbol($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	11/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i, $chr, $asc
+	$isSimbol = 1
+	for $i=1 to len($object)
+		$chr			= substr($object, $i, 1)
+		$asc			= asc($chr)
+		if	not ((($asc >= 0) and ($asc <= 47)) or (($asc >= 58) and ($asc <= 64)) or
+			(($asc >= 91) and ($asc <= 96)) or (($asc >= 123) and ($asc <= 191)) or
+			(($asc >= 215) and ($asc <= 216)) or (($asc = 222) and ($asc <= 223) and
+			($asc <= 230) and ($asc <= 247) and ($asc <= 248)))
+			$isSimbol = 0 exit 1
+		endif
+	next
+endfunction
+
+function Cinteger($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	10/03/2018
+	;DATE MODIFIED	10/03/2018
+	$object = Join(Split($object, "++"), "+")
+	$object = Join(Split($object, "--"), "-")
+	$Cinteger = cint($object)
+endfunction
+
+function CFloat($object, optional $dbl)
+	;VERSION		0.0.0.2
+	;DATE CREATED	10/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i
+	for $i=0 to len($object)
+		$object = Join(Split($object, "+-"), "-")
+		$object = Join(Split($object, "-+"), "-")
+		$object = Join(Split($object, "++"), "+")
+		$object = Join(Split($object, "--"), "-")
+	next
+
+	$object = Join(Split($object, "."), ",")
+	; if (Join(Split(RemoveNumeric($object), "-"), "") = '')
+		; $CFloat = $object
+		; exit 2
+	; endif
+	if not $dbl
+		$CFloat = cdbl($object)
+	else
+		dim
+			$chr, $point
+		for $i=1 to len($object)
+			$chr = substr($object, $i, 1)
+			if isNumber($chr) or ($chr = ",") or ($chr = "-")
+				$CFloat = cstr($CFloat) + $chr
+			endif
+		next
+		if (right($CFloat, 1) = ",")
+			$CFloat = substr($CFloat, 1, len($CFloat)-1)
+		endif
+	endif
+endfunction
+
+function OnlyNumbers($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	11/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i, $chr, $asc
+	for $i=1 to len($object)
+		$chr			= substr($object, $i, 1)
+		$asc			= asc($chr)
+		$OnlyNumbers	= $OnlyNumbers + iif((($asc >= 48) and ($asc <= 57)), $chr, "")
+	next
+endfunction
+
+function OnlyAlphabet($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	11/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i, $chr, $asc
+	for $i=1 to len($object)
+		$chr			= substr($object, $i, 1)
+		$asc			= asc($chr)
+		if	((($asc >= 65) and ($asc <= 90)) or (($asc >= 97) and ($asc <= 122))
+			or (($asc >= 192) and ($asc <= 214)) or (($asc >= 217) and ($asc <= 221))
+			or (($asc >= 224) and ($asc <= 246)))
+			$OnlyAlphabet	= $OnlyAlphabet + $chr
+		endif
+	next
+endfunction
+
+function OnlySimbol($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	11/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i, $chr, $asc
+	for $i=1 to len($object)
+		$chr			= substr($object, $i, 1)
+		$asc			= asc($chr)
+		if	((($asc >= 0) and ($asc <= 47)) or (($asc >= 58) and ($asc <= 64)) or
+			(($asc >= 91) and ($asc <= 96)) or (($asc >= 123) and ($asc <= 191)) or
+			(($asc >= 215) and ($asc <= 216)) or (($asc = 222) and ($asc <= 223) and
+			($asc <= 230) and ($asc <= 247) and ($asc <= 248)))
+			$OnlySimbol	= $OnlySimbol + $chr
+		endif
+	next
+endfunction
+
+function RemoveNumeric($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	10/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i, $chr, $asc
+	for $i=1 to len($object)
+		$chr			= substr($object, $i, 1)
+		$asc			= asc($chr)
+		$RemoveNumeric	= $RemoveNumeric + iif(not (($asc >= 48) and ($asc <= 57)), $chr, "")
+	next
+endfunction
+
+function RemoveAlphabet($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	10/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i, $chr, $asc
+	for $i=1 to len($object)
+		$chr			= substr($object, $i, 1)
+		$asc			= asc($chr)
+		if not ((($asc >= 65) and ($asc <= 90)) or (($asc >= 97) and ($asc <= 122))
+			or (($asc >= 192) and ($asc <= 214)) or (($asc >= 217) and ($asc <= 221))
+			or (($asc >= 224) and ($asc <= 246)))
+			$RemoveAlphabet	= $RemoveAlphabet + $chr
+		endif
+	next
+endfunction
+
+function RemoveSimbol($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	10/03/2018
+	;DATE MODIFIED	11/03/2018
+	dim $i, $chr, $asc
+	for $i=1 to len($object)
+		$chr			= substr($object, $i, 1)
+		$asc			= asc($chr)
+		if	not ((($asc >= 0) and ($asc <= 47)) or (($asc >= 58) and ($asc <= 64)) or
+			(($asc >= 91) and ($asc <= 96)) or (($asc >= 123) and ($asc <= 191)) or
+			(($asc >= 215) and ($asc <= 216)) or (($asc = 222) and ($asc <= 223) and
+			($asc <= 230) and ($asc <= 247) and ($asc <= 248)))
+			$RemoveSimbol	= $RemoveSimbol + $chr
+		endif
+	next
+endfunction
+
+function isGTR($n1, $n2)
+	$n1 = replace(replace($n1, ".", ""), ",", "")
+
+	$n2 = replace(replace($n2, ".", ""), ".", "")
+	$isGTR = ($n1 > $n2)
+endfunction
+
+function isLSS($n1, $n2)
+	$n1 = replace(replace($n1, ".", ""), ",", "")
+
+	$n2 = replace(replace($n2, ".", ""), ".", "")
+	$isLSS = ($n1 > $n2)
+endfunction
+
+function CountEventStr($input, $count)
+	;VERSION		0.0.0.1
+	;DATE CREATED	11/03/2018
+	;DATE MODIFIED	11/03/2018
+	$CountEventStr = Ubound(Split($input, $count))
+endfunction
+
+function repeatStr($object, $repeat)
+	;VERSION		0.0.0.1
+	;DATE CREATED	25/11/2017
+	;DATE MODIFIED	11/03/2018
+	dim $i, $len
+	$len = Len($object)
+	if ($repeat & 1)
+		$object =
+			$object + $object + $object + $object + $object +
+			$object + $object + $object + $object + $object + $object
+	else
+		$object =
+			$object + $object + $object + $object + $object +
+			$object + $object + $object + $object + $object
+	endif
+	for $i=1 to $repeat step len($object)
+		$repeatStr = $repeatStr + $object
+	next
+	$repeatStr = substr($repeatStr, 1, ($repeat*$len))
+endfunction
+
+function ReverseStr($object)
+	;VERSION		0.0.0.1
+	;DATE CREATED	25/11/2017
+	;DATE MODIFIED	11/03/2018
+	Dim $i
+	for $i=1 To Len($object)
+		$ReverseStr = Substr($object, $i, 1) + $ReverseStr
+	next
+endfunction
+
+function StringToCharArray($object)
+	;VERSION		0.0.0.4
+	;DATE CREATED	11/03/2018
+	;DATE MODIFIED	11/03/2018
+	;IN TEST TO VISUALIZE IF YOU HAD HIGH PERFORMANCE!!
+	;OBS: It depends on a certain form of function.
+	dim
+		$const, $len_s, $pos,
+		$rest, $Substring, $i,
+		$x, $k, $trash, $min, $
+
+	$const	= 200
+	$min	= 1500
+	$len_s	= len($object)
+	if ($len_s > $min)
+		$pos	= ($len_s/$const)-1
+		$rest	= ($len_s mod $const)
+
+		;;<REDIMENSIONANDO A STRING>
+			Redim $Substring[$pos+$rest]
+			Redim $StringToCharArray[$len_s-1]
+		;;</REDIMENSIONANDO A STRING>
+
+		$k		= -1
+		$tras	= 1
+		for $i=0 to $pos+$rest
+			$Substring[$i] = Substr($object, $i+$trash, $const)
+			$trash = $const+$trash-1
+			for $x=1 to len($Substring[$i])
+				$k=$k+1
+				$StringToCharArray[$k] = Substr($Substring[$i], $x, 1)
+			next
+		next
+	else
+		$StringToCharArray = _StringToCharArray_($object)
+	endif
+endfunction
+
+function _StringToCharArray_($string)
+	dim $len, $ $len=len($string)
+	redim $_StringToCharArray_[$len-1]
+	for $=0 to $len-1
+		$_StringToCharArray_[$] = substr($string, $+1, 1)
+	next
+endfunction

@@ -1,0 +1,462 @@
+Global
+	$GridView, $FundoServiço,
+	$GB_Serviços, $Tx_Pes_Serviços, $Bt_Pes_Serviços
+Global
+	$GB_Add_Serviço, $Bt_Sav_Serviços,
+	$Bt_Add_Serviços, $Bt_Del_Serviços, $Bt_Edit_Serviços,
+	$GB_Add_Serviços_Pessoal, $Ajuda_Serviços
+
+$Ajuda_Serviços					= $Tab_Serviços.Controls.GroupBox
+$Ajuda_Serviços.BorderStyle		= 2
+$Ajuda_Serviços.FontSize		= 16
+$Ajuda_Serviços.Location		= 10, -3
+$Ajuda_Serviços.ForeColor		= 'gray'
+$Ajuda_Serviços.ClientSize		= 460, 90
+$Ajuda_Serviços.BackColor		= 0, 51, 102
+$Ajuda_Serviços.Text			= 'Ajuda de pesquisa'
+
+$=$Ajuda_Serviços.Controls.LABEL
+$Ajuda_Serviços.Controls(0).TextAlign 		= 1
+$Ajuda_Serviços.Controls(0).FontName		= 'Segeo UI'
+$Ajuda_Serviços.Controls(0).FontSize		= 10
+$Ajuda_Serviços.Controls(0).Location		= 2, 8
+$Ajuda_Serviços.Controls(0).ForeColor		= 167, 177, 183;'gray'
+$Ajuda_Serviços.Controls(0).BackColor		= 'Transparent'
+$Ajuda_Serviços.Controls(0).Size				= 460, 80
+$Ajuda_Serviços.Controls(0).Cursor			= 14
+$Ajuda_Serviços.Controls(0).OnMouseEnter	= '$$Ajuda_Serviços.Controls(0).ToolTipText = $$Ajuda_Serviços.Controls(0).Text'
+$Ajuda_Serviços.Controls(0).Text				=
+'
+Para fazer uma pesquisa personalizada(pesquisar por DESCRIÇÃO, VALOR 
+etc.. ) Basta colocar o nome do campo seguido de dois, dois pontos(::),
+exemplo: VALOR::10.00. Caso for buscar por DESCRIÇÃO, não é necessário
+especificar: "DESCRIÇÃO::".
+'
+
+;;<BUTÕES DE CONTROLE>
+	$=$Tab_Serviços.Controls.TabControl
+	$Tab_Serviços.Controls(1).Anchor		= 1 + 2 + 4 + 8
+	$Tab_Serviços.Controls(1).SizeMode 		= 1
+	$Tab_Serviços.Controls(1).BorderStyle	= 0
+	$Tab_Serviços.Controls(1).Location		= 0, $Ajuda_Serviços.bottom+4
+	$Tab_Serviços.Controls(1).Size			= 590, 475
+	$Tab_Serviços.Controls(1).FontName		= 'Segeo UI'
+	$Tab_Serviços.Controls(1).FontSize		= 16
+	$Tab_Serviços.Controls(1).ForeColor		= 220, 220, 204
+	$Tab_Serviços.Controls(1).BackColor		= 30, 30, 30
+
+	$FundoServiço							= $Tab_Serviços.Controls(1).TabPages.Add("(0) Serviço(s) registrado(s)")
+	$FundoServiço.BackColor					= 202, 202, 181
+	$FundoServiço.FontName					= 'Candara'
+	$FundoServiço.FontSize					= 11
+
+	$Bt_Add_Serviços				= $FundoServiço.Controls.ToolButton
+	$Bt_Add_Serviços.Alignment		= 0
+	$Bt_Add_Serviços.BorderStyle	= 0
+	$Bt_Add_Serviços.FlatStyle		= 0
+	$Bt_Add_Serviços.Cursor			= 16
+	$Bt_Add_Serviços.Location		= 10, 3
+	$Bt_Add_Serviços.Size			= 150, 40
+	$Bt_Add_Serviços.BackColor		= 6, 175, 143;'Transparent'
+	$Bt_Add_Serviços.BackColor		= 255, 255, 255
+	$Bt_Add_Serviços.Text			= 'Adicionar serviço'
+	$Bt_Add_Serviços.Icon			= $ICO.Images(16)
+	$Bt_Add_Serviços.OnClick		=
+	'
+		if ($$GB_Add_Serviço.Visible)
+			if (Len($$GB_Add_Serviços_Pessoal.Controls(1).Text) > 0) and (Len($$Bt_Add_Serviços.Text) = 8)
+				if (MSG("Deseja cancelar as alterações?"+@@crlf+"você perdera todas aterações feitas!", "você perdera as aterações feitas!", 48 + 4) = 7)
+					$$GB_Add_Serviços_Pessoal.Controls(1).SetFocus()
+					exit 0
+				endif
+				$$GB_Add_Serviços_Pessoal.Controls(1).SetFocus()
+			endif
+			$$Bt_Add_Serviços.Alignment	= 0
+			$$Bt_Add_Serviços.Icon		= $$ICO.Images(16)
+			$$Bt_Add_Serviços.Text		= "Adicionar serviço"
+			$$Bt_Del_Serviços.Enabled	= 1
+			$$Tx_Pes_Serviços.Visible	= 1
+			$$Bt_Pes_Serviços.Visible	= 1
+			$$GridView.Visible			= 1
+			Clear_SERV($$GB_Add_Serviços_Pessoal)
+			$$Tx_Pes_Serviços.SetFocus()
+		else
+			$$Bt_Add_Serviços.Alignment	= 2
+			$$Bt_Add_Serviços.Icon		= $$ICO.Images(14)
+			$$Bt_Add_Serviços.Text		= "< Voltar"
+			$$Bt_Del_Serviços.Enabled	= 0
+			$$Tx_Pes_Serviços.Visible	= 0
+			$$Bt_Pes_Serviços.Visible	= 0
+			$$GridView.Visible			= 0
+			$$GB_Add_Serviços_Pessoal.Controls(1).SetFocus()
+		endif
+		$$GB_Serviços.Visible = Not $$GB_Serviços.Visible
+		$$GB_Add_Serviço.Visible = Not $$GB_Add_Serviço.Visible
+	'
+
+	$Bt_Del_Serviços				= $FundoServiço.Controls.ToolButton
+	$Bt_Del_Serviços.Alignment		= 0
+	$Bt_Del_Serviços.BorderStyle	= 0
+	$Bt_Del_Serviços.FlatStyle		= 0
+	$Bt_Del_Serviços.Cursor			= 16
+	$Bt_Del_Serviços.Location		= $Bt_Add_Serviços.Right+5, 3
+	$Bt_Del_Serviços.Size			= 150, 40
+	$Bt_Del_Serviços.BackColor		= 6, 175, 143;'Transparent'
+	$Bt_Del_Serviços.BackColor		= 255, 255, 255
+	$Bt_Del_Serviços.Text			= 'Deletar serviço(s)'
+	$Bt_Del_Serviços.Icon			= $ICO.Images(17)
+	$Bt_Del_Serviços.OnClick		= "Deletar_Serviço()"
+;;</BUTÕES DE CONTROLE>
+
+;;<PESQUISA>
+	$Tx_Pes_Serviços				= $FundoServiço.Controls.TextBox
+	$Tx_Pes_Serviços.BorderStyle	= 0
+	$Tx_Pes_Serviços.FontSize		= 17
+	$Tx_Pes_Serviços.Height			= 30
+	$Tx_Pes_Serviços.FontName		= 'Segeo UI'
+	$Tx_Pes_Serviços.Left			= $Bt_Add_Serviços.Left
+	$Tx_Pes_Serviços.Width			= $Bt_Del_Serviços.Right-10
+	$Tx_Pes_Serviços.Top			= $Bt_Del_Serviços.Bottom+5
+	$Tx_Pes_Serviços.OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$Tx_Pes_Serviços)
+		Pesquisar_Serviços()
+	'
+
+	$Bt_Pes_Serviços				= $FundoServiço.Controls.ToolButton
+	$Bt_Pes_Serviços.Alignment		= 0
+	$Bt_Pes_Serviços.BorderStyle	= 0
+	$Bt_Pes_Serviços.FlatStyle		= 0
+	$Bt_Pes_Serviços.Cursor			= 16
+	$Bt_Pes_Serviços.Size			= 150, 30
+	$Bt_Pes_Serviços.FontSize		= 12
+	$Bt_Pes_Serviços.ForeColor		= 'white'
+	$Bt_Pes_Serviços.BackColor		= 'black'
+	$Bt_Pes_Serviços.Text			= 'Pesquisar'
+	$Bt_Pes_Serviços.Icon			= $ICO.Images(15)
+	$Bt_Pes_Serviços.Left			= $Bt_Del_Serviços.Right+5
+	$Bt_Pes_Serviços.Top			= $Bt_Del_Serviços.Bottom+5
+	$Bt_Pes_Serviços.OnClick		= 'Pesquisar_Serviços(1)'
+;;</PESQUISA>
+
+;;<LISTA DE SERVIÇOS>
+	$GridView						= $FundoServiço.Controls.GridView()
+	$GridView.Anchor				= 1 + 2 + 4 + 8
+	$GridView.BorderStyle			= 0
+	$GridView.ReadOnly				= 1
+	$GridView.FullRowSelect			= 1
+	$GridView.ScrollBars			= 2
+	$GridView.Fontsize				= 15
+	$GridView.SelectionForeColor	= 0,0,0
+	$GridView.size					= $FundoServiço.Width-14, 335
+	$GridView.Location				= 10, $Tx_Pes_Serviços.Bottom+6
+	$GridView.HeaderStyle			= 1
+	$GridView.AlternatingBackColor	= &0F7EBE7
+	$GridView.SelectionBackColor	= 169,178,202
+	$GridView.BackColor				= "White";"GhostWhite"
+	$GridView.GridLineColor			= &E7BE94 ;"RoyalBlue"
+	$GridView.ForeColor				= "Black" ;"MidnightBlue"
+	$GridView.Font					= $System.Font("Segeo UI", 10)
+;;</LISTA DE SERVIÇOS>
+
+;;<DADOS DO SERVIÇO>
+	$GB_Add_Serviço						= $FundoServiço.Controls.GroupBox
+	$GB_Add_Serviço.Visible				= 0
+	$GB_Add_Serviço.BorderStyle			= 1
+	$GB_Add_Serviço.FontSize			= 18
+	$GB_Add_Serviço.Location			= 5, $Bt_Add_Serviços.Bottom+2
+	$GB_Add_Serviço.ForeColor			= 'white'
+	$GB_Add_Serviço.ClientSize			= 530, 400
+	$GB_Add_Serviço.BackColor			= $FundoServiço.BackColor
+	$GB_Add_Serviço.ForeColor			= 'black'
+	$GB_Add_Serviço.Text				= 'Dados do serviço'
+
+	$GB_Add_Serviços_Pessoal			= $GB_Add_Serviço.Controls.GroupBox
+	$GB_Add_Serviços_Pessoal.Location	= 15, 30
+	$GB_Add_Serviços_Pessoal.BackColor	= $FundoServiço.BackColor
+	$GB_Add_Serviços_Pessoal.FontSize	= 12
+	$GB_Add_Serviços_Pessoal.ForeColor	= 'black'
+	$GB_Add_Serviços_Pessoal.ClientSize	= 500, 85
+	$GB_Add_Serviços_Pessoal.Text		= 'Serviço'
+
+	$=$GB_Add_Serviços_Pessoal.Controls.Label
+	$GB_Add_Serviços_Pessoal.Controls(0).FontSize	= 15
+	$GB_Add_Serviços_Pessoal.Controls(0).Width		= 270
+	$GB_Add_Serviços_Pessoal.Controls(0).Location	= 15, 20
+	$GB_Add_Serviços_Pessoal.Controls(0).ForeColor	= 'Black'
+	$GB_Add_Serviços_Pessoal.Controls(0).FontName	= 'Segeo UI'
+	$GB_Add_Serviços_Pessoal.Controls(0).Text		= 'Descrição'
+
+	$=$GB_Add_Serviços_Pessoal.Controls.TextBox
+	$GB_Add_Serviços_Pessoal.Controls(1).BorderStyle	= 0
+	$GB_Add_Serviços_Pessoal.Controls(1).FontSize		= 15
+	$GB_Add_Serviços_Pessoal.Controls(1).Width			= 270
+	$GB_Add_Serviços_Pessoal.Controls(1).FontName		= 'Segeo UI'
+	$GB_Add_Serviços_Pessoal.Controls(1).Height			= $GB_Add_Serviços_Pessoal.Controls(1).Height-5
+	$GB_Add_Serviços_Pessoal.Controls(1).Location		= 15, $GB_Add_Serviços_Pessoal.Controls(0).Bottom+2
+	$GB_Add_Serviços_Pessoal.Controls(1).OnKeyDown		=
+	'
+		$$KeyCode_Temp = $$KeyCode_Temp + "_" + $$GB_Add_Serviços_Pessoal.Controls(1).KeyCode
+		if (InStr($$KeyCode_Temp, "17_65"))
+			$$GB_Add_Serviços_Pessoal.Controls(1).SelectionStart = 0
+			$$GB_Add_Serviços_Pessoal.Controls(1).SelectionLength = Len($$GB_Add_Serviços_Pessoal.Controls(1).Text)
+		endif
+		if ($$GB_Add_Serviços_Pessoal.Controls(1).KeyCode = 13)
+			$$GB_Add_Serviços_Pessoal.Controls(4).SelectionStart = 0
+			$$GB_Add_Serviços_Pessoal.Controls(4).SelectionLength = Len($$GB_Add_Serviços_Pessoal.Controls(4).Text)
+			$$GB_Add_Serviços_Pessoal.Controls(4).SetFocus()
+		endif
+	'
+	
+	$=$GB_Add_Serviços_Pessoal.Controls.Label
+	$GB_Add_Serviços_Pessoal.Controls(2).fontsize		= 10
+	$GB_Add_Serviços_Pessoal.Controls(2).Cursor			= 14
+	$GB_Add_Serviços_Pessoal.Controls(2).width			= 20
+	$GB_Add_Serviços_Pessoal.Controls(2).BackColor		= 'Transparent'
+	$GB_Add_Serviços_Pessoal.Controls(2).Text			= '(?)'
+	$GB_Add_Serviços_Pessoal.Controls(2).Location		= $GB_Add_Serviços_Pessoal.Controls(1).Right+90, $GB_Add_Serviços_Pessoal.Controls(0).Top
+	$GB_Add_Serviços_Pessoal.Controls(2).ToolTipText	=
+		'Neste campo, ponha o preço que você cobrará por este serviço.'
+
+	$=$GB_Add_Serviços_Pessoal.Controls.Label
+	$GB_Add_Serviços_Pessoal.Controls(3).FontSize	= 15
+	$GB_Add_Serviços_Pessoal.Controls(3).Width		= 150
+	$GB_Add_Serviços_Pessoal.Controls(3).BackColor	= 'Transparent'
+	$GB_Add_Serviços_Pessoal.Controls(3).ForeColor	= 'Black'
+	$GB_Add_Serviços_Pessoal.Controls(3).FontName	= 'Segeo UI'
+	$GB_Add_Serviços_Pessoal.Controls(3).Location	= $GB_Add_Serviços_Pessoal.Controls(1).Right+35, $GB_Add_Serviços_Pessoal.Controls(0).Top
+	$GB_Add_Serviços_Pessoal.Controls(3).Text		= 'Valor'
+	
+	$=$GB_Add_Serviços_Pessoal.Controls.TextBox
+	$GB_Add_Serviços_Pessoal.Controls(4).BorderStyle		= 0
+	$GB_Add_Serviços_Pessoal.Controls(4).FontSize			= 15
+	$GB_Add_Serviços_Pessoal.Controls(4).Width				= 150
+	$GB_Add_Serviços_Pessoal.Controls(4).FontName			= 'Segeo UI'
+	$GB_Add_Serviços_Pessoal.Controls(4).Height				= $GB_Add_Serviços_Pessoal.Controls(4).Height-5
+	$GB_Add_Serviços_Pessoal.Controls(4).Location			= $GB_Add_Serviços_Pessoal.Controls(1).Right+35, $GB_Add_Serviços_Pessoal.Controls(0).Bottom+2
+	$GB_Add_Serviços_Pessoal.Controls(4).OnKeyDown			=
+	'
+		$$KeyCode_Temp = $$KeyCode_Temp + "_" + $$GB_Add_Serviços_Pessoal.Controls(4).KeyCode
+		if (InStr($$KeyCode_Temp, "17_65"))
+			$$GB_Add_Serviços_Pessoal.Controls(4).SelectionStart = 0
+			$$GB_Add_Serviços_Pessoal.Controls(4).SelectionLength = Len($$GB_Add_Serviços_Pessoal.Controls(4).Text)
+		endif
+		if ($$GB_Add_Serviços_Pessoal.Controls(4).KeyCode = 13) Salvar_Serviço() endif
+		if ($$GB_Add_Serviços_Pessoal.Controls(4).KeyCode = 9)
+			$$GB_Add_Serviços_Pessoal.Controls(1).SelectionStart = 0
+			$$GB_Add_Serviços_Pessoal.Controls(1).SelectionLength = Len($$GB_Add_Serviços_Pessoal.Controls(1).Text)
+			$$GB_Add_Serviços_Pessoal.Controls(1).SetFocus()
+		endif
+	'
+;;</DADOS DO SERVIÇO>
+
+;;<SALVAR SERVIÇO>
+	$Bt_Sav_Serviços				= $GB_Add_Serviço.Controls.ToolButton
+	$Bt_Sav_Serviços.Alignment		= 0
+	$Bt_Sav_Serviços.BorderStyle	= 0
+	$Bt_Sav_Serviços.FlatStyle		= 0
+	$Bt_Sav_Serviços.Cursor			= 16
+	$Bt_Sav_Serviços.Location		= $GB_Add_Serviço.Width/3+10, $GB_Add_Serviço.Height-55
+	$Bt_Sav_Serviços.Size			= 150, 40
+	$Bt_Sav_Serviços.FontSize		= 12
+	$Bt_Sav_Serviços.ForeColor		= 'Black'
+	$Bt_Sav_Serviços.BackColor		= 'white'
+	$Bt_Sav_Serviços.Text			= 'Salvar cliente'
+	$Bt_Sav_Serviços.Icon			= $ICO.Images(19)
+	$Bt_Sav_Serviços.OnClick		= 'Salvar_Serviço()'
+;;</SALVAR SERVIÇO>
+
+;;<ADICIONANDO CAMPOS E DADOS>
+	$=$GridView.Columns.Add('#')
+	$GridView.Columns(0).Width = 20
+	kdb_field_GridView($GridView, 'Servicos')
+	Add_Data_TS()
+;;</ADICIONANDO CAMPOS E DADOS>
+
+;;<DELETE>
+	$=$GridView.Columns.Add('')
+	$GridView.Columns(4).Width		= 25
+	$GridView.Columns(4).ImageIndex	= 9
+;;</DELETE>
+$GridView.OnClick = 'Order_Click()'
+
+function Add_Data_TS()
+	Dim
+		$i, $text
+	$GridView.Columns(3).ValueType = 8;String
+	for each $text in tb_getField('Servicos')
+		$i=$i+1
+		kdb_fData_GridView($GridView, 'Servicos.'+$text, $i)
+	next
+	$GridView.Columns(0).ValueType	= 11
+endfunction
+
+function Order_Click()
+	Select
+		Case ($GridView.CurrentColumn.Index = 0)
+			$GridView.CurrentCell.value = not Cint($GridView.CurrentCell.value)
+		Case ($GridView.CurrentColumn.Index = 4)
+			Deletar_Serviço()
+	EndSelect
+endfunction
+
+function Deletar_Serviço()
+	Dim
+		$error, $i, $count
+	if ($GridView.CurrentColum.Index <> -1)
+		if (Msg('Deseja realmente deletar o serviço "'+$GridView.Cells($GridView.CurrentRow.Index, 2).Text+'"', 'Atenção!', 64+3+4096) = 6)
+			tb_DeleteRow('Servicos.IDCODIGO', $GridView.Cells($GridView.CurrentRow.Index, 1).Text)
+			$GridView.BeginUpdate
+				$=$GridView.rows.Removeat($GridView.CurrentRow.Index)
+			$GridView.EndUpdate
+			tb_Save2('Servicos', @CurDir+'\Banco-d-Dados\Serviços.ktb')
+		endif
+	endif
+	
+	for $i=0 to $GridView.Rows.Count
+		if ($GridView.Cells($i, 0).Value <> 0)
+			$count = $count+1
+		endif
+	next
+	
+	Select
+		Case ($count > 1)
+			$error = Msg('Deseja realmente deletar os ('+$count+') serviços', 'Atenção!', 64+3+4096)
+		Case ($count = 1)
+			$error = Msg('Deseja realmente deletar o serviço "'+$GridView.Cells($GridView.CurrentRow.Index, 2).Text+'"', 'Atenção!', 64+3+4096)
+		Case ($count = 0)
+			exit 0
+	Endselect
+	if ($error <> 6)
+		Exit 404
+	endif
+	$GridView.BeginUpdate
+	for $i=$GridView.Rows.Count To 0 step -1
+		if ($GridView.Cells($i, 0).Value <> 0)
+			tb_DeleteRow('Servicos.IDCODIGO', $GridView.Cells($i, 1).Text)
+			$=$GridView.Rows.RemoveAt($i)
+		endif
+	next
+	$GridView.EndUpdate
+	tb_Save2('Servicos', @CurDir+'\Banco-d-Dados\Serviços.ktb') ;SALVANDO OS DADOS!
+endfunction
+
+function Salvar_Serviço()
+	Dim
+		$Salvar_Serviço
+	;;<VERIFICA SE O NOME DE SERVIÇO É MAIOR OU IGUAL A TRÊS CARACTERES>
+	if (Len($GB_Add_Serviços_Pessoal.Controls(1).Text) < 3)
+		$GB_Add_Serviços_Pessoal.Controls(1).BackColor = "red"
+		$=MSG("Um nome de serviço tem que ter pelo menos 3 caractéres!", "Tipo de nome incorreto!", 48)
+		$GB_Add_Serviços_Pessoal.Controls(1).BackColor = "white"
+		$GB_Add_Serviços_Pessoal.Controls(1).SetFocus()
+		exit 0
+	endif
+	;;</VERIFICA SE O NOME DE SERVIÇO É MAIOR OU IGUAL A TRÊS CARACTERES>
+
+	;;<VERIFICA SE O SERVIÇO JÁ EXISTE!>
+	if (tb_GetData('Servicos.Descrição', 'Descrição', $GB_Add_Serviços_Pessoal.Controls(1).Text) <> '')
+		$=Msg('O serviço "'+$GB_Add_Serviços_Pessoal.Controls(1).Text+'" já existe!', 'Serviço existente!', 48)
+		exit 0
+	endif
+	;;</VERIFICA SE O SERVIÇO JÁ EXISTE!>
+
+	if (Trim($GB_Add_Serviços_Pessoal.Controls(4).Text) = '')
+		$GB_Add_Serviços_Pessoal.Controls(4).Text = '0,00'
+	else
+		$GB_Add_Serviços_Pessoal.Controls(4).Text = Flip_Currency(FormatNumber($GB_Add_Serviços_Pessoal.Controls(4).Text, 2))
+	endif
+
+	if (msg('Deseja salvar o serviço "'+$GB_Add_Serviços_Pessoal.Controls(1).Text+'"?', 'Deseja Salvar os dados?', 48 + 3 + 4096) = '6')
+		Dim
+			$ID, $Array[2], $i
+		$i	= 0
+		
+		$ID	= tb_getData('Servicos.IDCODIGO', 'max')
+		$ID	= Cint($ID[Ubound($ID)])+1
+		$Array	=
+			$ID, $GB_Add_Serviços_Pessoal.Controls(1).Text, $GB_Add_Serviços_Pessoal.Controls(4).Text
+		
+		tb_InsertData('Servicos', $Array) ;;INSERINDO OS DADOS
+		$form.enabled = not $form.enabled
+		tb_Save2('Servicos', @CurDir+'\Banco-d-Dados\Serviços.ktb') ;SALVANDO OS DADOS!
+		$form.enabled = not $form.enabled
+		
+		;;<ATUALIZANDO O GRID>
+			$GridView.BeginUpdate
+				$=$GridView.Rows.Add()
+				$GridView.Cells($GridView.Rows.Count-1, 1).text = $Array[0]
+				$GridView.Cells($GridView.Rows.Count-1, 2).text = $Array[1]
+				$GridView.Cells($GridView.Rows.Count-1, 3).text = $Array[2]
+			$GridView.EndUpdate
+		;;</ATUALIZANDO O GRID>
+
+		$Bt_Add_Serviços.Alignment	= 0
+		$Bt_Add_Serviços.Icon		= $ICO.Images(10)
+		$Bt_Add_Serviços.Text		= "Adicionar serviço"
+
+		$Bt_Del_Serviços.Enabled		= 1
+		$Tx_Pes_Serviços.Visible		= 1
+		$Bt_Pes_Serviços.Visible		= 1
+		$GridView.Visible				= 1
+		$GB_Add_Serviço.Visible			= 0
+		Clear_SERV($GB_Add_Serviços_Pessoal)
+	else
+		$GB_Add_Serviços_Pessoal.Controls(4).Text = Replace($GB_Add_Serviços_Pessoal.Controls(4).Text, 'R$ ',  '')
+	endif
+endfunction
+
+function Pesquisar_Serviços(Optional $Not)
+	Dim
+		$Tipo, $Busca,
+		$Result, $ID,
+		$Data, $line, $i
+	if ($Tx_Pes_Serviços.KeyCode <> 13) And Not ($Not)
+		Exit 0
+	endif
+	if ($Tx_Pes_Serviços.Text = '')
+		if ($GridView.Rows.Count < tb_GetDataLines('Servicos'))
+			$GridView.BeginUpdate
+				$GridView.Rows.Clear
+				Add_Data_TS()
+			$GridView.EndUpdate
+		endif
+		exit 0
+	endif
+	$Tipo	= Split($Tx_Pes_Serviços.Text, '::')
+	if (Ubound($Tipo) > 0)
+		$Tipo	= $Tipo[0]
+		$Busca	= Substr($Tx_Pes_Serviços.Text, InStr($Tx_Pes_Serviços.Text, '::')+2)
+	else
+		$Busca	= Join($Tipo, '')
+		$Tipo	= 'Descrição'
+	endif
+	if (Trim($Busca) = '')
+		;if ($GridView.Items.Count < tb_GetDataLines('Clientes'))
+		;	$GridView.BeginUpdate
+		;		Add_Data(1)
+		;	$GridView.EndUpdate
+		;endif
+		Exit 0
+	endif
+	
+	$Result = tb_Find_StringMath_Data('Servicos.IDCODIGO', $Tipo, $Busca)
+	$GridView.BeginUpdate
+		$GridView.Rows.Clear
+
+		$line=0
+		for each $ID in $Result
+			$Data = tb_GetDataLine('Servicos.IDCODIGO', $ID)
+			$=$GridView.Rows.Add()
+			for $i=1 To Ubound($Data)+1
+				$GridView.Cells($line, $i).Text = $Data[$i-1]
+			next
+			$line=$line+1
+		next
+	$GridView.EndUpdate
+endfunction
+
+Function Clear_SERV($obj1)
+	$obj1.Controls(1).Text = ''
+	$obj1.Controls(4).Text = ''
+EndFunction

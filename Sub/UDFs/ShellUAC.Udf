@@ -1,0 +1,22 @@
+;;AUTHOR		: André Luiz
+;;VERSION		: 1.0.0.0
+;;FUNCTION		: ShellUAC()
+;;SOURCE:
+function ShellUAC($Exe, $arg)
+	Dim
+		$ShellUAC, $handle, $file
+	$ShellUAC = CreateObject("Shell.Application")
+	$ShellUAC.ShellExecute($Exe, $arg, "", "runas", 1)
+	$handle = freefilehandle()
+	$file = cstr(@ticks)+'.bat'
+	$=Open($handle, "%temp%\$file", 5)
+	$=WriteLine($handle,
+		'@@echo off'+@crlf+
+		':Loop '+@crlf+
+		'for /f "skip=3" %%%i in ('+"'"+'tasklist /FO CSV /FI "IMAGENAME eq '+$Exe+'"'+"'"+') do Goto :Loop'+@crlf+
+		'Exit 0'
+	)
+	$=Close($handle)
+	Shell "%temp%\$file"
+	Del "%temp%\$file"
+endfunction

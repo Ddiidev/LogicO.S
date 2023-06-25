@@ -1,0 +1,873 @@
+Global
+	$GridView_OS[2], $FundoOS,
+	$GB_OS, $Tx_Pes_OS, $Bt_Pes_OS
+Global
+	$GB_Add_OS, $GB_Cliente_Valor, $Bt_Sav_OS,
+	$Bt_Add_OS, $Bt_Del_OS, $Bt_Edit_OS,
+	$Tx_Cliente_OS, $Tx_Valor_OS,
+	$GB_Add_OS_Pessoal, $Pixel_Preview_ProdOS, $Ajuda_OS
+
+$Ajuda_OS					= $Tab_OS.Controls.GroupBox
+$Ajuda_OS.BorderStyle		= 2
+$Ajuda_OS.FontSize			= 16
+$Ajuda_OS.Location			= 10, -3
+$Ajuda_OS.ForeColor			= 'gray'
+$Ajuda_OS.ClientSize		= 460, 90
+$Ajuda_OS.BackColor			= 0, 51, 102
+$Ajuda_OS.Text				= 'Ajuda de pesquisa'
+
+$=$Ajuda_OS.Controls.LABEL
+$Ajuda_OS.Controls(0).TextAlign 	= 1
+$Ajuda_OS.Controls(0).FontName		= 'Segeo UI'
+$Ajuda_OS.Controls(0).FontSize		= 10
+$Ajuda_OS.Controls(0).Location		= 2, 8
+$Ajuda_OS.Controls(0).ForeColor		= 167, 177, 183;'gray'
+$Ajuda_OS.Controls(0).BackColor		= 'Transparent'
+$Ajuda_OS.Controls(0).Size			= 460, 80
+$Ajuda_OS.Controls(0).Cursor		= 14
+$Ajuda_OS.Controls(0).OnMouseEnter	= '$$Ajuda_OS.Controls(0).ToolTipText = $$Ajuda_OS.Controls(0).Text'
+$Ajuda_OS.Controls(0).Text			=
+'
+Para fazer uma pesquisa personalizada(pesquisar por DESCRIÇÃO, VALOR 
+etc.. ) Basta colocar o nome do campo seguido de dois, dois pontos(::),
+exemplo: VALOR::10.00. Caso for buscar por DESCRIÇÃO, não é necessário
+especificar: "DESCRIÇÃO::".
+'
+;;<BUTÕES DE CONTROLE>
+	$=$Tab_OS.Controls.TabControl
+	$Tab_OS.Controls(1).Anchor			= 1 + 2 + 4 + 8
+	$Tab_OS.Controls(1).SizeMode 		= 1
+	$Tab_OS.Controls(1).BorderStyle		= 0
+	$Tab_OS.Controls(1).Location		= 0, $Ajuda_OS.bottom+4
+	$Tab_OS.Controls(1).Size			= 590, 475
+	$Tab_OS.Controls(1).FontName		= 'Segeo UI'
+	$Tab_OS.Controls(1).FontSize		= 16
+	$Tab_OS.Controls(1).ForeColor		= 220, 220, 204
+	$Tab_OS.Controls(1).BackColor		= 30, 30, 30
+
+	$FundoOS							= $Tab_OS.Controls(1).TabPages.Add("(0) Ordem de serviços(s) registrada(s)")
+	$FundoOS.BackColor					= 202, 202, 181
+	$FundoOS.FontName					= 'Candara'
+	$FundoOS.FontSize					= 16
+
+	$Bt_Add_OS							= $FundoOS.Controls.ToolButton
+	$Bt_Add_OS.Alignment				= 0
+	$Bt_Add_OS.BorderStyle				= 0
+	$Bt_Add_OS.FlatStyle				= 0
+	$Bt_Add_OS.Cursor					= 16
+	$Bt_Add_OS.Location					= 10, 3
+	$Bt_Add_OS.Size						= 150, 40
+	$Bt_Add_OS.FontSize					= 11
+	$Bt_Add_OS.BackColor				= 6, 175, 143;'Transparent'
+	$Bt_Add_OS.BackColor				= 255, 255, 255
+	$Bt_Add_OS.Text						= 'Adicionar O.S'
+	$Bt_Add_OS.ToolTipText				= 'Adicionar ordem de serviço'
+	$Bt_Add_OS.Icon						= $ICO.Images(16)
+	$Bt_Add_OS.OnClick					=
+	'
+		if ($$GB_Add_OS.Visible)
+			$$GB_Add_OS.Visible = 0
+			$$Pixel_Preview_ProdOS.Visible = Not $$Pixel_Preview_ProdOS.Visible
+			for $$temp=0 to 2
+				$$GridView_OS[$$temp].Visible = Not $$GridView_OS[$$temp].Visible
+			next
+		else
+			$$Pixel_Preview_ProdOS.Visible = Not $$Pixel_Preview_ProdOS.Visible
+			$$GB_Add_OS.Visible = 1
+			for $$temp=0 to 2
+				$$GridView_OS[$$temp].Visible = Not $$GridView_OS[$$temp].Visible
+			next
+		endif
+	'
+
+	$Bt_Del_OS					= $FundoOS.Controls.ToolButton
+	$Bt_Del_OS.Alignment		= 0
+	$Bt_Del_OS.BorderStyle		= 0
+	$Bt_Del_OS.FlatStyle		= 0
+	$Bt_Del_OS.Cursor			= 16
+	$Bt_Del_OS.Location			= $Bt_Add_OS.Right+5, 3
+	$Bt_Del_OS.Size				= 150, 40
+	$Bt_Del_OS.FontSize			= 11
+	$Bt_Del_OS.BackColor		= 6, 175, 143;'Transparent'
+	$Bt_Del_OS.BackColor		= 255, 255, 255
+	$Bt_Del_OS.Text				= 'Deletar O.S'
+	$Bt_Del_OS.ToolTipText		= 'Deletar ordem de serviço'
+	$Bt_Del_OS.Icon				= $ICO.Images(17)
+	
+	$Bt_Edit_OS					= $FundoOS.Controls.ToolButton
+	$Bt_Edit_OS.Alignment		= 0
+	$Bt_Edit_OS.BorderStyle		= 0
+	$Bt_Edit_OS.FlatStyle		= 0
+	$Bt_Edit_OS.Cursor			= 16
+	$Bt_Edit_OS.Location		= $Bt_Del_OS.Right+5, 3
+	$Bt_Edit_OS.Size			= 150, 40
+	$Bt_Edit_OS.FontSize		= 11
+	$Bt_Edit_OS.BackColor		= 255, 255, 255
+	$Bt_Edit_OS.Text			= 'Editar O.S'
+	$Bt_Edit_OS.ToolTipText		= 'Editar ordem de serviço'
+	$Bt_Edit_OS.Icon			= $ICO.Images(20)
+
+;;<GRUPOS PARA ADICIONAR DADOS>
+	$GB_Add_OS					= $FundoOS.Controls.GroupBox
+	$GB_Add_OS.Visible			= 0
+	$GB_Add_OS.BorderStyle		= 2
+	$GB_Add_OS.Location			= 10, 48
+	$GB_Add_OS.Size				= 570, 380
+	$GB_Add_OS.BackColor		= 202, 202, 181
+	$GB_Add_OS.Anchor			= 1 + 2 + 4
+	$GB_Add_OS.Text				= 'Cadastro de ordem de serviço'
+;;</GRUPOS PARA ADICIONAR DADOS>
+
+;;<PESQUISA>
+	$Tx_Pes_OS					= $FundoOS.Controls.TextBox
+	$Tx_Pes_OS.BorderStyle		= 0
+	$Tx_Pes_OS.FontSize			= 17
+	$Tx_Pes_OS.Height			= 30
+	$Tx_Pes_OS.FontName			= 'Segeo UI'
+	$Tx_Pes_OS.Left				= $Bt_Add_OS.Left
+	$Tx_Pes_OS.Width			= $Bt_Del_OS.Right-10
+	$Tx_Pes_OS.Top				= $Bt_Del_OS.Bottom+5
+	$Tx_Pes_OS.OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$Tx_Pes_OS)
+	'
+
+	$Bt_Pes_OS				= $FundoOS.Controls.ToolButton
+	$Bt_Pes_OS.Alignment	= 0
+	$Bt_Pes_OS.BorderStyle	= 0
+	$Bt_Pes_OS.FlatStyle	= 0
+	$Bt_Pes_OS.Cursor		= 16
+	$Bt_Pes_OS.Size			= 150, 30
+	$Bt_Pes_OS.FontSize		= 12
+	$Bt_Pes_OS.ForeColor	= 'white'
+	$Bt_Pes_OS.BackColor	= 'black'
+	$Bt_Pes_OS.Text			= 'Pesquisar'
+	$Bt_Pes_OS.Icon			= $ICO.Images(15)
+	$Bt_Pes_OS.Left			= $Bt_Del_OS.Right+5
+	$Bt_Pes_OS.Top			= $Bt_Del_OS.Bottom+5
+;;</PESQUISA>
+
+;;<GRID-VIEW-OS>
+::GRID
+	$GridView_OS[0]							= $FundoOS.Controls.GridView()
+	$GridView_OS[0].Anchor					= 1 + 4
+	$GridView_OS[0].BorderStyle				= 0
+	$GridView_OS[0].ReadOnly				= 1
+	$GridView_OS[0].FullRowSelect			= 1
+	$GridView_OS[0].ScrollBars				= 2
+	$GridView_OS[0].Fontsize				= 15
+	$GridView_OS[0].SelectionForeColor		= 0,0,0
+	$GridView_OS[0].Location				= $Tx_Pes_OS.Left, $Tx_Pes_OS.Bottom+18
+	$GridView_OS[0].Size					= $Tx_Pes_OS.Right-10, 151
+	$GridView_OS[0].HeaderStyle				= 1
+	$GridView_OS[0].AlternatingBackColor	= &0F7EBE7
+	$GridView_OS[0].SelectionBackColor		= 169,178,202
+	$GridView_OS[0].BackColor				= "White";"GhostWhite"
+	$GridView_OS[0].GridLineColor			= &E7BE94 ;"RoyalBlue"
+	$GridView_OS[0].ForeColor				= "Black" ;"MidnightBlue"
+	$GridView_OS[0].Font					= $System.Font("Segeo UI", 10)
+	$GridView_OS[0].OnClick					= 'Order_Click1_OS()'
+
+	$=$FundoOS.Controls.Label
+	$FundoOS.Controls($FundoOS.Controls.Count-1).Name = 'LBOS'
+	$FundoOS.Controls('LBOS').Text	= 'OS'
+	$FundoOS.Controls('LBOS').Height	= 13
+	$FundoOS.Controls('LBOS').FontSize= 9
+	$FundoOS.Controls('LBOS').Location= $GridView_OS[0].Left, $GridView_OS[0].Top-13
+;;</GRID-VIEW-OS>
+;;<GRID-VIEW1-SERVIÇOS>
+	$GridView_OS[1]							= $FundoOS.Controls.GridView()
+	$GridView_OS[1].Anchor					= 1 + 4 + 8
+	$GridView_OS[1].BorderStyle				= 0
+	$GridView_OS[1].ReadOnly				= 1
+	$GridView_OS[1].FullRowSelect			= 1
+	$GridView_OS[1].ScrollBars				= 2
+	$GridView_OS[1].Fontsize				= 15
+	$GridView_OS[1].SelectionForeColor		= 0,0,0
+	$GridView_OS[1].Location				= $Bt_Pes_OS.Left, $GridView_OS[0].Top
+	$GridView_OS[1].Size					= 255, 151
+	$GridView_OS[1].HeaderStyle				= 1
+	$GridView_OS[1].AlternatingBackColor	= &0F7EBE7
+	$GridView_OS[1].SelectionBackColor		= 169,178,202
+	$GridView_OS[1].BackColor				= "White";"GhostWhite"
+	$GridView_OS[1].GridLineColor			= &E7BE94 ;"RoyalBlue"
+	$GridView_OS[1].ForeColor				= "Black" ;"MidnightBlue"
+	$GridView_OS[1].Font					= $System.Font("Segeo UI", 10)
+
+	$=$FundoOS.Controls.Label
+	$FundoOS.Controls($FundoOS.Controls.Count-1).Name = 'LBServicos'
+	$FundoOS.Controls('LBServicos').Text	= 'Serviços'
+	$FundoOS.Controls('LBServicos').Height	= 13
+	$FundoOS.Controls('LBServicos').FontSize= 9
+	$FundoOS.Controls('LBServicos').Location= $Bt_Pes_OS.Left, $GridView_OS[1].Top-13
+;;</GRID-VIEW-SERVIÇOS>
+;;<GRID-VIEW1-PRODUTOS>
+	$GridView_OS[2]							= $FundoOS.Controls.GridView()
+	$GridView_OS[2].Anchor					= 1 + 4 + 2 + 8
+	$GridView_OS[2].BorderStyle				= 0
+	$GridView_OS[2].ReadOnly				= 1
+	$GridView_OS[2].FullRowSelect			= 1
+	$GridView_OS[2].ScrollBars				= 2
+	$GridView_OS[2].Fontsize				= 15
+	$GridView_OS[2].SelectionForeColor		= 0,0,0
+	$GridView_OS[2].Location				= $GridView_OS[1].Left, $GridView_OS[1].Bottom+17
+	$GridView_OS[2].Size					= 255, 171
+	$GridView_OS[2].HeaderStyle				= 1
+	$GridView_OS[2].AlternatingBackColor	= &0F7EBE7
+	$GridView_OS[2].SelectionBackColor		= 169,178,202
+	$GridView_OS[2].BackColor				= "White";"GhostWhite"
+	$GridView_OS[2].GridLineColor			= &E7BE94 ;"RoyalBlue"
+	$GridView_OS[2].ForeColor				= "Black" ;"MidnightBlue"
+	$GridView_OS[2].Font					= $System.Font("Segeo UI", 10)
+	$GridView_OS[2].OnClick					=
+	'
+		$$Pixel_Preview_ProdOS.Text		= DeAlternator($$GridView_OS[2].Cells($$GridView_OS[2].CurrentRow.Index, 6).Text)
+		$$Pixel_Preview_ProdOS.Text		= Replace($$Pixel_Preview_ProdOS.Text, "||curdir", @@curdir)
+		if Exist($$Pixel_Preview_ProdOS.Text)
+			$$Pixel_Preview_ProdOS.Image= $$System.Bitmap($$Pixel_Preview_ProdOS.Text)
+		else
+			$$Pixel_Preview_ProdOS.BackColor= 0,0,0
+		endif
+		$$Pixel_Preview_ProdOS.Refresh()
+	'
+
+	$=$FundoOS.Controls.Label
+	$FundoOS.Controls($FundoOS.Controls.Count-1).Name = 'LBProdutos'
+	$FundoOS.Controls('LBProdutos').Text	= 'Produtos'
+	$FundoOS.Controls('LBProdutos').Height	= 13
+	$FundoOS.Controls('LBProdutos').FontSize= 9
+	$FundoOS.Controls('LBProdutos').Location= $GridView_OS[1].Left, $GridView_OS[2].Top-13
+;;</GRID-VIEW-PRODUTOS>
+
+	$GB_Cliente_Valor				= $FundoOS.Controls.GroupBox
+	$GB_Cliente_Valor.Location		= $GridView_OS[0].Left, $GridView_OS[0].Bottom+10
+	$GB_Cliente_Valor.BorderStyle	= 0
+	$GB_Cliente_Valor.FontSize		= 16
+	$GB_Cliente_Valor.FontName		= "Lucida Consolas"
+	$GB_Cliente_Valor.Width			= $GridView_OS[2].Left-20
+	$GB_Cliente_Valor.Size			= $GridView_OS[2].Left, $GB_Cliente_Valor.Height+60
+	$GB_Cliente_Valor.BackColor		= $FundoOS.BackColor
+
+;;<NOME DO CLIENTE>
+	$=$GB_Cliente_Valor.Controls.Label
+	$GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-1).Text	= "Nome do cliente"
+	$GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-1).Width= 240
+	
+	$Tx_Cliente_OS							= $GB_Cliente_Valor.Controls.TextBox
+	$Tx_Cliente_OS.BorderStyle				= 0
+	$Tx_Cliente_OS.FontSize					= 17
+	$Tx_Cliente_OS.Height					= 30
+	$Tx_Cliente_OS.FontName					= 'Segeo UI'
+	$Tx_Cliente_OS.Location					= $GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-2).Left, $GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-2).Bottom+5
+	$Tx_Cliente_OS.Width					= 300
+	$Tx_Cliente_OS.OnKeyDown				=
+	'
+		$=fKeyCode_Temp($$Tx_Cliente_OS)
+	'
+	$=$GB_Cliente_Valor.Controls.ToolButton
+	$GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-1).Name	= "cliente"
+	$GB_Cliente_Valor.Controls("cliente").Text			= "Dados do cliente"
+	$GB_Cliente_Valor.Controls("cliente").Top			= $Tx_Cliente_OS.Bottom
+	$GB_Cliente_Valor.Controls("cliente").BorderStyle	= 0
+	$GB_Cliente_Valor.Controls("cliente").FlatStyle		= 0
+	$GB_Cliente_Valor.Controls("cliente").BackColor		= 255,255,255
+	$GB_Cliente_Valor.Controls("cliente").HotBackColor	= 128,0,64
+	$GB_Cliente_Valor.Controls("cliente").ForeColor		= 128,0,64
+	$GB_Cliente_Valor.Controls("cliente").HotForeColor	= 255,255,255
+	$GB_Cliente_Valor.Controls("cliente").Height		= 20
+	$GB_Cliente_Valor.Controls("cliente").FontSize		= 12
+	$GB_Cliente_Valor.Controls("cliente").FontBold		= 1
+	$GB_Cliente_Valor.Controls("cliente").Width			= 300
+	$GB_Cliente_Valor.Controls("cliente").OnClick		= 'DETALHE_DADOS_CLIENTE()'
+;;</NOME DO CLIENTE>
+;;<VALOR TOTAL>
+	$=$GB_Cliente_Valor.Controls.Label
+	$GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-1).Text		= "Valor Total"
+	$GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-1).Width	= 260
+	$GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-1).Location	= $Tx_Cliente_OS.Left, $GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-2).Bottom+10
+	
+	$Tx_Valor_OS							= $GB_Cliente_Valor.Controls.TextBox
+	$Tx_Valor_OS.BorderStyle				= 0
+	$Tx_Valor_OS.ReadOnly 					= 1
+	$Tx_Valor_OS.TextAlign 					= 2
+	$Tx_Valor_OS.FontSize					= 17
+	$Tx_Valor_OS.Height						= 30
+	$Tx_Valor_OS.Width						= 300
+	$Tx_Valor_OS.ForeColor					= 0,255,0
+	$Tx_Valor_OS.BackColor					= 0,0,0
+	$Tx_Valor_OS.FontName					= 'Segeo UI'
+	$Tx_Valor_OS.Location					= $Tx_Cliente_OS.Left, $GB_Cliente_Valor.Controls($GB_Cliente_Valor.Controls.Count-2).Bottom+5
+	$Tx_Valor_OS.OnMouseUp					=
+	'
+		if Instr("0,1,2,3", $$Tx_Valor_OS.MouseButton)
+			$$Tx_Valor_OS.Enabled = 0
+			$$Tx_Valor_OS.Enabled = 1
+		endif
+	'
+	$Tx_Valor_OS.OnKeyDown					=
+	'
+		$=fKeyCode_Temp($$Tx_Valor_OS)
+	'
+;;</VALOR TOTAL>
+;;<PICTUREBOX DOS PRODUTOS>
+	$Pixel_Preview_ProdOS					= $FundoOS.Controls.PictureBox
+	$Pixel_Preview_ProdOS.BorderStyle		= 0
+	$Pixel_Preview_ProdOS.SizeMode			= 1
+	$Pixel_Preview_ProdOS.Cursor			= 16
+	$Pixel_Preview_ProdOS.Width				= 100
+	$Pixel_Preview_ProdOS.Height			= 75
+	$Pixel_Preview_ProdOS.FontName			= 'Segeo UI'
+	$Pixel_Preview_ProdOS.ForeColor			= 'Black'
+	$Pixel_Preview_ProdOS.BackColor			= 'Black'
+	$Pixel_Preview_ProdOS.ToolTipText		= 'Aqui fica uma prévisualização do produto.'
+	$Pixel_Preview_ProdOS.Location			= $Bt_Edit_OS.Right+5, $Bt_Edit_OS.Top
+	$Pixel_Preview_ProdOS.OnClick			= 'View_PictureBox_Prod($$Pixel_Preview_ProdOS.Text, "Previsualização da imagem do produto.")'
+;;</PICTUREBOX DOS PRODUTOS>
+;;<PREENCHENDO GRIDS>
+;;<PREENCHENDO GRID-OS>
+	Add_Data_OS(0, $GridView_OS[0], 'OS', 'IDS-SERVIÇO;ID-CLIENTE;IDS-PRODUTO;DATA_CAD')
+	$GridView_OS[0].Columns(1).Text = 'O.S'
+	$GridView_OS[0].Columns(1).Width = 45
+	$GridView_OS[0].Columns(2).Width = 240
+;;</PREENCHENDO GRID-OS>
+;;</PREENCHENDO GRIDS>
+
+;;<ADICIONAR OU EDITAR O.S>
+	;$GB_Add_OS.Visible = 1
+;;<DESCRIÇÃO OS>
+::DESCRIÇÃO_OS
+	$=$GB_Add_OS.Controls.Label
+	$GB_Add_OS.Controls(0).Name					= 'LNome_OS'
+	$GB_Add_OS.Controls('LNome_OS').FontName	= 'Bahnschrift'
+	$GB_Add_OS.Controls('LNome_OS').FontSize	= 14
+	$GB_Add_OS.Controls('LNome_OS').Size		= 270, 30
+	$GB_Add_OS.Controls('LNome_OS').Location	= 10, 40
+	$GB_Add_OS.Controls('LNome_OS').Text		= 'Descrição da ordem de serviço.'
+;;
+	$=$GB_Add_OS.Controls.TextBox
+	$GB_Add_OS.Controls(1).Name					= 'TNome_OS'
+	$GB_Add_OS.Controls('TNome_OS').FontName	= 'Bahnschrift'
+	$GB_Add_OS.Controls('TNome_OS').FontSize	= 14
+	$GB_Add_OS.Controls('TNome_OS').Size		= 270, 28
+	$GB_Add_OS.Controls('TNome_OS').Location	= 10, $GB_Add_OS.Controls('LNome_OS').Bottom+2
+;;</DESCRIÇÃO OS>
+;;<SERVIÇOS>
+::SERVIÇOS
+	$=$GB_Add_OS.Controls.Label
+	$GB_Add_OS.Controls(2).Name					= 'LServico'
+	$GB_Add_OS.Controls('LServico').FontName	= 'Bahnschrift'
+	$GB_Add_OS.Controls('LServico').FontSize	= 14
+	$GB_Add_OS.Controls('LServico').Size		= 270, 30
+	$GB_Add_OS.Controls('LServico').Location	= $GB_Add_OS.Controls('LNome_OS').Right+8, $GB_Add_OS.Controls('LNome_OS').Top
+	$GB_Add_OS.Controls('LServico').Text		= 'Selecione os serviço desta O.S.'
+;;
+	$=$GB_Add_OS.Controls.ToolButton
+	$GB_Add_OS.Controls(3).Name					= 'BServico'
+	$GB_Add_OS.Controls('BServico').FontName	= 'Bahnschrift'
+	$GB_Add_OS.Controls('BServico').FlatStyle	= 0
+	$GB_Add_OS.Controls('BServico').BorderStyle	= 0
+	$GB_Add_OS.Controls('BServico').BackColor	= 0,0,0
+	$GB_Add_OS.Controls('BServico').HotBackColor= 255,255,255
+	$GB_Add_OS.Controls('BServico').ForeColor	= 255,255,255
+	$GB_Add_OS.Controls('BServico').HotForeColor= 0,0,0
+	$GB_Add_OS.Controls('BServico').FontSize	= 14
+	$GB_Add_OS.Controls('BServico').Size		= 270, 30
+	$GB_Add_OS.Controls('BServico').Text		= 'Selecionar serviços'
+	$GB_Add_OS.Controls('BServico').Location	= $GB_Add_OS.Controls('LServico').Left, $GB_Add_OS.Controls('LServico').Bottom+2
+;;
+	$=$GB_Add_OS.Controls.TextBox
+	$GB_Add_OS.Controls(4).Name					= 'TServico'
+	$GB_Add_OS.Controls('TServico').FontName	= 'Bahnschrift'
+	$GB_Add_OS.Controls('TServico').ReadOnly	= 1
+	$GB_Add_OS.Controls('TServico').BorderStyle = 0
+	$GB_Add_OS.Controls('TServico').FontSize	= 14
+	$GB_Add_OS.Controls('TServico').BackColor	= 40,42,54
+	$GB_Add_OS.Controls('TServico').ForeColor	= 0,255,0
+	$GB_Add_OS.Controls('TServico').Size		= 270, 28
+	$GB_Add_OS.Controls('TServico').Location	= $GB_Add_OS.Controls('LServico').Left, $GB_Add_OS.Controls('BServico').Bottom
+	$GB_Add_OS.Controls('TServico').Text		= '1,2,3'
+;;</SERVIÇOS>
+;;<CLIENTES>
+::CLIENTES
+	$=$GB_Add_OS.Controls.Label
+	$GB_Add_OS.Controls(5).Name					= 'LClientes'
+	$GB_Add_OS.Controls('LClientes').FontName	= 'Bahnschrift'
+	$GB_Add_OS.Controls('LClientes').FontSize	= 14
+	$GB_Add_OS.Controls('LClientes').Size		= 270, 30
+	$GB_Add_OS.Controls('LClientes').Location	= $GB_Add_OS.Controls('LNome_OS').Left, $GB_Add_OS.Controls('TServico').Bottom+25
+	$GB_Add_OS.Controls('LClientes').Text		= 'Selecione o cliente desta O.S.'
+;;
+	$=$GB_Add_OS.Controls.ToolButton
+	$GB_Add_OS.Controls(6).Name						= 'BClientes'
+	$GB_Add_OS.Controls('BClientes').FontName		= 'Bahnschrift'
+	$GB_Add_OS.Controls('BClientes').FlatStyle		= 0
+	$GB_Add_OS.Controls('BClientes').BorderStyle	= 0
+	$GB_Add_OS.Controls('BClientes').BackColor		= 0,0,0
+	$GB_Add_OS.Controls('BClientes').HotBackColor	= 255,255,255
+	$GB_Add_OS.Controls('BClientes').ForeColor		= 255,255,255
+	$GB_Add_OS.Controls('BClientes').HotForeColor	= 0,0,0
+	$GB_Add_OS.Controls('BClientes').FontSize		= 14
+	$GB_Add_OS.Controls('BClientes').Size			= 270, 30
+	$GB_Add_OS.Controls('BClientes').Text			= 'Selecionar cliente'
+	$GB_Add_OS.Controls('BClientes').Location		= $GB_Add_OS.Controls('LClientes').Left, $GB_Add_OS.Controls('LClientes').Bottom+2
+;;
+	$=$GB_Add_OS.Controls.TextBox
+	$GB_Add_OS.Controls(7).Name					= 'TClientes'
+	$GB_Add_OS.Controls('TClientes').FontName	= 'Bahnschrift'
+	$GB_Add_OS.Controls('TClientes').ReadOnly	= 1
+	$GB_Add_OS.Controls('TClientes').BorderStyle = 0
+	$GB_Add_OS.Controls('TClientes').FontSize	= 14
+	$GB_Add_OS.Controls('TClientes').BackColor	= 40,42,54
+	$GB_Add_OS.Controls('TClientes').ForeColor	= 0,255,0
+	$GB_Add_OS.Controls('TClientes').Size		= 270, 28
+	$GB_Add_OS.Controls('TClientes').Location	= $GB_Add_OS.Controls('BClientes').Left, $GB_Add_OS.Controls('BClientes').Bottom
+	$GB_Add_OS.Controls('TClientes').Text		= '2 - André'
+;;</CLIENTES>
+;;<PRODUTOS>
+::PRODUTOS
+	$=$GB_Add_OS.Controls.Label
+	$GB_Add_OS.Controls(8).Name						= 'LProdutos'
+	$GB_Add_OS.Controls('LProdutos').FontName		= 'Bahnschrift'
+	$GB_Add_OS.Controls('LProdutos').FontSize		= 14
+	$GB_Add_OS.Controls('LProdutos').Size			= 270, 30
+	$GB_Add_OS.Controls('LProdutos').Location		= $GB_Add_OS.Controls('LServico').Left, $GB_Add_OS.Controls('TServico').Bottom+25
+	$GB_Add_OS.Controls('LProdutos').Text			= 'Selecione os produtos desta O.S.'
+;;
+	$=$GB_Add_OS.Controls.ToolButton
+	$GB_Add_OS.Controls(9).Name						= 'BProdutos'
+	$GB_Add_OS.Controls('BProdutos').FontName		= 'Bahnschrift'
+	$GB_Add_OS.Controls('BProdutos').FlatStyle		= 0
+	$GB_Add_OS.Controls('BProdutos').BorderStyle	= 0
+	$GB_Add_OS.Controls('BProdutos').BackColor		= 0,0,0
+	$GB_Add_OS.Controls('BProdutos').HotBackColor	= 255,255,255
+	$GB_Add_OS.Controls('BProdutos').ForeColor		= 255,255,255
+	$GB_Add_OS.Controls('BProdutos').HotForeColor	= 0,0,0
+	$GB_Add_OS.Controls('BProdutos').FontSize		= 14
+	$GB_Add_OS.Controls('BProdutos').Size			= 270, 30
+	$GB_Add_OS.Controls('BProdutos').Text			= 'Selecionar produtos'
+	$GB_Add_OS.Controls('BProdutos').Location		= $GB_Add_OS.Controls('LProdutos').Left, $GB_Add_OS.Controls('LProdutos').Bottom+2
+	$GB_Add_OS.Controls('BProdutos').OnClick		= 'GridProd_Select_OS()'
+;;
+	$=$GB_Add_OS.Controls.TextBox
+	$GB_Add_OS.Controls(10).Name					= 'TProdutos'
+	$GB_Add_OS.Controls('TProdutos').FontName		= 'Bahnschrift'
+	$GB_Add_OS.Controls('TProdutos').ReadOnly		= 1
+	$GB_Add_OS.Controls('TProdutos').BorderStyle	= 0
+	$GB_Add_OS.Controls('TProdutos').FontSize		= 14
+	$GB_Add_OS.Controls('TProdutos').BackColor		= 40,42,54
+	$GB_Add_OS.Controls('TProdutos').ForeColor		= 0,255,0
+	$GB_Add_OS.Controls('TProdutos').Size			= 270, 28
+	$GB_Add_OS.Controls('TProdutos').Location		= $GB_Add_OS.Controls('BProdutos').Left, $GB_Add_OS.Controls('BProdutos').Bottom
+	$GB_Add_OS.Controls('TProdutos').Text			= '1,2,3'
+;;</PRODUTOS>
+;;<ADICIONAR OU EDITAR O.S>
+
+function Order_Click1_OS()
+	Dim
+		$OS_Now, $Servicos,
+		$Cliente, $Produtos,
+		$text, $i, $data
+
+		$GridView_OS[1].BeginUpdate
+			$GridView_OS[1].RowCount = 0
+			$GridView_OS[1].ColumnCount = 0
+		$GridView_OS[1].EndUpdate
+		;;###
+		$GridView_OS[2].BeginUpdate
+			$GridView_OS[2].RowCount = 0
+			$GridView_OS[2].ColumnCount = 0
+		$GridView_OS[2].EndUpdate
+		$Tx_Cliente_OS.Text	= ''
+		$Tx_Valor_OS.Text	= ''
+		$Pixel_Preview_ProdOS.Text = ''
+		$Pixel_Preview_ProdOS.image = ''
+		$Pixel_Preview_ProdOS.BackColor = 0,0,0
+		$Pixel_Preview_ProdOS.Refresh()
+	if ($GridView_OS[0].CurrentColumn.Index = -1)
+		exit 1
+	endif
+;;<PREGADO DADOS>
+	$OS_Now		= tb_GetDataLine('OS.IDCODIGO', $GridView_OS[0].Cells($GridView_OS[0].CurrentRow.index, 1).Text)
+	$Servicos	= Split($OS_Now[2], ',')
+	$Cliente	= $OS_Now[3]
+	$Produtos	= Split($OS_Now[4], ',')
+;;</PREGADO DADOS>
+
+;;<INSERINDO DADOS DO SERVIÇOS>
+	$GridView_OS[1].BeginUpdate
+	;;<CRIANDO CHECKBOX>
+		$=$GridView_OS[1].Columns.Add('')
+		$GridView_OS[1].Columns(0).ValueType	= 11
+		$GridView_OS[1].Columns(0).Width	 	= 20
+	;;</CRIANDO CHECKBOX>
+	kdb_field_GridView($GridView_OS[1], 'SERVICOS', '')
+	$GridView_OS[1].Columns(1).Text			= 'ID'
+	$GridView_OS[1].Columns(1).Width 		= 45
+	$GridView_OS[1].Columns(2).Width 		= 245
+	$GridView_OS[1].Columns(3).Width		= 90
+	$GridView_OS[1].Columns(3).ValueType	= 8
+;;
+	$GridView_OS[1].EndUpdate
+	for $i=0 to Ubound($Servicos)
+		$data = tb_getDataLine('Servicos.IDCODIGO', $Servicos[$i])
+		if (VarType($data) = 8204)
+			$GridView_OS[1].RowCount = $GridView_OS[1].RowCount+1
+			$GridView_OS[1].Cells($i, 1).Text = $data[0]
+			$GridView_OS[1].Cells($i, 2).Text = $data[1]
+			$GridView_OS[1].Cells($i, 3).Text = $data[2]
+		endif
+		for $text=0 to 6
+			$GridView_OS[1].Columns($text).TextAlign = 2
+		next
+	next
+;;</INSERINDO DADOS DO SERVIÇOS>
+
+;;<INSERINDO DADOS DOS PRODUTOS>
+	$GridView_OS[2].BeginUpdate
+	;;<CRIANDO CHECKBOX>
+		$=$GridView_OS[2].Columns.Add('')
+		$GridView_OS[2].Columns(0).ValueType	= 11
+		$GridView_OS[2].Columns(0).Width	 	= 20
+	;;</CRIANDO CHECKBOX>
+	$=$GridView_OS[2].Columns.Add('')
+	$GridView_OS[2].Columns(1).ValueType = 8
+	kdb_field_GridView($GridView_OS[2], 'PRODUTOS', 'ID_CODEBAR;COMPLEMENTO;DATA-CAD;DATA-ALTERAÇÃO;FUNC-ALTERAÇÃO;MOTIVO-ALTERAÇÃO;PESÁVEL')
+	$GridView_OS[2].Columns(4).ValueType	= 8
+;;
+	for $i=0 to Ubound($Produtos)
+		if (InStr('ID_CODEBAR;COMPLEMENTO;DATA-CAD;DATA-CAD;DATA-ALTERAÇÃO;FUNC-ALTERAÇÃO;MOTIVO-ALTERAÇÃO;PESÁVEL', $GridView_OS[2].Rows($i).Text) = 0)
+			$data = tb_getDataLine('Produtos.IDCODIGO', $Produtos[$i])
+			if (VarType($data) = 8204)
+				$GridView_OS[2].RowCount	= $GridView_OS[2].RowCount+1
+				$GridView_OS[2].Cells($i, 1).Text = $data[0]
+				$GridView_OS[2].Cells($i, 2).Text = $data[2]
+				$GridView_OS[2].Cells($i, 3).Text = $data[3]
+				$GridView_OS[2].Cells($i, 4).Text = $data[7]
+				$GridView_OS[2].Cells($i, 5).Text = $data[8]
+				$GridView_OS[2].Cells($i, 6).Text = $data[9]
+			endif
+			for $text=0 to 6
+				$GridView_OS[2].Columns($text).TextAlign = 2
+			next
+		endif
+	next
+	$GridView_OS[2].Columns(1).Text			= 'ID'
+	$GridView_OS[2].Columns(1).Width 		= 45
+	$GridView_OS[2].Columns(2).Width 		= 160
+	$GridView_OS[2].Columns(5).Width		= 100
+	$GridView_OS[2].Columns(6).Width 		= 100
+	for $i=0 to $GridView_OS[2].Rows.count
+		$GridView_OS[2].Cells($i, 2).text = tb_GetDataCond('Categoria_Produtos.Nome', 'IDCODIGO', $GridView_OS[2].Cells($i, 2).text)
+	next
+	$GridView_OS[2].EndUpdate
+;;</INSERINDO DADOS DOS PRODUTOS>
+	$Tx_Cliente_OS.Text	= tb_getDataCond('Clientes.NOME', 'IDCODIGO', $Cliente)
+	for $i=0 to $GridView_OS[1].Rows.Count
+		$Tx_Valor_OS.Text	= Cdbl($Tx_Valor_OS.Text) + Cdbl(Replace($GridView_OS[1].Cells($i, 3).text, 'R$', ''))
+	next
+	for $i=0 to $GridView_OS[2].Rows.Count
+		$Tx_Valor_OS.Text	= Cdbl($Tx_Valor_OS.Text) + Cdbl(Replace($GridView_OS[2].Cells($i, 4).text, 'R$', ''))
+	next
+	$Tx_Valor_OS.Text = Flip_Currency(FormatNumber($Tx_Valor_OS.Text, 2))
+;;<INSERINDO DADOS NOME CLIENTE>
+endfunction
+
+function Add_Data_OS($Not, $Grid, $NameTb, $NotField, Optional $Type)
+	Dim
+		$i, $text
+	$=$Grid.Columns.Add('')
+	$Grid.Columns(0).ValueType	= 11
+	$Grid.Columns(0).Width	 	= 20
+	if Not $Not
+		kdb_field_GridView($Grid, $NameTb, $NotField)
+	endif
+	if (Trim($Type) <> '')
+		$Type = Split($Type, ',')
+		$Grid.Columns(Cint($Type[0])).ValueType = Cint($Type[1])
+	endif
+	for each $text in tb_getField($NameTb)
+		$i=$i+1
+		kdb_fData_GridView($Grid, $NameTb+'.'+$text, $i)
+	next
+endfunction
+
+function DETALHE_DADOS_CLIENTE()
+	Dim
+		$Form_Temp, $ListView_,
+		$data, $Cliente, $i, $x
+	$Cliente				= tb_GetDataLine('OS.IDCODIGO', $GridView_OS[0].Cells($GridView_OS[0].CurrentRow.index, 1).Text)[3]
+	$Form_Temp				= $System.Form($Form)
+	$Form_Temp.Text			= 'Visualização detalhada do cliente.'
+	$Form_Temp.Width		= 450
+	$Form_Temp.Resizable	= False()
+	$Form_Temp.MaximizeBox	= False()
+	$Form_Temp.MinimizeBox	= False()
+	$Form_Temp.OnKeyUp		=
+	'
+		if ($$Form_Temp.KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+	
+	$=$Form_Temp.Controls.Label
+	$Form_Temp.Controls(0).FontName		= 'Segeo UI'
+	$Form_Temp.Controls(0).BackColor	= 'Black'
+	$Form_Temp.Controls(0).ForeColor	= 'White'
+	$Form_Temp.Controls(0).Width		= 450
+	$Form_Temp.Controls(0).Height		= 26
+	$Form_Temp.Controls(0).FontSize		= 11
+	$Form_Temp.Controls(0).FontBold		= 1
+	$Form_Temp.Controls(0).Left			= 0
+	$Form_Temp.Controls(0).TextAlign	= 32
+	$Form_Temp.Controls(0).Anchor		= 1 + 4 + 8
+	$Form_Temp.Controls(0).Text			= $Form_Temp.Text
+	$Form_Temp.Controls(0).OnKeyDown	=
+	'
+		if ($$Form_Temp.Controls(0).KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+
+	$ListView_					= $Form_Temp.Controls.GridView
+	$ListView_.Width			= $Form_Temp.Width-5
+	$ListView_.Height			= $Form_Temp.ClientHeight-$Form_Temp.Controls(0).Height
+	$ListView_.ReadOnly			= True()
+	$ListView_.HeaderStyle		= True()
+	$ListView_.FullRowSelect	= True()
+	$ListView_.Top				= 25
+	$ListView_.OnKeyDown		=
+	'
+		if ($$ListView_.KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+	kdb_field_GridView($ListView_, 'Clientes')
+	$data = tb_getDataLine('Clientes.IDCODIGO', $Cliente)
+
+	$ListView_.RowCount = 1
+	for $i=0 to $ListView_.RowCount-1
+		$ListView_.Cells($i, 0).Text = $data[0]
+		$ListView_.Cells($i, 1).Text = $data[1]
+		$ListView_.Cells($i, 2).Text = $data[2]
+		$ListView_.Cells($i, 3).Text = $data[3]
+		$ListView_.Cells($i, 4).Text = $data[4]
+		$ListView_.Cells($i, 5).Text = $data[5]
+		$ListView_.Cells($i, 6).Text = $data[6]
+		$ListView_.Cells($i, 7).Text = $data[7]
+		$ListView_.Cells($i, 8).Text = $data[8]
+		$ListView_.Cells($i, 9).Text = $data[9]
+		for $x=0 to 9
+			$ListView_.Columns($x).TextAlign = 2
+		next
+	next
+	$Form_Temp.ShowModal()
+	while $Form_Temp.Visible
+		$=Execute($Form_Temp.DoEvents)
+	loop
+endfunction
+
+function GridProd_Select_OS()
+	Dim
+		$Form_Temp, $GridView_,
+		$GridView_1, $GB_Op, $Gb_Button,
+		$Bt_Sub, $Bt_Add, $Bt_SubAll,
+		$Bt_AddAll, $Bt_Concluir,
+		$i, $x, $FieldNow, $data
+	$Form_Temp				= $System.Form($Form)
+	$Form_Temp.Text			= 'Selecione os seus produtos.'
+	$Form_Temp.Size			= 600, 520
+	$Form_Temp.Resizable	= False()
+	$Form_Temp.MaximizeBox	= False()
+	$Form_Temp.MinimizeBox	= False()
+	$Form_Temp.Center()
+	$Form_Temp.OnKeyUp		=
+	'
+		if ($$Form_Temp.KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+	
+	$=$Form_Temp.Controls.Label
+	$Form_Temp.Controls(0).Dock			= 1
+	$Form_Temp.Controls(0).FontName		= 'Segeo UI'
+	$Form_Temp.Controls(0).BackColor	= 'Black'
+	$Form_Temp.Controls(0).ForeColor	= 'White'
+	$Form_Temp.Controls(0).Width		= 600
+	$Form_Temp.Controls(0).Height		= 26
+	$Form_Temp.Controls(0).FontSize		= 11
+	$Form_Temp.Controls(0).FontBold		= 1
+	$Form_Temp.Controls(0).Left			= 0
+	$Form_Temp.Controls(0).TextAlign	= 32
+	$Form_Temp.Controls(0).Anchor		= 1 + 4 + 8
+	$Form_Temp.Controls(0).Text			= $Form_Temp.Text
+	$Form_Temp.Controls(0).OnKeyDown	=
+	'
+		if ($$Form_Temp.Controls(0).KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+
+	$GridView_						= $Form_Temp.Controls.GridView
+	$GridView_.Anchor				= 4+8
+	$GridView_.Dock					= 1
+	$GridView_.Width				= $Form_Temp.Width-6
+	$GridView_.Height				= 200
+	$GridView_.BackColor			= 'DarkGray'
+	$GridView_.ForeColor			= 'Black'
+	$GridView_.GridLineColor		= 'Black'
+	$GridView_.AlternatingBackColor	= -1
+	$GridView_.Font					= $System.Font("Microsoft Sans Serif", 10)
+	$GridView_.Location				= 0,$Form_Temp.Controls(0).Bottom
+	$GridView_.ReadOnly				= True()
+	$GridView_.HeaderStyle			= True()
+	$GridView_.FullRowSelect		= True()
+	$GridView_.OnClick				= '$$GridView_.Cells($$GridView_.CurrentRow.index, 0).text?'
+	$GridView_.OnKeyDown			=
+	'
+		if ($$GridView_.KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+;;
+;;<CENTRAL DE BUTÕES>
+	$GB_Op						= $Form_Temp.Controls.GroupBox
+	$GB_Op.BorderStyle			= 0
+	$GB_Op.Dock					= 5
+	$GB_Op.Anchor				= 1+2
+	$GB_Op.Top					= $GridView_.Bottom
+	$GB_Op.Height				= 35
+	$GB_Op.BackColor			= 0,0,0
+	$GB_Op.Center()
+;;
+	$GB_Button					= $GB_Op.GroupBox
+	$GB_Button.BorderStyle		= 0
+	$GB_Button.FontBold			= True()
+	$GB_Button.FontName			= 'Bahnschrift'
+	$GB_Button.Height			= 35
+	$GB_Button.Width			= 510
+	$GB_Button.BackColor		= 0,0,0
+	$GB_Button.Center()
+	
+	$Bt_Add						= $GB_Button.ToolButton
+	$Bt_Add.BorderStyle			= 0
+	$Bt_Add.FlatStyle			= 0
+	$Bt_Add.Size				= 100, 35
+	$Bt_Add.BackColor			= 'white'
+	$Bt_Add.ForeColor			= 0,0,0
+	$Bt_Add.Icon				= $Ico.Images(23)
+	$Bt_Add.Text				= 'Adicionar'
+	$Bt_Add.OnClick				=
+	'
+		if ($$GridView_.CurrentColumn.Index <> -1)
+			$$data	= tb_GetDataLine("Produtos.IDCODIGO", $$GridView_.Cells($$GridView_.CurrentRow.index, 0).text)
+			$$i		= $$GridView_1.Columns(0).Find($$data[0])
+			if ($$i = -1) or (cstr($$i) = "")
+				$$GridView_1.RowCount = $$GridView_1.RowCount+1
+				for $$i=0 to $$GridView_1.ColumnCount
+					$$GridView_1.Cells($$GridView_1.RowCount-1, $$i).text = $$data[$$i]
+				next
+			endif
+		endif
+	'
+;;
+	$Bt_AddAll					= $GB_Button.ToolButton
+	$Bt_AddAll.BorderStyle		= 0
+	$Bt_AddAll.FlatStyle		= 0
+	$Bt_AddAll.Location			= $Bt_Add.Right+2, 0
+	$Bt_AddAll.Size				= 100, 35
+	$Bt_AddAll.BackColor		= 'white'
+	$Bt_AddAll.ForeColor		= 0,0,0
+	$Bt_AddAll.Icon				= $Ico.Images(24)
+	$Bt_AddAll.Text				= 'Adicionar todos'
+	$Bt_AddAll.OnClick			=
+	'
+		;if ($$GridView_.RowCount <> $$GridView_1.RowCount)
+		;debug on
+			$$i=0
+			for each $$FieldNow in tb_getfield("Produtos")
+				if not Instr("ID_CODEBAR;DATA-CAD;DATA-ALTERAÇÃO;FUNC-ALTERAÇÃO;MOTIVO-ALTERAÇÃO", $$FieldNow)
+					$$data = tb_getdata("Produtos."+$$FieldNow, "max")
+					if ($$GridView_1.Columns(0).Find(tb_getdata("Produtos.IDCODIGO", $$i)) = "")
+						if ($$i=0) $$GridView_1.RowCount = Ubound($$data)+1 endif
+						for $$x=0 to $$GridView_1.RowCount-1
+							$$GridView_1.Cells($$x, $$i).text = $$data[$$x]
+						next
+						$$i=$$i+1
+					endif
+				endif
+			next
+		;endif
+	'
+;;
+	$Bt_Sub						= $GB_Button.ToolButton
+	$Bt_Sub.BorderStyle			= 0
+	$Bt_Sub.FlatStyle			= 0
+	$Bt_Sub.Location			= $Bt_AddAll.Right+2, 0
+	$Bt_Sub.Size				= 100, 35
+	$Bt_Sub.BackColor			= 'white'
+	$Bt_Sub.ForeColor			= 0,0,0
+	$Bt_Sub.Icon				= $Ico.Images(21)
+	$Bt_Sub.Text				= 'Remover'
+;;
+	$Bt_SubAll					= $GB_Button.ToolButton
+	$Bt_SubAll.BorderStyle		= 0
+	$Bt_SubAll.FlatStyle		= 0
+	$Bt_SubAll.Location			= $Bt_Sub.Right+2, 0
+	$Bt_SubAll.Size				= 100, 35
+	$Bt_SubAll.BackColor		= 'white'
+	$Bt_SubAll.ForeColor		= 0,0,0
+	$Bt_SubAll.Icon				= $Ico.Images(24)
+	$Bt_SubAll.Text				= 'Remover todos'
+;;
+	$Bt_Concluir				= $GB_Button.ToolButton
+	$Bt_Concluir.BorderStyle	= 0
+	$Bt_Concluir.FlatStyle		= 0
+	$Bt_Concluir.Location		= $Bt_SubAll.Right+2, 0
+	$Bt_Concluir.Size			= 100, 35
+	$Bt_Concluir.BackColor		= 'white'
+	$Bt_Concluir.ForeColor		= 0,0,0
+	$Bt_Concluir.Icon			= $Ico.Images(19)
+	$Bt_Concluir.Text			= 'Concluir'
+;;</CENTRAL DE BUTÕES>
+;;
+	$GridView_1						= $Form_Temp.Controls.GridView
+	$GridView_1.Anchor				= 4+8
+	$GridView_1.Dock				= 2
+	$GridView_1.Width				= $Form_Temp.Width-6
+	$GridView_1.Height				= $GridView_.Height+30
+	$GridView_1.BackColor			= 'DarkGray'
+	$GridView_1.ForeColor			= 'Black'
+	$GridView_1.GridLineColor		= 'Black'
+	$GridView_1.AlternatingBackColor= -1
+	$GridView_1.Font				= $System.Font("Microsoft Sans Serif", 10)
+	$GridView_1.Location			= 0,$GB_Op.Bottom
+	$GridView_1.ReadOnly			= True()
+	$GridView_1.HeaderStyle			= True()
+	$GridView_1.FullRowSelect		= True()
+	$GridView_1.OnKeyDown			=
+	'
+		if ($$GridView_1.KeyCode = 27)
+			$$Form_Temp.Hide()
+		endif
+	'
+	kdb_field_GridView($GridView_, 'Produtos', 'ID_CODEBAR;DATA-CAD;DATA-ALTERAÇÃO;FUNC-ALTERAÇÃO;MOTIVO-ALTERAÇÃO')
+	kdb_field_GridView($GridView_1, 'Produtos', 'ID_CODEBAR;DATA-CAD;DATA-ALTERAÇÃO;FUNC-ALTERAÇÃO;MOTIVO-ALTERAÇÃO')
+
+	::ADICIONANDO_DADOS_PROD
+	$i=0
+	for each $FieldNow in tb_getfield('Produtos')
+		if not Instr('ID_CODEBAR;DATA-CAD;DATA-ALTERAÇÃO;FUNC-ALTERAÇÃO;MOTIVO-ALTERAÇÃO', $FieldNow)
+			$data = tb_getdata('Produtos.'+$FieldNow, 'max')
+			if ($i=0) $GridView_.RowCount = Ubound($data)+1 endif
+			for $x=0 to $GridView_.RowCount-1
+				$GridView_.Cells($x, $i).text = $data[$x]
+			next
+			$i=$i+1
+		endif
+	next
+	
+	$Form_Temp.ShowModal()
+	while $Form_Temp.Visible
+		$=Execute($Form_Temp.DoEvents)
+	loop
+endfunction

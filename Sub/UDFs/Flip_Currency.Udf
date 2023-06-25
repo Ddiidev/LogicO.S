@@ -1,0 +1,79 @@
+;Function	Flip_Currency()
+;
+;Author		New Mexico Mark
+;
+;Action		Adds (or removes if present) the system currency symbol to the
+;		system-specified location in a string (or expression that can
+;		be converted to a string), then returns the modified string.
+;
+;Syntax		Flip_Currency(String)
+;
+;Parameters
+;
+;		String
+;		Any expression that evaluates to a string or can be directly
+;		converted to a string.
+;
+;Remarks 	This is a pretty basic function. It may be used directly, but
+;		I designed it for advanced string handling from the FMT UDF.
+;
+;Returns	A string.
+;
+;Dependencies	The settings in the registry must be correct.
+;
+;Example(s)		
+;"Flip_Currency($123.00) = " + Flip_Currency(FormatNumber("0,050", 2)) ?
+;"Flip_Currency($123.00) = " + Flip_Currency("$123.00") ?
+;"Flip_Currency(123.00) = " + Flip_Currency("123.00") ?
+;get$
+;
+;Console Output (Example)
+;Flip_Currency($123.00) = 123.00
+;Flip_Currency(123.00) = $123.00
+;
+;Source
+FUNCTION Flip_Currency($sVar)
+; This function takes an expression that evaluates to a string or that can be
+; directly converted to a string. It adds (or removes if present) the system
+; currency symbol in the place specified by the system and returns the 
+; modified string.
+	IF VarType($sVar) < 2 OR VarType($sVar) > 8 RETURN ENDIF
+	DIM $cCur, $iLoc, $iLen, $sReg
+	$sVar = "" + $sVar
+	$sReg = 'HKCU\Control Panel\International'
+	$cCur = ReadValue($sReg,'sCurrency')
+	$iLoc = Val(ReadValue($sReg,'iCurrency'))
+	$iLen = Len($sVar)
+	SELECT
+	CASE $iLoc = 0 ; "$2"
+		IF SubStr($sVar,1,1) = $cCur 
+			$Flip_Currency = SubStr($sVar,2)
+		ELSE
+			$Flip_Currency = $cCur + $sVar
+		ENDIF
+	CASE $iLoc = 1 ; "2$"
+		IF $iLen > 1
+			IF SubStr($sVar,$iLen - 1,1) = $cCur
+				$Flip_Currency = SubStr($sVar,1,$iLen - 1)
+			ELSE
+				$Flip_Currency = $sVar + $cCur
+			ENDIF
+		ENDIF
+	CASE $iLoc = 2 ; "$ 2"
+		IF SubStr($sVar,1,2) = $cCur + " "
+			$Flip_Currency = SubStr($sVar,3)
+		ELSE
+			$Flip_Currency = $cCur + " " + $sVar
+		ENDIF
+	CASE $iLoc = 3 ; "2 $"
+		IF $iLen > 2
+			IF SubStr($sVar,$iLen - 2,2) = " " + $cCur
+				$Flip_Currency = SubStr($sVar,1,$iLen - 2)
+			ELSE
+				$Flip_Currency = $sVar + " " + $cCur
+			ENDIF
+		ELSE
+			$Flip_Currency = $sVar + " " + $cCur
+		ENDIF
+	ENDSELECT
+ENDFUNCTION ; Flip_Currency()

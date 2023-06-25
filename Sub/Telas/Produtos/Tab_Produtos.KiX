@@ -1,0 +1,82 @@
+Global
+	$Tab_Prod_Control, $Tab_Prod_Categoria,
+	$Tab_Prod_Produtos, $Ajuda_Produtos
+
+$Ajuda_Produtos					= $Tab_Produtos.Controls.GroupBox
+$Ajuda_Produtos.BorderStyle		= 2
+$Ajuda_Produtos.FontSize		= 16
+$Ajuda_Produtos.Location		= 10, -3
+$Ajuda_Produtos.ForeColor		= 'gray'
+$Ajuda_Produtos.ClientSize		= 460, 90
+$Ajuda_Produtos.BackColor		= 0, 51, 102
+$Ajuda_Produtos.Text			= 'Ajuda de pesquisa'
+
+$=$Ajuda_Produtos.Controls.LABEL
+$Ajuda_Produtos.Controls(0).TextAlign 		= 1
+$Ajuda_Produtos.Controls(0).FontName		= 'Segeo UI'
+$Ajuda_Produtos.Controls(0).FontSize		= 10
+$Ajuda_Produtos.Controls(0).Location		= 2, 8
+$Ajuda_Produtos.Controls(0).ForeColor		= 167, 177, 183;'gray'
+$Ajuda_Produtos.Controls(0).BackColor		= 'Transparent'
+$Ajuda_Produtos.Controls(0).Size			= 460, 80
+$Ajuda_Produtos.Controls(0).Cursor			= 14
+$Ajuda_Produtos.Controls(0).OnMouseEnter	= '$$Ajuda_Produtos.Controls(0).ToolTipText = $$Ajuda_Produtos.Controls(0).Text'
+$Ajuda_Produtos.Controls(0).Text			=
+'
+Para fazer uma pesquisa personalizada(pesquisar por DESCRIÇÃO, VALOR 
+etc.. ) Basta colocar o nome do campo seguido de dois, dois pontos(::),
+exemplo: VALOR::10.00. Caso for buscar por DESCRIÇÃO, não é necessário
+especificar: "DESCRIÇÃO::".
+'
+$Ajuda_Produtos					= $Tab_Produtos.Controls.GroupBox
+$Ajuda_Produtos.BorderStyle		= 2
+$Ajuda_Produtos.FontSize		= 16
+$Ajuda_Produtos.Location		= 10, -3
+$Ajuda_Produtos.ForeColor		= 'gray'
+$Ajuda_Produtos.ClientSize		= 460, 90
+$Ajuda_Produtos.BackColor		= 0, 51, 102
+$Ajuda_Produtos.Text			= 'Ajuda de pesquisa'
+
+$=$Ajuda_Produtos.Controls.LABEL
+$Ajuda_Produtos.Controls(0).TextAlign 		= 1
+$Ajuda_Produtos.Controls(0).FontName		= 'Segeo UI'
+$Ajuda_Produtos.Controls(0).FontSize		= 10
+$Ajuda_Produtos.Controls(0).Location		= 2, 8
+$Ajuda_Produtos.Controls(0).ForeColor		= 167, 177, 183;'gray'
+$Ajuda_Produtos.Controls(0).BackColor		= 'Transparent'
+$Ajuda_Produtos.Controls(0).Size			= 460, 80
+$Ajuda_Produtos.Controls(0).Cursor			= 14
+$Ajuda_Produtos.Controls(0).OnMouseEnter	= '$$Ajuda_Produtos.Controls(0).ToolTipText = $$Ajuda_Produtos.Controls(0).Text'
+$Ajuda_Produtos.Controls(0).Text			=
+'
+Para fazer uma pesquisa personalizada(pesquisar por DESCRIÇÃO, VALOR 
+etc.. ) Basta colocar o nome do campo seguido de dois, dois pontos(::),
+exemplo: VALOR::10.00. Caso for buscar por DESCRIÇÃO, não é necessário
+especificar: "DESCRIÇÃO::".
+'
+;;<TAB_CONTROL'S>
+	:Grupos_TABs
+	$Tab_Prod_Control 				= $Tab_Produtos.Controls.TabControl
+	$Tab_Prod_Control.FlatStyle		= 0
+	$Tab_Prod_Control.BorderStyle	= 0
+	$Tab_Prod_Control.MultiLine		= 1
+	$Tab_Prod_Control.Appearance	= 0
+	$Tab_Prod_Control.FontSize		= 14
+	$Tab_Prod_Control.ImageList		= $ICO
+	$Tab_Prod_Control.Location		= 0, $Ajuda_Produtos.Bottom+5
+	$Tab_Prod_Control.Size			= 590, 475
+	$Tab_Prod_Control.FontSize		= 'Segeo UI'
+	$Tab_Prod_Control.BackColor		= 30, 30, 30
+	$Tab_Prod_Control.Anchor		= 1 + 2 + 4 + 8
+	$Tab_Prod_Control.ForeColor		= 220, 220, 204
+
+	$Tab_Prod_Categoria				= $Tab_Prod_Control.TabPages.Add('Categoria')
+	$Tab_Prod_Categoria.ImageIndex	= 18
+	$Tab_Prod_Categoria.FontSize	= 11
+	$Tab_Prod_Categoria.BackColor	= 202, 202, 181
+
+	$Tab_Prod_Produtos				= $Tab_Prod_Control.TabPages.Add('Produtos')
+	$Tab_Prod_Produtos.ImageIndex	= 2
+	$Tab_Prod_Produtos.FontSize		= 11
+	$Tab_Prod_Produtos.BackColor	= 202, 202, 181
+;;</TAB_CONTROL'S>

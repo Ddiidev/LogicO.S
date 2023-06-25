@@ -1,0 +1,1314 @@
+Global
+	$__KixDB__VER__,
+	$__KixDB__CFG__,
+	$__KixDB__Cache__[1],/*[0] = Identificador; [1] = Dados*/
+	$__KixDB__Eventfrm__,
+	$__KixDB__GetURL__,
+	$__IOFast
+$__KixDB__GetURL__	= CreateObject("Msxml2.XMLHTTP.6.0")
+$__IOFast			= CreateObject("IOFast.IO")
+$__KixDB__CFG__		= 0; 1 = messagebox.
+$__KixDB__VER__	 	= '1.2.1.2018'
+$__KixDB__Cache__	= "", ""
+
+/*
+	##################################################
+	#  DAQUI PRA BAIXO FICA TUDO RELACIONADO A BASE  #
+	##################################################
+*/
+
+; Version 4.53
+; function replace($input, $arg1, $arg2) $replace = join(split($input, $arg1), $arg2) endfunction
+
+::KIXDB____BASE____
+/*
+function kdb_Load($File, $Alias)
+	Dim
+		$Kdb, $Table, $Dir
+	$Dir	= kixdb__GetPath__($File)
+	$Kdb	= Split(ReadProfileString($File, 'KixDataBase', ''), chr(10))
+	
+	;<ADICIONA AS TABELAS E DIRECIONA AO BANCO CORRETO>
+		for each $Table in $Kdb
+			if (Trim($Table) <> '')
+				$Table = ReadProfileString($File, 'KixDataBase', $Table)
+				if not exist($Dir+'\'+$Table)
+					Exit 305
+				endif
+				__AddCollection__($Alias+'-'+$Table, $Table)
+				tb_Load($Dir+'\'+$Table, $Table)
+			endif
+		next
+	;</ADICIONA AS TABELAS E DIRECIONA AO BANCO CORRETO>
+endfunction
+*/
+
+function tb_Create($Dir, $Alias, optional $DESC, optional $type)
+	Dim
+		$write[5], $handle,
+		$Now, $tb_create
+	if exist($Dir) exit 20 endif
+	if (trim($type) = '') $type = 'file' endif
+	$Now		= Cstr(@Time) + ',' + Cstr(@Msecs) + ' | ' + @Date
+	$Write[0]	= '##'+$Now+'##'
+	$Write[1]	= '##'+$Now+'##'
+	$Write[2]	= '##'+kixdb__CutLine__($DESC)+'##'
+	$Write[3]	= '##'+$Alias+'##'
+	$Write[4]	= '##'+$__KixDB__VER__+'##'
+	$Write[5]	= '##'+$DIR
+	if ($type = 'file')
+		$handle = freefilehandle()
+		$=Open($handle, $Dir, 5)
+		if (@error <> 0) exit 20 endif
+		$=WriteLine($handle, Join($Write, chr(10)))
+		$=Close($handle)
+	else if ($type = "memory")
+		_create($Alias+".conf", $write)
+	endif endif
+	exit 200
+endfunction
+
+function tb_Load($Dir, Optional $Alias)
+	if __isItemList__(tb_GetInfo($Dir)+'.conf')
+		exit 1
+	endif
+	Dim
+		$NameTB, $TempArray[5],
+		$handle, $i, $path
+
+	;;<ABRINDO ARQUIVO>
+	; debug on
+	$path = $Dir
+	select
+		case not exist($Dir) and (left($Dir, 4) = "http")
+			if (VarType($__KixDB__GetURL__) <> 9)
+				$__KixDB__GetURL__ = CreateObject("Msxml2.XMLHTTP.6.0")
+			endif
+			$Dir = Split(kixdb__GetDataString_Url__($__KixDB__GetURL__, $Dir), chr(10))
+
+		case exist($Dir)
+			Dim
+				$objFSO, $objFile
+			$objFSO		= CreateObject("Scripting.FileSystemObject")
+			$objFile	= $objFSO.OpenTextFile($Dir, 1, 0)
+			$Dir		= Split($objFile.ReadAll, chr(10))
+			$objFile.Close()
+			; $Dir = $__IOFast.ReadFile($Dir)
+
+		case 1
+			exit 21
+	endselect
+	;;</ABRINDO ARQUIVO>
+
+	for $i=0 to Ubound($Dir)
+		Select
+			Case (Left($Dir[$i], 1) = '<') And Not (Left($Dir[$i], 2) = '</')
+				Dim
+					$end, $x, $RaizTb
+				; debug on
+				$RaizTb	= Substr($Dir[$i], 2)
+				$RaizTb	= Substr($RaizTb, 1, Len($RaizTb)-1)
+				$end	= Ascan($Dir, '</'+$RaizTb+'>')-2
+				
+				if ($end < 0)
+					exit 60
+				endif
+				Dim $Write[$end]
+
+				for $x=$i+1 To $end+1
+					$write[$x-$i-1] = Cstr(Substr(_cutScape($Dir[$x]), 2))
+				next
+				
+				if ($x-$i-2 < 0)
+					/*	tabela vazia */
+					Redim Preserve $write[$x-$i-1]
+				else
+					Redim Preserve $write[$x-$i-2]
+				endif
+				_create($NameTB+'.'+$RaizTb, $write)
+				$i = $x-1
+				
+			Case (Left($Dir[$i], 1) = '#')
+				if (ubound($TempArray) >= $i)
+					$TempArray[$i] = _cutScape($Dir[$i])
+				endif
+
+				if (Trim($Alias) <> '')
+					$NameTB = $Alias
+				else
+					if ($i = 3)
+						$NameTB = Substr($Dir[$i], 3, Len($Dir[$i])-4)
+					endif
+				endif
+
+				if ($i = 5)
+					$TempArray[5] = $path
+					_create($NameTB+'.conf', $TempArray)
+					Redim $TempArray
+				endif
+		Endselect
+	next
+	exit 200
+endfunction
+
+function tb_Dispose($NameTB)
+	if __isItemList__($NameTB+".conf")
+		dim
+			$current, $tb_Dispose
+		for each $current in tb_GetField($NameTB)
+			tb_DelField($NameTB+"."+$current)
+		next
+		tb_DelField($NameTB+".conf")
+		if __isItemList__($NameTB+".conf")
+			exit 201
+		endif
+		exit 200
+	endif
+	exit 70
+endfunction
+
+function tb_Save($NameTB)
+	Dim
+		$i, $x, $k,
+		$bool, $campo, $temp[],
+		$WriteFile, $objFSO, $objFile,
+		$tb_Save, $Dir, $i_start,
+		$row_cache_index, $i_end,
+		$fields_alloc, ;Dados dos campos da tabela em atual.
+		$fields_name ;Nomes dos campos da tabela em atual.
+
+	$temp = _get_value($NameTB+".conf")
+	if @error
+		exit 70
+	endif
+
+	if (left($temp[5], 2) = "##")
+		$Dir		= Substr($temp[5], 3)
+	else
+		$Dir		= $temp[5]
+	endif
+	$i_start		= chr(10)+"<"
+	$i_end			= ">"+chr(10)
+	$objFSO			= CreateObject("Scripting.FileSystemObject")
+	$objFile		= $objFSO.OpenTextFile($Dir+'_', 8, 1)
+
+	;ÚLTIMA ATUALIZAÇÃO
+		$temp[1]	= '##'+Cstr(@Time) + ',' + Cstr(@Msecs)+' | '+@Date+'##'
+		$temp[5]	= '##'+$Dir
+		_put($NameTB+'.conf', $temp)
+	;ÚLTIMA ATUALIZAÇÃO.
+
+	/*<ALOCANDO O DADO DA TABELA>*/
+		for each $i in _get_keys()
+			$i = kixdb__split_NameTBField($i)
+			if ($i[0] = $NameTB)
+				redim
+					preserve $fields_alloc[ubound($fields_alloc)+1],
+					preserve $fields_name[ubound($fields_name)+1]
+
+				$fields_alloc[ubound($fields_alloc)]		= _get_value($i[0]+'.'+$i[1])
+				$fields_name[ubound($fields_name)]			= Join($i, ".")
+			endif
+		next
+		if (ubound($fields_alloc) > 0)
+			$row_cache_index = $fields_alloc[1]
+		endif
+	/*</ALOCANDO O DADO DA TABELA>*/
+
+	for $campo=0 to ubound($fields_name)
+		$temp				= kixdb__split_NameTBField($fields_name[$campo])
+		$row_cache_index	= $fields_alloc[$campo]
+		select
+			case ($temp[0] = $NameTB) And ($temp[1] = 'conf')
+				$i		= $fields_alloc[0]
+				$i[2]	= kixdb__CutLine__($i[2])
+				$objFile.Write(Join($i, chr(10)))
+
+			case ($temp[0] = $NameTB)
+				$WriteFile			= $i_start+$temp[1]+$i_end
+				for $x=0 to ubound($fields_alloc[$campo])
+					/*<Verificando se a linha não está completamente vazia.>*/
+						$bool=0
+						if VarType($row_cache_index[$x])
+							for $k=1 to ubound($fields_alloc)
+								if (VarType($fields_alloc[$k][$x])>0)
+									; $=Execute($__KixDB__Eventfrm__)
+									$k						= ubound($fields_alloc)
+									$bool					= 1
+									$row_cache_index[$x]	= ''
+								endif
+							next
+						endif
+					/*<Verificando se a linha não está completamente vazia.>*/
+
+					; if (ubound($fields_alloc[$campo][$x]) = 0) $fields_alloc[$campo][$x] = $fields_alloc[$campo][$x][0] endif
+					select
+						case (not $bool)
+						case ($bool)
+							$WriteFile = $WriteFile + "|"+kixdb__CutLine__($fields_alloc[$campo][$x])+chr(10)
+						case (1)
+							$WriteFile = $WriteFile + "|"+chr(10)
+					endselect
+				next
+				$objFile.Write($WriteFile+"</"+$temp[1]+">")
+		endselect
+	next
+
+	$objFile.Close()
+	Del $Dir
+	Move $Dir+'_' $Dir
+	if exist($Dir) exit 200 else exit 201 endif
+endfunction
+
+function tb_Save2($NameTB)
+	Dim
+		$i, $x, $k, $,
+		$bool, $campo, $temp[],
+		$WriteFile, $handle,
+		$tb_Save2, $Dir, $i_start,
+		$row_cache_index, $i_end,
+		$fields_alloc, ;Dados dos campos da tabela em atual.
+		$fields_name ;Nomes dos campos da tabela em atual.
+
+	$temp = _get_value($NameTB+".conf")
+	if @error
+		exit 70
+	endif
+
+	if (left($temp[5], 2) = "##")
+		$Dir		= Substr($temp[5], 3)
+	else
+		$Dir		= $temp[5]
+	endif
+	$i_start		= chr(10)+"<"
+	$i_end			= chr(10)
+	$handle			= FreeFileHandle()
+	$=Open($handle, $Dir+"_", 5)
+
+	;ÚLTIMA ATUALIZAÇÃO
+		$temp[1]	= '##'+Cstr(@Time) + ',' + Cstr(@Msecs)+' | '+@Date+'##'
+		$temp[5]	= '##'+$Dir
+		_put($NameTB+'.conf', $temp)
+
+		$temp[2] = kixdb__CutLine__($temp[2])
+		$=WriteLine($handle, Join($temp, chr(10)))
+	;ÚLTIMA ATUALIZAÇÃO.
+
+	$fields_name = tb_GetField($NameTB)
+	$bool=1;(VarType($fields_alloc[$x])>0)
+	for $campo=0 to ubound($fields_name)
+		$fields_alloc		= _get_value($NameTB+'.'+$fields_name[$campo])
+
+		$=WriteLine($handle, $i_start+$fields_name[$campo]+">")
+		for $x=0 to ubound($fields_alloc)
+			$fields_alloc[$x] = kixdb__CutLine__($fields_alloc[$x])
+			if ($x = 0) $fields_alloc[$x] = $i_end+"|"+$fields_alloc[$x] endif
+		next
+		$=WriteLine($handle, $__IOFast.Join_($fields_alloc, chr(10)+"|"))
+		$=WriteLine($handle, chr(10)+"</"+$fields_name[$campo]+">")
+	next
+
+	$=Close($handle)
+	Move $Dir+'_' $Dir
+	if exist($Dir) exit 200 else exit 201 endif
+endfunction
+
+; function KiXDB_Command($code)
+	; dim
+		; $i, $k, $y, $command,
+		; $fields
+	; $code = Split($code, @crlf)
+	; for $i=0 to ubound($code)
+		; $command = split($code[$i], ' ')
+		; for $k=0 to ubound($command)
+			; select
+				; case ($command[$k] = 'SELECT')
+					
+			; endselect
+		; next
+	; next
+; endfunction
+
+/*
+	###########################################
+	#  DAQUI PRA BAIXO FICA APENAS OS CAMPOS  #
+	###########################################
+*/
+::KIXDB____FIELDS____
+
+function tb_InsertField($NameTB, $name)
+	If not __isItemList__($NameTB+'.'+$name)
+		Dim
+			$tb_InsertField, $temp, $
+
+		$tb_InsertField		= tb_GetField($NameTB)
+
+		if (Ubound($tb_InsertField) > 0)
+			$ = Ubound(_get_value($NameTB+'.'+$tb_InsertField[0]))
+			Redim $temp[$]
+			for $=0 to ubound($temp)
+				$temp[$] = CSTR("");$temp[$]
+			next
+		else
+			Redim $temp[0]
+			$temp[0] = ""
+		endif
+
+		_create($NameTB+'.'+$name, $temp)
+		if ($__KixDB__Cache__[0] = "GET-FIELD>"+$NameTB)
+			redim preserve $tb_InsertField[ubound($tb_InsertField)+1]
+			$tb_InsertField[ubound($tb_InsertField)] = $name
+			$__KixDB__Cache__[1]	= $tb_InsertField
+		else
+			$__KixDB__Cache__ = "", ""
+		endif
+		if __isItemList__($NameTB+'.'+$name) exit 200 else exit 201 endif
+	endif
+	exit 71
+endfunction
+
+function tb_UpdateField($NameTBfield, $NewNameField)
+	if __isItemList__($NameTBfield)
+		_rename($NameTBfield, Split($NameTBfield, '.')[0]+'.'+$NewNameField)
+		if __isItemList__(Split($NameTBfield, '.')[0]+'.'+$NewNameField) and not __isItemList__($NameTBfield)
+			$__KixDB__Cache__ = 'UPDATE-FIELD', ''
+			exit 200
+		else
+			exit 201
+		endif
+	else
+		exit 70
+	endif
+endfunction
+
+function tb_GetField($NameTb) /*return=	ARRAY	*/
+	if ($__KixDB__Cache__[0] = "GET-FIELD>"+$NameTB)
+		$tb_GetField = $__KixDB__Cache__[1]
+		exit 210
+	endif
+	if __isItemList__($NameTB+'.conf'); and (tb_CountField($NameTB) > 0)
+		Dim
+			$i, $cut, $fields, $fields_out
+	
+		$fields = _get_keys()
+		Redim
+			$fields_out[ubound($fields)]
+
+		for $i=0 to Ubound($fields_out)
+			if ($fields[$i] <> "")
+				$cut = split($fields[$i], '.')
+				if ($cut[0] = $NameTB) and ($cut[1] <> 'conf')
+					$fields_out[$i] = $cut[1]
+				endif
+			endif
+		next
+
+		$tb_GetField		= __CutNullArray__($fields_out)
+		$__KixDB__Cache__	= "GET-FIELD>"+$NameTB, $tb_GetField
+		exit 200
+	else
+		Dim $tb_GetField
+		exit 70
+	endif
+endfunction
+
+function tb_DelField($NameTbField)
+	if __isItemList__($NameTbField)
+		_free($NameTbField)
+		if (@error = 0)
+			$__KixDB__Cache__ = "DELETE-FIELD", ""
+			exit 200
+		else
+			exit 201
+		endif
+	else
+		exit 201
+	endif
+endfunction
+
+function tb_CountField($NameTB)
+	if __isItemList__($NameTB+".conf")
+		if ($__KixDB__Cache__[0] = "GET-FIELD") and ($__KixDB__Cache__[0] = "COUNT-FIELD")
+			$tb_CountField = Ubound($__KixDB__Cache__[1])
+		else
+			$tb_CountField = -1
+			for each $ in _get_keys()
+				if (Split($, '.')[0] = $NameTB)
+					$tb_CountField = $tb_CountField + 1
+				endif
+			next
+			if ($tb_CountField = -1)
+				exit 80
+			else
+				$tb_CountField = $tb_CountField
+				exit 200
+			endif
+			; $__KixDB__Cache__ = "COUNT-FIELD", $tb_countfield
+		endif
+	endif
+	exit 70
+endfunction
+
+function tb_ShortField($NameTb, $ID_INSERT_ORDER /*ARRAY*/)
+	if __isItemList__($NameTB+".conf")
+		Dim
+			$text, $temp[1], $i,
+			$FieldTmp[Ubound($ID_INSERT_ORDER)],
+			$NameTBField
+		
+		$i=0
+		$__KixDB__Cache__	= "", ""
+		$NameTBField		= tb_GetField($NameTB)
+		for each $text in $ID_INSERT_ORDER
+			if (Ascan($NameTBField, $text) = -1)
+				exit 82
+			endif
+			$FieldTmp[$i] = _get_value($NameTB+'.'+$ID_INSERT_ORDER[$i])
+			$i=$i+1
+		next
+		for each $text in $NameTBField
+			_rename($NameTB+"."+$text, $NameTB+">"+$text+':*')
+		next
+		
+		$i=0
+		for each $text in $NameTBField
+			_create($NameTB+">"+$text+':*', $FieldTmp[$i])
+			_rename($NameTB+">"+$text+':*', $NameTB+'.'+$ID_INSERT_ORDER[$i])
+			$i=$i+1
+			if ($i = Ubound($ID_INSERT_ORDER)+1)
+				Goto ':FIM_shortfield'
+			endif
+		next ::FIM_shortfield
+		$__KixDB__Cache__	= "GET-FIELD>"+$NameTB, $ID_INSERT_ORDER
+		exit 200
+	else
+		exit 70
+	endif
+endfunction
+
+/*
+	#######################################
+	#  DAQUI PRA BAIXO FICA APENAS DADOS  #
+	#######################################
+*/
+::KIXDB____DATAS____
+
+function tb_InsertData($NameTb, $Data)
+	if __isItemList__($NameTb+".conf")
+		Dim
+			$FieldsNow, $i,
+			$tb_InsertData, $countRow
+		if (VarType($Data) < 8204)
+			$Data = Tokens($Data)
+		endif
+		$tb_InsertData	= ubound($Data)
+		$FieldsNow		= tb_GetField($NameTB)
+		$countRow		= tb_CountRow($NameTB)
+		$NameTB			= $NameTB+"."
+
+		if ($countRow = 0)
+			for $i=0 to ubound($FieldsNow)
+				if ($i<=$tb_InsertData)
+					_put1($NameTB+$FieldsNow[$i], cstr($Data[$i]))
+				else
+					_put1($NameTB+$FieldsNow[$i], "")
+				endif
+			next
+		else
+			for $i=0 to ubound($FieldsNow)
+				if ($i<=$tb_InsertData)
+					_append($NameTB+$FieldsNow[$i], cstr($Data[$i]))
+				else
+					_append($NameTB+$FieldsNow[$i], "")
+				endif
+			next
+		endif
+		exit 200
+	else
+		exit 70
+	endif
+endfunction
+
+function tb_increment($NameTbField, Optional $row, Optional $Cond, Optional $comparer, Optional $value, Optional $AutoSave)
+	/*
+		tb_increment("NOME_TABELA.NOME_CAMPO_1", [NÚMERO DA LINHA(INTEGER)])
+		;OR
+		tb_increment("NOME_TABELA.NOME_CAMPO_1",, [NOME_CAMPO_2(ALL-TYPES='')], [DADO_COMPARER(ALL-TYPES='')], [DADO(ALL-TYPES=1)], [AUTO_SAVE(BOOLEAN=0)])
+	*/
+	if __isItemList__($NameTbField)
+		if (Trim($comparer) <> '') And (Trim($Cond) <> '')
+			Dim $DataNow
+			$DataNow	= _get_value(Split($NameTBField, '.')[0]+'.'+$Cond)
+			$row		= AsCan($DataNow, $comparer)+1
+		endif
+		$row = Cint($row)
+		if ($row =< 0)
+			exit 211
+		else
+			$row = cint($row)-1
+		endif
+		$tb_increment = _get_value($NameTbField)
+		if ($row > Ubound($tb_increment))
+			$tb_increment = ''
+			exit 211
+		endif
+		$AutoSave			= iif(not vartype($AutoSave), 1, $AutoSave)
+		$value				= iif(not vartype($value), 1, $value)
+		$tb_increment		= cfloat($tb_increment[$row]) + cfloat($value)
+
+		_UpDataIndex($NameTBField, $row, $tb_increment)
+		if $AutoSave
+			tb_save2(kixdb__split_NameTBField($NameTBField)[0])
+		endif
+		exit 200
+	endif
+	exit 70
+endfunction
+
+function tb_decrement($NameTbField, Optional $row, Optional $Cond, Optional $comparer, Optional $value, Optional $AutoSave)
+	/*
+		tb_decrement("NOME_TABELA.NOME_CAMPO_1", [NÚMERO DA LINHA(INTEGER)])
+		;OR
+		tb_decrement("NOME_TABELA.NOME_CAMPO_1",, [NOME_CAMPO_2(ALL-TYPES='')], [DADO_COMPARER(ALL-TYPES='')], [DADO(ALL-TYPES=1)], [AUTO_SAVE(BOOLEAN=0)])
+	*/
+	if __isItemList__($NameTbField)
+		if (Trim($comparer) <> '') And (Trim($Cond) <> '')
+			Dim $DataNow
+			$DataNow	= _get_value(Split($NameTBField, '.')[0]+'.'+$Cond)
+			$row		= AsCan($DataNow, $comparer)+1
+		endif
+		$row = Cint($row)
+		if ($row =< 0)
+			exit 211
+		else
+			$row = cint($row)-1
+		endif
+		$tb_decrement = _get_value($NameTbField)
+		if ($row > Ubound($tb_decrement))
+			$tb_decrement = ''
+			exit 211
+		endif
+		$AutoSave			= iif(not vartype($AutoSave), 1, $AutoSave)
+		$value				= iif(not vartype($value), 1, $value)
+		$tb_decrement		= cfloat($tb_decrement[$row]) - cfloat($value)
+
+		_UpDataIndex($NameTBField, $row, $tb_decrement)
+		if $AutoSave
+			tb_save2(kixdb__split_NameTBField($NameTBField)[0])
+		endif
+		exit 200
+	endif
+	exit 70
+endfunction
+
+function tb_UpDataIndex($NameTBfield, $ID, $Data)
+	if __isItemList__($NameTBfield)
+		if ($ID = 0)
+			exit 211
+		else
+			$ID = cint($ID)-1
+		endif
+
+		_UpDataIndex($NameTBField, $ID, cstr($Data))
+		exit 200
+	else
+		exit 70
+	endif
+endfunction
+
+
+function tb_UpData($NameTB, $Fields, $Data, $Cond, Optional $Comparer)
+	/*
+		$NameTB	= Nome da tabela.
+		$Fields	= Entra os campos.
+		$Data	= Entra uma array.
+		$cond	= Condição, que se baseia no nome de um dos campos e
+			no dado que se encontra no mesmo.
+			syntax:
+				"1==ID_CODE" ;NO!
+				"ID_CODE==1" ;OK!
+			ps:Campo vem antes da igualdade.
+
+		tb_UpData('teste', '"nome";"altura"', '"Luiz";1,2.70', IDCODIGO, 1)
+	*/
+	Dim $tb_UpData
+	if __isItemList__($NameTB+".conf")
+		Dim
+			$FieldNow, $ID,
+			$temp, $end, $i
+
+		if (VarType($Fields) <> 8204)
+			$Fields	= Tokens($Fields)
+		endif
+
+		if (VarType($Data) <> 8204)
+			$Data	= Tokens($Data)
+		endif
+
+		if (Ubound($Fields) > Ubound($Data))
+			exit 220
+		endif
+		
+		;;<BUSCANDO POR UM DADO>
+			if __isItemList__($NameTB+"."+$Cond)
+				$end	= -1
+				$temp	= _get_value($NameTB+"."+$Cond)
+				for $i=0 to ubound($temp)
+					if ($temp[$i] == $Comparer)
+						$end	= $i
+						$i		= ubound($temp)
+					endif
+				next
+				if ($end = -1)
+					exit 201
+				endif
+			else
+				$cond = cint($cond)
+				if ($cond < 1)
+					exit 1
+				endif
+				$end = $cond-1
+			endif
+		;;</BUSCANDO POR UM DADO>
+
+		for $i=0 to iif(ubound($Data)>ubound($fields), ubound($fields), ubound($Data))
+			_UpDataIndex($NameTB+"."+$Fields[$i], $end, cstr($Data[$i]))
+		next
+		exit 200
+	endif
+	exit 70
+endfunction
+
+function tb_GetData($NameTbField, optional $Data, Optional $Cond, Optional $ID)
+	/*
+		tb_getData("NOME_TABELA.NOME_CAMPO_1", [NÚMERO DA LINHA])
+		;OR
+		tb_getData("NOME_TABELA.NOME_CAMPO_1",, "NOME_CAMPO_2", "LINHA A PEGAR.")
+	*/
+	if __isItemList__($NameTbField)
+		if (Trim($ID) <> '') And (Trim($Cond) <> '')
+			Dim $DataNow
+			$DataNow	= _get_value(Split($NameTBField, '.')[0]+'.'+$Cond)
+			$Data		= AsCan($DataNow, $ID)+1
+		endif
+		Select
+			Case (Cstr($Data) = 'all') and (Trim($ID) = '') And (Trim($Cond) = '')
+				$tb_getData = _get_value($NameTbField)
+				exit 200
+			Case 1
+				$Data = Cint($Data)
+				if ($Data =< 0)
+					exit 211
+				else
+					$Data = $Data-1
+				endif
+				$tb_getData = _get_value($NameTbField)
+				if ($Data > Ubound($tb_getData))
+					$tb_getData = ''
+					exit 211
+				endif
+				$tb_getData = $tb_getData[$Data]
+				exit 200
+		Endselect
+		exit 201
+	endif
+	exit 70
+endfunction
+
+function tb_GetDataRowFull($NameTbOrJoinAll, Optional $Cond)
+	select
+		case __isItemList__($NameTbOrJoinAll+".conf")
+			dim
+				$i, $maxField
+
+			if (VarType($Cond) = 3) or (VarType($Cond) = 5)
+				if ($cond = 0)
+					exit 211
+				else
+					$cond=cint($cond)-1
+				endif
+				$maxField = tb_getField($NameTbOrJoinAll)
+
+				redim
+					$tb_getDataRowFull[ubound($maxField)]
+
+				for $i=0 to ubound($maxField)
+					$tb_getDataRowFull[$i] = _get_value($NameTbOrJoinAll+"."+$maxField[$i])
+					if (ubound($tb_getDataRowFull[$i]) >= $cond)
+						$tb_getDataRowFull[$i] = $tb_getDataRowFull[$i][$Cond]
+					else
+						$tb_getDataRowFull[$i] = ""
+					endif
+				next
+				exit 200
+			endif
+			$tb_getDataRowFull = ""
+			exit 230
+
+		case __isItemList__($NameTbOrJoinAll)
+			dim
+				$Field, $ID, $
+
+			$						= kixdb__split_NameTBField($NameTbOrJoinAll)
+			$Field					= $[1]
+			$NameTbOrJoinAll		= $[0]
+			$ID						= cstr(tb_FindData(join($, "."), $cond, 1)[1])
+			if ($ID <> "")
+				$ID = Cint($ID)+1
+				$tb_getDataRowFull	= tb_getDataRowFull($NameTbOrJoinAll, $ID)
+			else
+				Redim
+					$tb_getDataRowFull[tb_CountField($NameTbOrJoinAll)-1]
+			endif
+			if (@error = 0)
+				exit 200
+			else
+				exit 201
+			endif
+
+		case (1)
+			exit 201
+	endselect
+endfunction
+
+function tb_AutoMathField($NameTBField, $CondField, $Comparer, $operador)
+	/*
+		tb_AutoMathField("NOME_TABELA.NOME_CAMPO_1", "CAMPO_CURRENCY", "21", )
+	*/
+	if __isItemList__($NameTbField)
+		if (Trim($CondField) = '') And (Trim($Comparer) = '')
+			dim $tb_AutoMathField
+			exit 70
+		endif
+		dim $i
+		$tb_AutoMathField	= tb_FindTextinSequenceData($NameTbField, $CondField, $Comparer, "=*")
+		$tb_AutoMathField[0]= Cfloat($tb_AutoMathField[0])
+		debug on
+		for $i=1 to ubound($tb_AutoMathField)
+			select
+				case ($operador = "+")
+					$tb_AutoMathField[0] = $tb_AutoMathField[0]+Cfloat($tb_AutoMathField[$i])
+				case ($operador = "-")
+					$tb_AutoMathField[0] = $tb_AutoMathField[0]-Cfloat($tb_AutoMathField[$i])
+				case ($operador = "*")
+					$tb_AutoMathField[0] = $tb_AutoMathField[0]*Cfloat($tb_AutoMathField[$i])
+				case ($operador = "/")
+					$tb_AutoMathField[0] = $tb_AutoMathField[0]/Cfloat($tb_AutoMathField[$i])
+			endselect
+		next
+		$tb_AutoMathField = $tb_AutoMathField[0]
+		exit 200
+	endif
+	exit 70
+endfunction
+
+function tb_FindData($NameTBField, $DataFind, $n)
+	$tb_FindData = "", ""
+	if __isItemList__($NameTBField)
+		$n=cint($n)-1
+		if ($n < 0)
+			exit 211
+		endif
+
+		if (Trim($DataFind) <> '')
+			Dim
+				$DataNow, $data, $field
+
+			$field				= split($NameTBField, ".")[0]
+			$DataNow			= _get_value($NameTBfield)
+			$data				= AsCan($DataNow, $DataFind)
+			if ($data > -1)
+				$tb_FindData = $field, $data
+				exit 200
+			else
+				exit 90
+			endif
+		else
+			exit 201
+		endif
+	endif
+	exit 201
+endfunction
+
+function tb_FindTextinSequenceData($NameTBField, $COND_FIELD, $COND_DATAFIELD, Optional $TypeCond)
+	/*
+		Param1:
+			NomeTabela.NomeCampoAObter
+		Param2:
+			CampoDeCondição
+		Param3:
+			DadoParaComparaçãoDoCampoDoParam2
+		Param4:
+			TipoDeBusca
+		Types:
+			=		|	Busca semi-incremental;
+			=*		|	Busca incremental;
+			------------
+			==		|	Busca exata;
+			=> \ >=	|	Busca com maior ou igual;
+			=< \ <=	|	Busca com menor ou igual;
+			>		|	Busca com maior;
+			<		|	Busca com menor;
+			<>		|	Busca com diferente;
+
+		tb_FindTextinSequenceData("tabela.idcod", "names", "an", "=*")
+	*/
+	dim
+		$NameTB, $field, $
+	$NameTB	= kixdb__split_NameTBField($NameTBField)
+	$field	= $NameTB[1]
+	$NameTB	= $NameTB[0]
+	if (ubound($COND_FIELD) = 0)
+		$TYPECOND		= $TYPECOND[0]
+		$COND_FIELD		= $COND_FIELD[0]
+		$COND_DATAFIELD	= $COND_DATAFIELD[0]
+	endif
+	if __isItemList__($NameTBField) and __isItemList__($NameTB+"."+$COND_FIELD)
+		dim
+			$DataAllField, $DataAllField_out,
+			$i, $x
+		if ($TypeCond = '')
+			$TypeCond = "="
+		endif
+
+		$DataAllField		= tb_getData($NameTB+"."+$COND_FIELD, 'all')
+		$DataAllField_out	= tb_getData($NameTBField, 'all')
+
+		redim
+			$tb_FindTextinSequenceData[ubound($DataAllField)+1]
+	
+		$x=0
+		for $i=0 to ubound($tb_FindTextinSequenceData)
+			Select
+				case ($TypeCond = "=")
+					$i = Ascan($DataAllField, $COND_DATAFIELD, $i)
+					if ($i<>-1)
+						$tb_FindTextinSequenceData[$x] = $DataAllField_out[$i]
+						$x=$x+1
+					else
+						$i=ubound($tb_FindTextinSequenceData)
+					endif
+
+				case ($TypeCond = "=*")
+					$ = Ascan($DataAllField, $COND_DATAFIELD,$i,,1)
+					if ($<>-1)
+						$i = $
+						$tb_FindTextinSequenceData[$x] = $DataAllField_out[$i]
+						$x=$x+1
+					else
+						; $i=ubound($tb_FindTextinSequenceData)
+					endif
+
+				case ($TypeCond = "==") and (kixdb__arr_index($DataAllField, $i) == $COND_DATAFIELD) and (@error = 0)
+					$tb_FindTextinSequenceData[$x] = $DataAllField_out[$i]
+					$x=$x+1
+	
+				case ($TypeCond = ">") and (kixdb__arr_index($DataAllField, $i) > $COND_DATAFIELD) and (@error = 0)
+					$tb_FindTextinSequenceData[$x] = $DataAllField_out[$i]
+					$x=$x+1
+	
+				case ($TypeCond = "<") and (kixdb__arr_index($DataAllField, $i) < $COND_DATAFIELD) and (@error = 0)
+					$tb_FindTextinSequenceData[$x] = $DataAllField_out[$i]
+					$x=$x+1
+	
+				case ($TypeCond = "<>") and (kixdb__arr_index($DataAllField, $i) <> $COND_DATAFIELD) and (@error = 0)
+					$tb_FindTextinSequenceData[$x] = $DataAllField_out[$i]
+					$x=$x+1
+	
+				case ($TypeCond = ">=") or ($TypeCond = "=>") and (kixdb__arr_index($DataAllField, $i) >= $COND_DATAFIELD) and (@error = 0)
+					$tb_FindTextinSequenceData[$x] = $DataAllField_out[$i]
+					$x=$x+1
+	
+				case ($TypeCond = "<=") or ($TypeCond = "=<") and (kixdb__arr_index($DataAllField, $i) =< $COND_DATAFIELD) and (@error = 0)
+					$tb_FindTextinSequenceData[$x] = $DataAllField_out[$i]
+					$x=$x+1
+			Endselect
+		next
+		if ($x > 0) $x=$x-1 endif
+		Redim
+			preserve $tb_FindTextinSequenceData[$x]
+		if (instr(Join($tb_FindTextinSequenceData, ""), $COND_DATAFIELD) > 0)
+			exit 200
+		else
+			exit 90
+		endif
+	endif
+	exit 70
+endfunction
+
+function tb_GetFirstData($NameTBField)
+	if __isItemList__($NameTBField)
+		$tb_GetFirstData = _get_value($NameTBField)
+		if (VarType($tb_GetFirstData) <> 8204)
+			$tb_GetFirstData = ""
+		else
+			$tb_GetFirstData = $tb_GetFirstData[0]
+		endif
+		exit 200
+	endif
+	exit 70
+endfunction
+
+function tb_GetLastData($NameTBField)
+	if __isItemList__($NameTBField)
+		$tb_GetLastData = _get_value($NameTBField)
+		if (VarType($tb_GetLastData) <> 8204)
+			$tb_GetLastData = ""
+		else
+			$tb_GetLastData = $tb_GetLastData[ubound($tb_GetLastData)]
+		endif
+		exit 200
+	endif
+	exit 70
+endfunction
+
+function tb_GetMaxData($NameTBField)
+	if __isItemList__($NameTBField)
+		Dim $index
+		$tb_GetMaxData	= _get_value($NameTBField)
+		$index			= IndexMaxArrayItem($tb_GetMaxData)
+		if ($index = -1)
+			$tb_GetMaxData	= Cdbl(0)
+			exit 201
+		else
+			$tb_GetMaxData	= Cdbl($tb_GetMaxData[$index])
+			exit 200
+		endif
+	endif
+	exit 70
+endfunction
+
+function tb_GetMinData($NameTBField)
+	if __isItemList__($NameTBField)
+		Dim $index
+		$tb_GetMinData	= _get_value($NameTBField)
+		$index			= IndexMinArrayItem($tb_GetMinData)
+		if ($index = -1)
+			$tb_GetMinData	= Cdbl(0)
+			exit 201
+		else
+			$tb_GetMinData	= Cdbl($tb_GetMinData[$index])
+			exit 200
+		endif
+	endif
+	exit 70
+endfunction
+
+/*
+	##################################################
+	#  DAQUI PRA BAIXO FICA TUDO RELACIONADO A ROWS  #
+	##################################################
+*/
+::KIXDB____ROWS____
+
+function tb_DeleteRow($NameTB, Optional $Field, $ID)
+	dim
+		$tb_DeleteRow
+
+	if (Cint($ID) < 1)
+		exit 211
+	else
+		if (trim($Field) = "")
+			$ID = Cint($ID)-1
+		endif
+	endif
+	select
+		case __isItemList__($NameTB+".conf") and (Trim($Field) = "")
+			Dim
+				$Data, $FieldNow, $i
+
+			for each $FieldNow in _get_keys()
+				$FieldNow = Split($FieldNow, '.')
+
+				if (ubound($FieldNow) > 0)
+					if ($FieldNow[0] = $NameTB) And ($FieldNow[1] <> 'conf')
+						Dim
+							$DataNow
+						$Data = _get_value(Join($FieldNow, '.'))
+						if (Ubound($Data) >= $ID)
+							$Data[$ID] = createObject("")
+
+							for $i=$ID to Ubound($Data)
+								if (($i+1) =< Ubound($Data))
+									$Data[$i] = $Data[$i+1]
+								endif
+							next
+
+							if (Ubound($Data) > 0)
+								Redim
+									Preserve $Data[Ubound($Data)-1]
+							else
+								$data = createObject("")
+							endif
+							_create(Join($FieldNow, '.'), $Data)
+						endif
+					endif
+				endif
+			next
+			exit 200
+
+		case __isItemList__($NameTB+".conf") and (Trim($Field) <> "")
+			Dim $Data
+			$Data		= _get_value($NameTB+'.'+$Field)
+			$ID			= AsCan($Data, $ID)+1
+
+			tb_DeleteRow($NameTB,, $ID)
+			exit 200
+	endselect
+endfunction
+
+function tb_CountRow($NameTB)
+	if __isItemList__($NameTB+'.conf')
+		dim $
+		$ = tb_GetField($NameTB)
+		if (Ubound($) > -1)
+			$ = _get_value($NameTB+'.'+$[0])
+			if (ubound($) >= 0)
+				if (VarType($[0]) <> 0)
+					$tb_CountRow = Ubound($)+1
+					exit 200
+				endif
+			endif
+		endif
+		$tb_CountRow = 0
+		exit 201
+	endif
+	exit 70
+endfunction
+
+function tb_GetControlIndex($NameTB)
+	/*
+		RETORNA TODOS OS ID'S EM SUA SEQUÊNCIA PADRÃO.
+		RETURN: ARRAY
+	*/
+	Redim $tb_GetControlIndex[0]
+	$tb_GetControlIndex[0] = 1
+
+	if __isItemList__($NameTB+'.conf') and (tb_CountField($NameTB) > 0)
+		Dim
+			$i, $fields, $ub
+		$fields		= _get_keys()
+		$i			= Ascan($fields, $NameTB+".",, len($NameTB)+1, 1)
+		$i			= Ascan($fields, $NameTB+".", $i+1, len($NameTB)+1, 1)
+		if ($i <> -1)
+			$fields		= $fields[$i]
+			$ub			= ubound(_get_value($fields))
+			if ($ub > 0)
+				redim $tb_GetControlIndex[$ub]
+				for $i=0 to ubound($tb_GetControlIndex)
+					$tb_GetControlIndex[$i] = $i+1
+				next
+			endif
+			; $tb_GetControlIndex	= iif($ub=-1, 0, $tb_GetControlIndex)
+			exit 200
+		else
+			exit 201
+		endif
+	endif
+	exit 70
+endfunction
+
+function tb_RemoveAllRows($NameTB)
+	Dim $tb_RemoveAllRows
+	if __isItemList__($NameTB+".conf")
+		dim $FieldNow
+		for each $FieldNow in tb_getField($NameTB)
+			_create($NameTB+"."+$FieldNow, "")
+		next
+		exit 200
+	endif
+	exit 70
+endfunction
+
+/*
+	#########################################################
+	#  DAQUI PRA BAIXO FICA TUDO RELACIONADO A INFORMAÇÕES  #
+	#########################################################
+*/
+::KIXDB____INFORMAÇÕES____
+
+function tb_GetInfo($NameTB, Optional $TypeData)
+	if __isItemList__($NameTB+'.conf')
+		Select
+			Case ($TypeData = 'DateC') Or ($TypeData = 1)
+				$tb_getInfo	= _get_value($NameTB+'.conf')[0]
+
+			Case ($TypeData = 'DateL') Or ($TypeData = 2)
+				$tb_getInfo	= _get_value($NameTB+'.conf')[1]
+
+			Case ($TypeData = 'Desc') Or ($TypeData = 3)
+				$tb_getInfo	= _get_value($NameTB+'.conf')[2]
+
+			Case ($TypeData = 'NameTB') Or ($TypeData = 4)
+				$tb_getInfo	= _get_value($NameTB+'.conf')[3]
+
+			Case ($TypeData = 'VersionTb') Or ($TypeData = 5)
+				$tb_getInfo	= _get_value($NameTB+'.conf')[4]
+
+			Case 1 ;;Não existe tal configuração.
+				exit 404
+		Endselect
+		$tb_getInfo	= Substr($tb_getInfo, 3, Len($tb_getInfo)-4)
+		exit 200
+	else
+		if exist($NameTB)
+			Dim
+				$handle, $i
+			$handle = FreeFileHandle()
+			$=Open($handle, $NameTB)
+			for $i=0 to 3
+				$NameTB = ReadLine($handle)
+			next
+			$=Close($handle)
+			$tb_getInfo = Substr($NameTB, 3, Len($NameTB)-4)
+			exit 200
+		else
+			Exit 21
+		endif
+	endif
+endfunction
+
+function tb_SetInfo($NameTB, Optional $TypeData, Optional $NewData)
+	Dim $tb_setInfo
+	if __isItemList__($NameTB+'.conf')
+		Select
+			Case ($TypeData = 'Desc') Or ($TypeData = 3)
+				$tb_setInfo		= _get_value($NameTB+'.conf')
+				$tb_setInfo[2]	= '##'+$NewData+'##'
+				_put($NameTB+'.conf', $tb_setInfo)
+
+			Case ($TypeData = 'NameTB') Or ($TypeData = 4)
+				$tb_setInfo	= _get_value($NameTB+'.conf')[3]
+
+			Case ($TypeData = 'VersionTb') Or ($TypeData = 5)
+				$tb_setInfo	= _get_value($NameTB+'.conf')[4]
+
+			Case 1 ;;Não existe tal configuração.
+				exit 404
+		Endselect
+		exit 200
+	endif
+	exit 70
+endfunction
+
+function kixdb__GetDataString_Url__($obj, $url)
+	dim
+		$dwSM, $sLoc
+		$sLoc="HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
+	$dwSM = Readvalue($sLoc,"Syncmode5")
+	$=writevalue($sLoc,"Syncmode5",3,"REG_DWORD")
+	
+	$obj.open("GET", $url, 0)
+	$obj.send()
+	$kixdb__GetDataString_Url__ = $obj.responseBody
+	
+	$=writevalue($sLoc,"Syncmode5",$dwSM,"REG_DWORD")
+	if (@error < 0)
+		$kixdb__GetDataString_Url__ = ''
+	endif
+	exit @error
+endfunction
+
+/*
+	########################################################################
+	#  DAQUI PRA BAIXO FICA TUDO RELACIONADO AO MOTOR DE CONSTRUÇÃO DO DB  #
+	########################################################################
+*/
+function kixdb__GetPath__($Dir)
+	$kixdb__GetPath__ = Split($Dir, '\')
+	Redim
+		Preserve $kixdb__GetPath__[Ubound($kixdb__GetPath__)-1]
+	$kixdb__GetPath__ = Join($kixdb__GetPath__, '\')
+endfunction
+
+function kixdb__CutLine__($data)
+	Select
+		case (instr($data, "\"))
+		case (instr($data, '"'))
+		case (instr($data, "'"))
+		case (instr($data, chr(10)))
+		case (instr($data, chr(13)))
+		Case 1;Default
+			$kixdb__CutLine__ = $data
+			exit 1
+	endselect
+	$kixdb__CutLine__ = Replace($data, 				"\",		"\\")
+	$kixdb__CutLine__ = Replace($kixdb__CutLine__, 	@crlf,		"\n")
+	$kixdb__CutLine__ = Replace($kixdb__CutLine__, 	'"',		"\Q")
+	$kixdb__CutLine__ = Replace($kixdb__CutLine__, 	"'",		"\q")
+	$kixdb__CutLine__ = Replace($kixdb__CutLine__, 	chr(13),	"\c")
+	$kixdb__CutLine__ = Replace($kixdb__CutLine__, 	chr(10),	"\l")
+endfunction
+
+function kixdb__split_NameTBField($NameTBField)
+	$kixdb__split_NameTBField =
+		split($NameTBField, ".")[0],
+		substr($NameTBField, instr($NameTBField, ".")+1)
+endfunction
+
+function kixdb__NamePossible__($input, optional $IsReturnText)
+	Dim
+		$NotPossble_Name, $i
+	$kixdb__NamePossible__	= 1
+	$NotPossble_Name		=
+		"*", ":", ",", ">", "<", ";", "?", "'", '"',
+		"¨", "¬", "=", "´", "`", "°", "º", "ª", "^",
+		"~", " ", chr(10), chr(13)
+
+	if ($IsReturnText = 1)
+		$kixdb__NamePossible__ = $NotPossble_Name
+		exit 1
+	endif
+
+	for $i=0 to ubound($NotPossble_Name)
+		if (instr($input, $NotPossble_Name[$i]) > 0)
+			$kixdb__NamePossible__ = 0
+			exit 1
+		endif
+	next
+	exit 0
+endfunction
+
+function __CutNullArray__($array)
+	Dim
+		$Text, $i, $x
+
+	If Not VarType($Array) & 8192 exit 1 EndIf
+	$__CutNullArray__	= $Array
+	$x					= 0
+	$i					= 0
+
+	for each $text in $__CutNullArray__
+		if (Trim($text) <> '')
+			$__CutNullArray__[$i-$x] = $text
+		else
+			$x=$x+1
+		endif
+		$i=$i+1
+	next
+	if ((ubound($array)-$x) > 0)
+		Redim
+			Preserve $__CutNullArray__[ubound($array)-$x]
+	else
+		if (trim($__CutNullArray__[0]) <> '')
+			Redim preserve $__CutNullArray__[0]
+		else
+			Redim $__CutNullArray__
+		endif
+	endif
+	if ubound($__CutNullArray__) = -1 exit 2 Endif
+endfunction
+
+function kixdb__arr_index($array, $index)
+	if (ubound($array) >= $index)
+		$kixdb__arr_index = $array[$index]
+		exit 0
+	else
+		$kixdb__arr_index = ''
+		exit 1
+	endif
+endfunction
+
+function kixdb__MsgError__()
+	
+endfunction

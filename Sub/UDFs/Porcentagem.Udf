@@ -1,0 +1,21 @@
+;;AUTHOR		: André Luiz
+;;VERSION		: 1.0.0.0
+;;DATA CREATE	: 19/11/2017
+;;FUNCTION		: Porcentagem(Valor, Porcentagem[, TIPO])
+;;SOURCE		:
+function Porcentagem($Value, $Por, Optional $Rev)
+	Dim
+		$Lucro
+	if Not $Rev
+		$Value			= Cdbl($Value)
+		$Por			= Cdbl($Por)
+		$porcentagem	= Cdbl(Cdbl($Por*$Value)/100)
+		$Lucro			= Cdbl($Value+$Porcentagem)
+		$Porcentagem	= $Por, Cdbl($Lucro-$Value), $Lucro
+	else
+		$Value			= Cdbl($Value)
+		$Por			= Cdbl($Por)
+		$Lucro			= Cdbl($Por+$Value)
+		$porcentagem	= ($Por*100)/Cdbl($Lucro-$Por), $Por, $Lucro
+	endif
+endfunction

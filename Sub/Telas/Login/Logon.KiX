@@ -1,0 +1,176 @@
+;;Login
+function UserLogin()
+	Dim
+		$form_user, $ComboBox, $Senha,
+		$Logar, $Painel, $Label_Nome, $Label_Senha, $Pic,
+		$Progress, $i, $ID
+	$form_user					= $System.Form($form)
+	$form_user.Resizable		= False()
+	$form_user.MaximizeBox		= False()
+	$form_user.MinimizeBox		= False()
+	$form_user.ShowInTaskBar	= True()
+	$form_user.Icon				= $Form.icon
+	$form_user.Size				= 450, 350
+	$form_user.BackColor		= 0, 51, 102
+	$form_user.Text				= 'Entre com a sua conta usuário.'
+
+	$Painel					= $form_user.Controls.GroupBox
+	$Painel.BorderStyle		= 0
+	$Painel.Dock			= 1
+	$Painel.Height			= 65
+	$Painel.BackColor		= 'black'
+	
+	$=$Painel.Controls.Label
+	$Painel.Controls(0).Text		= 'Por favor entre com sua conta de usuário'
+	$Painel.Controls(0).ForeColor	= 'White'
+	$Painel.Controls(0).FontName	= 'Segeo UI'
+	$Painel.Controls(0).FontSize	= 14
+	$Painel.Controls(0).FontBold	= True()
+	$Painel.Controls(0).Width		= 390
+	$Painel.Controls(0).Center()
+
+	$Label_Nome				= $form_user.Controls.Label
+	$Label_Nome.Text		= 'Usuário:'
+	$Label_Nome.ForeColor	= 'White'
+	$Label_Nome.FontName	= 'Segeo UI'
+	$Label_Nome.FontSize	= 14
+	$Label_Nome.FontBold	= True()
+	$Label_Nome.Width		= 250
+	$Label_Nome.Center()
+	$Label_Nome.Location	= $Label_Nome.Left-70, $Label_Nome.Top-10
+	
+	$ComboBox				= $form_user.Controls.ComboBox
+	$ComboBox.DropDownStyle = 1
+	$ComboBox.BorderStyle	= 0
+	$ComboBox.ItemHeight	= 12
+	$ComboBox.Fontsize		= 14
+	$ComboBox.Size			= 250, 300
+	$ComboBox.Center()
+	$ComboBox.Location		= $Label_Nome.Left, $Label_Nome.Bottom+5
+	$ComboBox.OnKeyDown		=
+	'
+		if ($$ComboBox.KeyCode = 13) Or ($$ComboBox.KeyCode = 9)
+			$$Senha.SetFocus()
+		endif
+	'
+	Preenche_Cbox_Login($ComboBox)
+	
+	$Pic					= $form_user.Controls.ToolButton
+	$Pic.Location			= $ComboBox.Right+10, $Painel.Bottom+20
+	$Pic.FlatStyle			= 0
+	$Pic.Style				= 1
+	$Pic.Pushed				= True()
+	$Pic.Size				= 130, 135
+	$Pic.Icon				= $IMG_Large.Images(0)
+	$Pic.OnClick			= '$$Pic.Pushed = True()'
+	
+	$Progress				= $Pic.Controls.ProgressBar
+	$Progress.Visible		= 0
+	$Progress.BorderStyle	= 0
+	$Progress.Minimum		= 0
+	$Progress.Dock			= 1
+	$Progress.Style			= 1
+	$Progress.Step			= 5
+	$Progress.Height		= 10
+	$Progress.Maximum		= 100
+	$Progress.ForeColor		= 'green'
+
+	$Label_Senha			= $form_user.Controls.Label
+	$Label_Senha.Text		= 'Senha:'
+	$Label_Senha.ForeColor	= 'White'
+	$Label_Senha.FontName	= 'Segeo UI'
+	$Label_Senha.FontSize	= 14
+	$Label_Senha.FontBold	= True()
+	$Label_Senha.Width		= 250
+	$Label_Senha.Location	= $Label_Nome.Left, $ComboBox.Bottom+10
+	
+	$Senha					= $form_user.Controls.TextBox
+	$Senha.BorderStyle		= 0
+	$Senha.FlatStyle		= 0
+	$Senha.TextAlign 	 	= 2
+	$Senha.Fontbold			= True()
+	$Senha.Fontsize			= 16
+	$Senha.Size				= 250, 30
+	$Senha.OnKeyDown		=
+	'
+		$=fKeyCode_Temp($$Senha)
+		if ($$Senha.KeyCode = 13)
+			$$=Execute($$Logar.OnClick)
+		endif
+		if ($$Senha.KeyCode = 9)
+			$$ComboBox.SetFocus()
+		endif
+	'
+	$Senha.PasswordChar 	= '*'
+	$Senha.Location		 	= $Label_Senha.Left, $Label_Senha.Bottom+5
+
+	$Logar					= $form_user.Controls.ToolButton
+	$Logar.Anchor			= 1
+	$Logar.FlatStyle		= 0
+	$Logar.FontSize			= 13
+	$Logar.Top				= 35
+	$Logar.BorderStyle		= false()
+	$Logar.BackColor		= 0, 0, 0
+	$Logar.Size				= 130, 30
+	$Logar.Location			= $Senha.Right+10, $Senha.Top
+	$Logar.HotBackColor		= 20, 20, 20
+	$Logar.ForeColor		= 'White'
+	$Logar.Text				= 'Entrar'
+	$Logar.OnClick			=
+	'
+		if ($$senha.Text = "")
+			$$Pic.Icon = $$IMG_Large.Images(0)
+			exit 0
+		endif
+		$$Senha.OnKeyDown = "/*"+$$Senha.OnKeyDown+"*/"
+		$$Progress.Visible = 1
+		$$ID = Substr($$ComboBox.Text, 1, Instr($$ComboBox.Text, "-")-2)
+		for $$i=0 to 100 step 5
+			$$Progress.PerformStep()
+			sleep 0.01
+		next
+		$$Progress.Visible	= 0
+		$$Progress.Value	= 0
+		if (tb_getdataCond("Usuario.Senha", "ID-User", $$ID) == $$Senha.text)
+			for $$i=0 to 20
+				$$Pic.Icon = $$IMG_Large.Images(1)
+				Sleep 0.01
+			next
+			$$UserLogin = tb_GetDataLine("Usuario.ID-User", $$ID)
+			$$form_user.Hide()
+			exit 0
+		else
+			$$Senha.OnKeyDown = Substr($$Senha.OnKeyDown, 3, Len($$Senha.OnKeyDown)-6)
+			$$Pic.Icon = $$IMG_Large.Images(2)
+			$$Senha.Text = ""
+			$$Senha.SetFocus()
+		endif
+	'
+
+
+	$ComboBox.setfocus()
+	$form_user.Center()
+	$form_user.ShowModal()
+	while $form_user.visible()
+		$=Execute($form_user.DoEvents())
+	loop
+endfunction
+
+function Preenche_Cbox_Login($Cbox)
+	Dim
+		$nome_func, $idcodigo,
+		$i, $textnow
+	$idcodigo	= tb_getData('Usuario.IDCODIGO', 'max')
+	$nome_func	= tb_getData('Funcionario.Nome', 'max')
+
+	for $i=0 to ubound($idcodigo)
+		$idcodigo[$i]	= tb_GetDataLine('Usuario.IDCODIGO', $idcodigo[$i])
+	next
+	
+	$i=0
+	for each $textnow in $nome_func
+		$=$CBox.AddItem(cstr($idcodigo[$i][1])+' - '+$textnow, $i)
+		$i=$i+1
+	next
+	$Cbox.SelectedIndex = 0
+endfunction

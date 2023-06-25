@@ -1,0 +1,45 @@
+function kdb_field_GridView($Grid, $NameTB, Optional $Not)
+	Dim
+		$kdb_field_GridView
+	if __isItemList__($NameTb+'.conf')
+		Dim
+			$text
+		for each $text in tb_getField($NameTb)
+			if (InStr($Not, $text) = 0)
+				$=$Grid.Columns.add($text, (13*Len($text))+$Grid.FontSize, 2)
+			endif
+		next
+		Exit 200
+	endif
+endfunction
+
+function kdb_fData_GridView($Grid, $NameTbField, $ID, Optional $Pos, Optional $Not)
+	Dim
+		$kdb_fData_ListView
+	if __isItemList__($NameTbField)
+		Dim
+			$text, $i, $Width
+		if ($pos = '') $pos = 2 endif
+		$i=0
+		if ($Grid.Columns.Count =< $ID)
+			exit 404
+		endif
+		for each $text in tb_getData($NameTbField, 'max')
+			if (InStr($Not, $text) = 0)
+				if ($Grid.Rows.Count < tb_LinesData($NameTbField))
+					$=$Grid.Rows.Add('')
+				endif
+				$Width = (Len($text) * ($Grid.FontSize))
+				if ($Width > $Grid.Columns($ID).Width)
+					$Grid.Columns($ID).Width	= $Width
+				endif
+				$Grid.Columns($ID).TextAlign = $pos
+				$Grid.Cells($i, $ID).text = $text
+				$i=$i+1
+			endif
+		next
+		Exit 200
+	else
+		Exit 404
+	endif
+endfunction

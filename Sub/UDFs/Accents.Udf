@@ -1,0 +1,117 @@
+;;AUTHOR		: AndrÈ Luiz
+;;VERSION		: 1.0.0.0
+;;FUNCTION	: Accents()
+;;Source:
+function Accents($text)
+	Dim
+		$chr, $i
+	for $i=1 to Len($text)
+		$chr = Substr($text, $i, 1)
+		select
+			case ($chr = 'Ç')
+				$Accents = $Accents +Chr(Asc('È'))
+			case ($chr = 'Í')
+				$Accents = $Accents +'à'
+			case ($chr = 'Î')
+				$Accents = $Accents +'â'
+			case ($chr = 'Ë')
+				$Accents = $Accents +'ä'
+			case ($chr = '‡')
+				$Accents = $Accents +'Ö'
+			case ($chr = '·')
+				$Accents = $Accents +'†'
+			case ($chr = '„')
+				$Accents = $Accents +'„'
+			case ($chr = '‚')
+				$Accents = $Accents +'É'
+			case ($chr = '‰')
+				$Accents = $Accents +'Ñ'
+			case ($chr = 'Ú')
+				$Accents = $Accents +'ï'
+			case ($chr = 'Ù')
+				$Accents = $Accents +'ì'
+			case ($chr = 'ˆ')
+				$Accents = $Accents +'î'
+			case ($chr = 'Û')
+				$Accents = $Accents +'¢'
+			case ($chr = '˙')
+				$Accents = $Accents +'£'
+			case ($chr = 'Ò')
+				$Accents = $Accents +'§'
+			case ($chr = '—')
+				$Accents = $Accents +'•'
+			case ($chr = 'Ì')
+				$Accents = $Accents +'°'
+			case ($chr = 'ˇ')
+				$Accents = $Accents +'ò'
+			case ($chr = '˚')
+				$Accents = $Accents +'ñ'
+			case ($chr = '˘')
+				$Accents = $Accents +'ó'
+			case ($chr = '÷')
+				$Accents = $Accents +'ô'
+			case ($chr = '‹')
+				$Accents = $Accents +'ö'
+			case ($chr = 'Á')
+				$Accents = $Accents +'á'
+			case ($chr = '«')
+				$Accents = $Accents +'Ä'
+			case ($chr = 'Ì')
+				$Accents = $Accents +'°'
+			case ($chr = 'Ï')
+				$Accents = $Accents +'ç'
+			case ($chr = 'Ó')
+				$Accents = $Accents +'å'
+			case ($chr = 'Ô')
+				$Accents = $Accents +'ã'
+			case ($chr = 'ƒ')
+				$Accents = $Accents +'é'
+			case ($chr = '¡')
+				$Accents = $Accents +'¡'
+			case ($chr = '¿')
+				$Accents = $Accents +'¿'
+			case ($chr = '√')
+				$Accents = $Accents +'√'
+			case ($chr = '…')
+				$Accents = $Accents +'…'
+			case ($chr = '»')
+				$Accents = $Accents +'»'
+			case ($chr = ' ')
+				$Accents = $Accents +' '
+			case ($chr = '”')
+				$Accents = $Accents +'”'
+			case ($chr = '“')
+				$Accents = $Accents +'“'
+			case ($chr = '‘')
+				$Accents = $Accents +'‘'
+			case ($chr = '’')
+				$Accents = $Accents +'’'
+			case ($chr = '⁄')
+				$Accents = $Accents +'⁄'
+			case ($chr = 'Ÿ')
+				$Accents = $Accents +'Ÿ'
+			case ($chr = '€')
+				$Accents = $Accents +'€'
+			case ($chr = '™')
+				$Accents = $Accents +'¶'
+			case ($chr = '∫')
+				$Accents = $Accents +'ß'
+			case ($chr = '∞')
+				$Accents = $Accents +'¯'
+			case ($chr = '£')
+				$Accents = $Accents +'ú'
+			case ($chr = '¢')
+				$Accents = $Accents +'õ'
+			case ($chr = '¨')
+				$Accents = $Accents +'™'
+			case ($chr = '~')
+				$Accents = $Accents +'~'
+			case ($chr = '^')
+				$Accents = $Accents +'^'
+			case ($chr = '`')
+				$Accents = $Accents +'`'
+			case 1
+				$Accents = $Accents +$chr
+		endselect
+	next
+endfunction

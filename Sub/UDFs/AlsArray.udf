@@ -1,0 +1,121 @@
+;;Author			: André Luiz
+;;Version			: 1.0.0.0
+;;Functions[LIBs]	: AlsArray
+
+function IndexMaxArrayItem($array)
+	if not Instr("8204:8:3:5:0", VarType($array))
+		$IndexMaxArrayItem = -1
+		exit 2
+	endif
+	if (VarType($array) = 8)
+		$IndexMaxArrayItem = -1
+		exit 0
+	endif
+	Dim $max, $i
+
+	$max				= Cdbl(replace($array[0], ".", ","))
+	$IndexMaxArrayItem	= 0
+
+	for $i=1 to Ubound($array)
+		if (len($array[$i]) >= 1)
+			$array[$i] = Cdbl(replace($array[$i], ".", ","))
+
+			if ($array[$i] > $max)
+				$max				= $array[$i]
+				$IndexMaxArrayItem	= $i
+			endif
+		endif
+	next
+	exit 0
+endfunction
+
+function IndexBetweenOrGreaterArrayItem($number, $Array)
+	if not Instr("8204:8:3:5:0", VarType($array))
+		$IndexBetweenOrGreaterArrayItem = -1
+		exit 2
+	endif
+	if (VarType($array) = 8)
+		$IndexBetweenOrGreaterArrayItem = -1
+		exit 0
+	endif
+	Dim $i, $start
+	$start	= 0
+	$number = cdbl($number)
+
+	$IndexBetweenOrGreaterArrayItem = 0
+	for $i=0 to ubound($array)
+		$array[$i] = cdbl($array[$i])
+		if ($array[$i] >= $number) and ($array[$i]/$number) ;;NÚMERO ACEITO!
+			if ($array[$i] =< $array[$IndexBetweenOrGreaterArrayItem]) or ($start = 0)
+				$start = 1
+				$IndexBetweenOrGreaterArrayItem = $i
+			endif
+		endif
+	next
+	exit 0
+endfunction
+
+function IndexBetweenOrSmallerArrayItem($number, $Array)
+	if not Instr("8204:8:3:5:0", VarType($array))
+		$IndexBetweenOrSmallerArrayItem = -1
+		exit 2
+	endif
+	if (VarType($array) = 8)
+		$IndexBetweenOrSmallerArrayItem = -1
+		exit 0
+	endif
+	Dim $i, $start
+	$start	= 0
+	$number = cdbl($number)
+
+	$IndexBetweenOrSmallerArrayItem = 0
+	for $i=0 to ubound($array)
+		$array[$i] = cdbl($array[$i])
+		if ($array[$i] <= $number) and ($array[$i]/$number) ;;NÚMERO ACEITO!
+			if ($array[$i] => $array[$IndexBetweenOrSmallerArrayItem]) or ($start = 0)
+				$start = 1
+				$IndexBetweenOrSmallerArrayItem = $i
+			endif
+		endif
+	next
+	exit 0
+endfunction
+
+function IndexMinArrayItem($array)
+	if not Instr("8204:8:3:5:0", VarType($array))
+		$IndexMinArrayItem = -1
+		exit 2
+	endif
+	Dim $min, $i, $max
+	if (VarType($array) = 8)
+		$IndexMinArrayItem = -1
+		exit 0
+	endif
+
+	$max					= 2.147.483.647
+	$IndexMinArrayItem	= 0
+
+	for $i=0 to Ubound($array)
+		$array[$i] = replace($array[$i], ".", ",") ;Valor atual
+		if Instr("8:0", VarType($min))
+			if ($i+1 <= Ubound($array))
+				;Pegando o próximo valor!
+				if isNumeric($array[$i+1])
+					$min = Cdbl($array[$i+1])
+				else
+					$min = $max
+				endif
+			endif
+		endif
+
+		if isNumeric($array[$i])
+			$array[$i]	= Cdbl($array[$i])
+			if ($array[$i] < $min)
+				$min					= $array[$i]
+				$IndexMinArrayItem	= $i
+			endif
+		endif
+	next
+
+	exit 0
+endfunction
